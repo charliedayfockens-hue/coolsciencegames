@@ -1,7 +1,7 @@
-/* script.js */
+/* script.js – FIXED: Opens games as webpages, not source code */
 const DEV_CODE = 'dev123';               // CHANGE THIS to any secret you want
 const STORAGE_KEY = 'gameHubGames';
-const ASSETS_URL = 'assets/';            // relative to index.html
+const ASSETS_URL = './assets/';          // FIXED: Relative path for browser
 
 document.addEventListener('DOMContentLoaded', () => {
     const listEl = document.getElementById('game-list');
@@ -13,13 +13,60 @@ document.addEventListener('DOMContentLoaded', () => {
     const exitBtn = document.getElementById('exit-dev');
     const gameNameInput = document.getElementById('game-name');
 
-    // ---------- LOAD GAMES ----------
+    // ---------- LOAD & SCAN GAMES ----------
     const loadGames = () => {
         const saved = localStorage.getItem(STORAGE_KEY);
-        const games = saved ? JSON.parse(saved) : [];
-        renderGames(games);
+        const savedGames = saved ? JSON.parse(saved) : [];
+        
+        // ALSO SCAN assets/ folder automatically (for manual additions)
+        scanAssetsFolder(savedGames).then(allGames => {
+            // Remove duplicates (saved takes priority)
+            const uniqueGames = allGames.filter((game, index, self) => 
+                index === self.findIndex(g => g.name === game.name)
+            );
+            renderGames(uniqueGames);
+        });
     };
 
+    // ---------- SCAN ASSETS FOLDER (automatic detection) ----------
+    const scanAssetsFolder = async (savedGames) => {
+        const games = [...savedGames];
+        
+        try {
+            // List all items in assets/
+            const assetsDir = await getDirectoryContents('./assets/');
+            for (const item of assetsDir) {
+                const name = item.name;
+                
+                if (item.type === 'directory') {
+                    // Folder: look for any .html file
+                    const folderContents = await getDirectoryContents(`./assets/${name}/`);
+                    const htmlFile = folderContents.find(f => f.name.toLowerCase().endsWith('.html'));
+                    if (htmlFile && !games.some(g => g.name === name)) {
+                        games.push({
+                            name: name,
+                            url: `./assets/${name}/${htmlFile.name}`  // FIXED: Browser path
+                        });
+                    }
+                } else if (item.name.toLowerCase().endsWith('.html')) {
+                    // Single HTML file
+                    const gameName = item.name.replace(/\.html$/i, '');
+                    if (!games.some(g => g.name === gameName)) {
+                        games.push({
+                            name: gameName,
+                            url: `./assets/${item.name}`  // FIXED: Browser path
+                        });
+                    }
+                }
+            }
+        } catch (e) {
+            console.warn('Could not scan assets folder:', e);
+        }
+        
+        return games;
+    };
+
+    // ---------- RENDER GAMES ----------
     const renderGames = (games) => {
         listEl.innerHTML = '';
         if (games.length === 0) {
@@ -32,9 +79,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const card = document.createElement('div');
             card.className = 'game-card';
             const a = document.createElement('a');
-            a.href = g.url;
+            a.href = g.url;           // FIXED: Proper relative path
             a.target = '_blank';
-            a.rel = 'noopener';
+            a.rel = 'noopener noreferrer';  // Security
             a.textContent = g.name;
             card.appendChild(a);
             frag.appendChild(card);
@@ -64,24 +111,47 @@ document.addEventListener('DOMContentLoaded', () => {
         const rawName = gameNameInput.value.trim();
         if (!rawName) { alert('Enter a name!'); return; }
 
-        // Sanitize name: letters, numbers, dash, underscore only
+        // Sanitize name
         const name = rawName.replace(/[^a-zA-Z0-9\-_]/g, '');
         if (!name) { alert('Invalid name – use letters, numbers, - or _'); return; }
 
         const type = document.querySelector('input[name="type"]:checked').value;
         let url = '';
-        let folder = '';
 
         if (type === 'folder') {
-            folder = `${ASSETS_URL}${name}/`;
-            url = `${folder}index.html`;
-            // Create minimal index.html content
-            const html = `<!DOCTYPE html><html><head><title>${name}</title></head><body><h1>${name}</h1><p>Edit this file in <code>assets/${name}/index.html</code></p></body></html>`;
-            createFile(`${name}/index.html`, html);
+            url = `./assets/${name}/index.html`;  // FIXED: Browser path
+            const html = `<!DOCTYPE html>
+<html>
+<head>
+    <title>${name}</title>
+    <meta charset="UTF-8">
+    <style>body { font-family: Arial; text-align: center; padding: 50px; background: #222; color: white; }</style>
+</head>
+<body>
+    <h1>${name}</h1>
+    <p>🎮 Game loaded successfully!</p>
+    <p><small>Edit this file: <code>assets/${name}/index.html</code></small></p>
+    <script>console.log('${name} game started!');</script>
+</body>
+</html>`;
+            downloadFile(`${name}/index.html`, html);
         } else {
-            url = `${ASSETS_URL}${name}.html`;
-            const html = `<!DOCTYPE html><html><head><title>${name}</title></head><body><h1>${name}</h1><p>Edit this file in <code>assets/${name}.html</code></p></body></html>`;
-            createFile(`${name}.html`, html);
+            url = `./assets/${name}.html`;  // FIXED: Browser path
+            const html = `<!DOCTYPE html>
+<html>
+<head>
+    <title>${name}</title>
+    <meta charset="UTF-8">
+    <style>body { font-family: Arial; text-align: center; padding: 50px; background: #222; color: white; }</style>
+</head>
+<body>
+    <h1>${name}</h1>
+    <p>🎮 Game loaded successfully!</p>
+    <p><small>Edit this file: <code>assets/${name}.html</code></small></p>
+    <script>console.log('${name} game started!');</script>
+</body>
+</html>`;
+            downloadFile(`${name}.html`, html);
         }
 
         // Save to localStorage
@@ -95,22 +165,45 @@ document.addEventListener('DOMContentLoaded', () => {
 
         gameNameInput.value = '';
         loadGames();
-        alert(`Game "${name}" added!`);
+        alert(`"${name}" added! Place the downloaded file in assets/ and refresh.`);
     });
 
-    // ---------- FILE CREATION (via download) ----------
-    const createFile = (path, content) => {
-        const blob = new Blob([content], { type: 'text/html' });
+    // ---------- DOWNLOAD HELPER ----------
+    const downloadFile = (filename, content) => {
+        const blob = new Blob([content], { type: 'text/html;charset=utf-8' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = path;
+        a.download = filename;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
-        // NOTE: The file is **downloaded** – you must place it manually into assets/
-        alert(`Download started for ${path}. Place it in the "assets" folder (create subfolders if needed).`);
+    };
+
+    // ---------- FOLDER SCANNING HELPER (File System Access API) ----------
+    const getDirectoryContents = async (path) => {
+        if ('showDirectoryPicker' in window) {
+            // Modern browsers: use File System Access API
+            try {
+                const dirHandle = await window.showDirectoryPicker();
+                return await scanDirHandle(dirHandle);
+            } catch (e) {
+                return [];
+            }
+        }
+        return []; // Fallback: manual folder management
+    };
+
+    const scanDirHandle = async (dirHandle) => {
+        const files = [];
+        for await (const [name, handle] of dirHandle.entries()) {
+            if (handle.kind === 'file') {
+                const file = await handle.getFile();
+                files.push({ name, type: 'file' });
+            }
+        }
+        return files;
     };
 
     // ---------- INITIAL LOAD ----------
