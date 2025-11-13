@@ -140,7 +140,7 @@
             transition: all 0.2s;
         }
 
-        #prestigeButton:hover {
+        #prestigeButton:hover:not(:disabled) {
             background: #c33;
             box-shadow: 0 0 30px var(--gold);
         }
@@ -193,7 +193,7 @@
             overflow: hidden;
         }
 
-        .upgrade:hover:not(:disabled) {
+        .upgrade:hover:not(.unaffordable) {
             background: var(--button-hover);
             box-shadow: 0 0 18px var(--accent);
             transform: translateX(3px);
@@ -204,9 +204,15 @@
             box-shadow: 0 0 10px var(--accent);
         }
 
-        .upgrade:not(.affordable) {
+        .upgrade.unaffordable {
             opacity: 0.4;
             cursor: not-allowed;
+        }
+
+        .upgrade.maxed {
+            opacity: 0.6;
+            cursor: not-allowed;
+            border-color: #666;
         }
 
         .upgrade-name {
@@ -266,17 +272,19 @@
             display: flex;
         }
 
-        .login-box {
+        .login-box, .menu-box {
             background: #000;
             border: 3px solid var(--accent);
             padding: 30px;
-            width: 380px;
+            width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
             border-radius: 15px;
             text-align: center;
             box-shadow: 0 0 30px var(--accent);
         }
 
-        .login-box h2 {
+        .login-box h2, .menu-box h2 {
             margin-bottom: 20px;
             font-size: 28px;
             color: var(--accent);
@@ -318,22 +326,89 @@
             background: var(--red);
             color: #fff;
             margin-top: 20px;
+            width: 100%;
         }
 
         .login-box .logout:hover {
             background: #f44;
         }
 
+        /* Menu Styles */
+        .menu-content {
+            text-align: left;
+            font-size: 14px;
+        }
+
+        .menu-section {
+            margin: 20px 0;
+            padding: 15px;
+            background: #111;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+        }
+
+        .menu-section h3 {
+            color: var(--gold);
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .leaderboard {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .leaderboard-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #333;
+        }
+
+        .leaderboard-item:last-child {
+            border-bottom: none;
+        }
+
+        .rank {
+            color: var(--gold);
+            font-weight: bold;
+            width: 30px;
+        }
+
+        .menu-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .menu-buttons button {
+            flex: 1;
+            padding: 12px;
+            background: var(--accent);
+            color: #000;
+            border: 2px solid var(--border);
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .menu-buttons button:hover {
+            background: #0f0;
+            box-shadow: 0 0 15px #0f0;
+        }
+
         .upgrade-panel::-webkit-scrollbar {
             width: 14px;
         }
 
-        .upgrade-panel::-webkit-scrollbar-track {
+        .upgrade-panel::-webkit-scrollbar-track, .leaderboard::-webkit-scrollbar-track {
             background: #000;
             border: 1px solid var(--border);
         }
 
-        .upgrade-panel::-webkit-scrollbar-thumb {
+        .upgrade-panel::-webkit-scrollbar-thumb, .leaderboard::-webkit-scrollbar-thumb {
             background: var(--accent);
             border: 1px solid #000;
         }
@@ -354,8 +429,21 @@
         </div>
     </div>
 
+    <!-- Menu Modal -->
+    <div id="menuModal" class="modal">
+        <div class="menu-box">
+            <h2>PLAYER MENU</h2>
+            <div class="menu-content" id="menuContent">
+                <!-- Dynamic content -->
+            </div>
+            <div class="menu-buttons">
+                <button id="closeMenuBtn">CLOSE MENU</button>
+                <button id="copyPasswordBtn">COPY PASSWORD</button>
+            </div>
+        </div>
+    </div>
+
     <div class="container" id="gameContainer" style="display:none;">
-        <!-- Left: Game -->
         <div class="game-panel">
             <h1>RETRO CLICKER</h1>
             <p style="color:#0ff; font-size:14px;">Welcome, <span id="welcomeUser">Guest</span>!</p>
@@ -376,46 +464,33 @@
             <button id="prestigeButton" disabled>PRESTIGE</button>
         </div>
 
-        <!-- Right: Upgrades -->
-        <div class="upgrade-panel" id="upgradePanel">
-            <!-- Upgrades injected by JS -->
-        </div>
+        <div class="upgrade-panel" id="upgradePanel"></div>
     </div>
 
     <script>
-        // === AUTH & STORAGE ===
+        // === GLOBAL STATE ===
         const STORAGE_KEY = 'retroClicker_users';
+        const LEADERBOARD_KEY = 'retroClicker_leaderboard';
         let currentUser = null;
+        let playerId = null;
 
-        function loadUsers() {
-            try {
-                const data = localStorage.getItem(STORAGE_KEY);
-                return data ? JSON.parse(data) : {};
-            } catch (e) {
-                console.error("Failed to load users:", e);
-                return {};
-            }
-        }
+        // Game state
+        let score = 0;
+        let clickPower = 1;
+        let cps = 0;
+        let prestigeCount = 0;
+        let prestigeBonus = 1;
+        let prestigeThreshold = 10000000;
+        const MAX_LEVEL = 2000;
+        const upgrades = [];
 
-        function saveUsers(users) {
-            try {
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(users));
-            } catch (e) {
-                console.error("Failed to save users:", e);
-            }
-        }
-
-        function hash(str) {
-            let h = 0;
-            for (let i = 0; i < str.length; i++) {
-                h = (h * 31 + str.charCodeAt(i)) & 0xFFFFFFFF;
-            }
-            return h.toString(16);
-        }
-
-        // === DOM ELEMENTS ===
+        // DOM elements
         const modal = document.getElementById('loginModal');
+        const menuModal = document.getElementById('menuModal');
         const gameContainer = document.getElementById('gameContainer');
+        const menuContent = document.getElementById('menuContent');
+        
+        // Login elements
         const usernameInput = document.getElementById('username');
         const passwordInput = document.getElementById('password');
         const loginBtn = document.getElementById('loginBtn');
@@ -424,7 +499,8 @@
         const logoutBtn = document.getElementById('logoutBtn');
         const loginMessage = document.getElementById('loginMessage');
         const welcomeUser = document.getElementById('welcomeUser');
-
+        
+        // Game elements
         const scoreEl = document.getElementById('score');
         const cpsEl = document.getElementById('cps');
         const clickPowerEl = document.getElementById('clickPower');
@@ -435,27 +511,75 @@
         const clickBtn = document.getElementById('clickButton');
         const upgradePanel = document.getElementById('upgradePanel');
 
-        // === GAME STATE ===
-        let score = 0;
-        let clickPower = 1;
-        let cps = 0;
-        let prestigeCount = 0;
-        let prestigeBonus = 1;
-        let prestigeThreshold = 10000000;
-
-        const TIERS = 10;
-        const PER_TIER = 100;
-        const MAX_LEVEL = 2000;
-        const upgrades = [];
-
         // Word banks
-        const prefixes = ['Quantum', 'Mega', 'Ultra', 'Hyper', 'Giga', 'Tera', 'Peta', 'Exa', 'Zetta', 'Yotta',
-                          'Nano', 'Micro', 'Milli', 'Kilo', 'Atomic', 'Plasma', 'Fusion', 'Laser', 'Photon', 'Neutron'];
-        const nouns = ['Core', 'Reactor', 'Engine', 'Booster', 'Amplifier', 'Generator', 'Converter', 'Matrix', 'Grid', 'Node',
-                       'Circuit', 'Capacitor', 'Transistor', 'Resonator', 'Oscillator', 'Modulator', 'Demodulator', 'Filter', 'Relay', 'Switch'];
-        const effects = ['Click', 'Auto'];
+        const prefixes = ['Quantum','Mega','Ultra','Hyper','Giga','Tera','Peta','Exa','Zetta','Yotta','Nano','Micro','Milli','Kilo','Atomic','Plasma','Fusion','Laser','Photon','Neutron'];
+        const nouns = ['Core','Reactor','Engine','Booster','Amplifier','Generator','Converter','Matrix','Grid','Node','Circuit','Capacitor','Transistor','Resonator','Oscillator','Modulator','Demodulator','Filter','Relay','Switch'];
+        const effects = ['Click','Auto'];
 
-        // === AUTH FUNCTIONS ===
+        // === STORAGE ===
+        function loadUsers() {
+            try {
+                const data = localStorage.getItem(STORAGE_KEY);
+                return data ? JSON.parse(data) : {};
+            } catch (e) {
+                return {};
+            }
+        }
+
+        function saveUsers(users) {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(users));
+            } catch (e) {}
+        }
+
+        function loadLeaderboard() {
+            try {
+                const data = localStorage.getItem(LEADERBOARD_KEY);
+                return data ? JSON.parse(data) : [];
+            } catch (e) {
+                return [];
+            }
+        }
+
+        function saveLeaderboard(leaderboard) {
+            try {
+                localStorage.setItem(LEADERBOARD_KEY, JSON.stringify(leaderboard));
+            } catch (e) {}
+        }
+
+        function updateLeaderboard() {
+            const leaderboard = loadLeaderboard();
+            const users = loadUsers();
+            
+            // Update current user score if logged in
+            if (currentUser && users[currentUser]) {
+                users[currentUser].score = score;
+                saveUsers(users);
+            }
+
+            // Rebuild leaderboard
+            const playerScores = Object.entries(users)
+                .map(([username, data]) => ({
+                    username,
+                    score: data.score || 0,
+                    playerId: data.playerId
+                }))
+                .sort((a, b) => b.score - a.score)
+                .slice(0, 10);
+
+            saveLeaderboard(playerScores);
+            return playerScores;
+        }
+
+        function hash(str) {
+            let h = 0;
+            for (let i = 0; i < str.length; i++) {
+                h = (h * 31 + str.charCodeAt(i)) & 0xFFFFFFFF;
+            }
+            return h.toString(16);
+        }
+
+        // === AUTH ===
         function showMessage(msg, isError = true) {
             loginMessage.textContent = msg;
             loginMessage.style.color = isError ? '#f88' : '#8f8';
@@ -466,6 +590,7 @@
             const hashPass = hash(password);
             if (users[username] && users[username].password === hashPass) {
                 currentUser = username;
+                playerId = users[username].playerId;
                 loadGameData(users[username].game || getDefaultGameData());
                 showGame();
                 showMessage("Login successful!", false);
@@ -486,8 +611,11 @@
                 showMessage("Username already taken!");
                 return false;
             }
+            const newPlayerId = Date.now().toString(36) + Math.random().toString(36).substr(2);
             users[username] = {
                 password: hash(password),
+                playerId: newPlayerId,
+                score: 0,
                 game: getDefaultGameData()
             };
             saveUsers(users);
@@ -497,10 +625,10 @@
         }
 
         function logout() {
-            if (currentUser) {
-                saveGame();
-            }
+            saveGame();
+            updateLeaderboard();
             currentUser = null;
+            playerId = null;
             modal.classList.add('active');
             gameContainer.style.display = 'none';
             usernameInput.value = '';
@@ -510,6 +638,7 @@
 
         function playAsGuest() {
             currentUser = null;
+            playerId = 'guest_' + Date.now();
             loadGameData(getDefaultGameData());
             showGame();
             showMessage("Playing as Guest (no save)", false);
@@ -550,16 +679,13 @@
             upgradePanel.innerHTML = '';
             initUpgrades();
 
-            if (data.upgrades && data.upgrades.length > 0) {
+            if (data.upgrades) {
                 data.upgrades.forEach(saved => {
                     const upg = upgrades.find(u => u.id === saved.id);
                     if (upg) {
                         upg.level = saved.level;
-                        if (upg.type === 'cps') {
-                            cps += upg.powerPerLevel * upg.level;
-                        } else {
-                            clickPower += upg.powerPerLevel * upg.level;
-                        }
+                        if (upg.type === 'cps') cps += upg.powerPerLevel * upg.level;
+                        else clickPower += upg.powerPerLevel * upg.level;
                     }
                 });
             }
@@ -572,11 +698,11 @@
             const users = loadUsers();
             users[currentUser].game = {
                 score,
-                clickPower: 1, // Save base values
+                clickPower: 1,
                 cps: 0,
                 prestigeCount,
                 prestigeThreshold,
-                upgrades: upgrades.map(u => ({ id: u.id, level: u.level }))
+                upgrades: upgrades.map(u => ({id: u.id, level: u.level}))
             };
             saveUsers(users);
         }
@@ -584,23 +710,21 @@
         // === UPGRADES ===
         function initUpgrades() {
             let id = 0;
-            for (let tier = 1; tier <= TIERS; tier++) {
+            for (let tier = 1; tier <= 10; tier++) {
                 const header = document.createElement('div');
                 header.className = 'tier-header';
                 header.textContent = `TIER ${tier} UPGRADES`;
                 upgradePanel.appendChild(header);
 
-                let lastPower = 0.15; // Start each tier at 0.15
-
-                for (let i = 0; i < PER_TIER; i++) {
+                let lastPower = 0.15;
+                for (let i = 0; i < 100; i++) {
                     const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
                     const noun = nouns[Math.floor(Math.random() * nouns.length)];
                     const effect = effects[Math.floor(Math.random() * effects.length)];
 
-                    const baseCost = Math.pow(10, tier) * 100 * (i + 1) * 0.5;
+                    const baseCost = Math.pow(10, tier) * 50 * (i + 1);
                     const powerPerLevel = lastPower;
                     lastPower *= 1.5;
-
                     const costMultiplier = 1.15 + (tier * 0.05);
 
                     const upgrade = {
@@ -627,8 +751,8 @@
             div.dataset.id = upgrade.id;
 
             const effectText = upgrade.type === 'cps' 
-                ? `+${upgrade.powerPerLevel.toFixed(3)} CPS per level`
-                : `+${upgrade.powerPerLevel.toFixed(3)} per click`;
+                ? `+${upgrade.powerPerLevel.toFixed(3)} CPS/level`
+                : `+${upgrade.powerPerLevel.toFixed(3)}/click`;
 
             div.innerHTML = `
                 <span class="upgrade-name" title="${upgrade.name}">${upgrade.name}</span>
@@ -644,13 +768,12 @@
 
         function buyUpgrade(upgrade) {
             if (upgrade.level >= MAX_LEVEL) return;
-            
             const cost = getUpgradeCost(upgrade);
             if (score < cost) return;
 
             score -= cost;
             upgrade.level++;
-
+            
             if (upgrade.type === 'cps') {
                 cps += upgrade.powerPerLevel;
             } else {
@@ -672,12 +795,18 @@
             el.querySelector('.cost-value').textContent = formatNumber(nextCost);
             el.querySelector('.upgrade-level').textContent = upgrade.level;
 
-            const canAfford = score >= nextCost && upgrade.level < MAX_LEVEL;
-            
-            if (canAfford) {
+            // Clear previous classes
+            el.classList.remove('affordable', 'unaffordable', 'maxed');
+
+            const canAfford = score >= nextCost;
+            const isMaxed = upgrade.level >= MAX_LEVEL;
+
+            if (isMaxed) {
+                el.classList.add('maxed');
+            } else if (canAfford) {
                 el.classList.add('affordable');
             } else {
-                el.classList.remove('affordable');
+                el.classList.add('unaffordable');
             }
         }
 
@@ -689,27 +818,20 @@
         function updatePrestige() {
             nextPrestigeEl.textContent = formatNumber(prestigeThreshold);
             prestigeCountEl.textContent = prestigeCount;
-            prestigeBonusEl.textContent = `+${((prestigeBonus - 1) * 100).toFixed(1)}%`;
+            prestigeBonusEl.textContent = `+${((prestigeBonus-1)*100).toFixed(1)}%`;
             prestigeBtn.disabled = score < prestigeThreshold;
             prestigeBtn.textContent = score >= prestigeThreshold ? 'PRESTIGE NOW!' : 'PRESTIGE';
         }
 
         function prestige() {
             if (score < prestigeThreshold) return;
-
             prestigeCount++;
             prestigeBonus = 1 + (prestigeCount * 0.1);
             prestigeThreshold = Math.floor(prestigeThreshold * 10.67);
-
             score = 0;
             clickPower = 1 * prestigeBonus;
             cps = 0;
-
-            upgrades.forEach(u => {
-                u.level = 0;
-                updateUpgradeElement(u);
-            });
-
+            upgrades.forEach(u => { u.level = 0; });
             updateDisplay();
             updatePrestige();
             saveGame();
@@ -717,77 +839,135 @@
 
         // === DISPLAY ===
         function updateDisplay() {
-            scoreEl.textContent = formatNumber(Math.floor(score));
+            scoreEl.textContent = formatNumber(score);
             cpsEl.textContent = formatNumber(cps.toFixed(1));
             clickPowerEl.textContent = formatNumber(clickPower.toFixed(1));
             updatePrestige();
-            
-            // Update ALL upgrade affordability after any change
             updateAllUpgrades();
         }
 
         function formatNumber(num) {
-            if (num >= 1e12) return (num / 1e12).toFixed(2) + 'T';
-            if (num >= 1e9) return (num / 1e9).toFixed(2) + 'B';
-            if (num >= 1e6) return (num / 1e6).toFixed(2) + 'M';
-            if (num >= 1e3) return (num / 1e3).toFixed(1) + 'K';
+            if (num >= 1e12) return (num/1e12).toFixed(2)+'T';
+            if (num >= 1e9) return (num/1e9).toFixed(2)+'B';
+            if (num >= 1e6) return (num/1e6).toFixed(2)+'M';
+            if (num >= 1e3) return (num/1e3).toFixed(1)+'K';
             return Math.floor(num).toString();
+        }
+
+        // === MENU ===
+        function showMenu() {
+            const users = loadUsers();
+            const leaderboard = updateLeaderboard();
+            const userData = currentUser ? users[currentUser] : null;
+
+            let html = `
+                <div class="menu-section">
+                    <h3>PLAYER INFO</h3>
+                    <p><strong>Username:</strong> ${currentUser || 'Guest'}</p>
+                    <p><strong>Player ID:</strong> ${playerId || 'N/A'}</p>
+            `;
+
+            if (userData && userData.password) {
+                html += `<p><strong>Password:</strong> ${atob(userData.password).slice(0,10)+'...'}</p>`;
+            }
+
+            html += `
+                    <p><strong>Total Cookies:</strong> ${formatNumber(score)}</p>
+                    <p><strong>Prestige:</strong> ${prestigeCount}</p>
+                </div>
+            `;
+
+            html += `
+                <div class="menu-section">
+                    <h3>TOP 10 LEADERBOARD</h3>
+                    <div class="leaderboard">
+            `;
+
+            leaderboard.forEach((player, index) => {
+                html += `
+                    <div class="leaderboard-item">
+                        <span class="rank">#${index+1}</span>
+                        <span>${player.username}</span>
+                        <span>${formatNumber(player.score)}</span>
+                    </div>
+                `;
+            });
+
+            html += `
+                    </div>
+                </div>
+            `;
+
+            menuContent.innerHTML = html;
+            menuModal.classList.add('active');
         }
 
         // === EVENT LISTENERS ===
         loginBtn.addEventListener('click', () => {
             const user = usernameInput.value.trim();
             const pass = passwordInput.value;
-            if (!user || !pass) {
-                showMessage("Enter username & password");
-                return;
-            }
+            if (!user || !pass) return showMessage("Enter username & password");
             login(user, pass);
         });
 
         signupBtn.addEventListener('click', () => {
             const user = usernameInput.value.trim();
             const pass = passwordInput.value;
-            if (!user || !pass) {
-                showMessage("Enter username & password");
-                return;
-            }
+            if (!user || !pass) return showMessage("Enter username & password");
             signup(user, pass);
         });
 
         guestBtn.addEventListener('click', playAsGuest);
         logoutBtn.addEventListener('click', logout);
         prestigeBtn.addEventListener('click', prestige);
+        document.getElementById('closeMenuBtn').addEventListener('click', () => menuModal.classList.remove('active'));
+        document.getElementById('copyPasswordBtn').addEventListener('click', () => {
+            if (currentUser) {
+                const users = loadUsers();
+                navigator.clipboard.writeText(atob(users[currentUser].password));
+                alert('Password copied!');
+            }
+        });
 
         clickBtn.addEventListener('click', () => {
             score += clickPower;
             updateDisplay();
-            saveGame();
+            if (currentUser) saveGame();
         });
 
-        // Auto CPS - calls updateDisplay which updates all upgrades
+        // ESC key menu
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && gameContainer.style.display !== 'none') {
+                showMenu();
+            }
+        });
+
+        // Auto CPS
         setInterval(() => {
             score += cps;
             updateDisplay();
             if (currentUser) saveGame();
         }, 1000);
 
+        // Leaderboard update
+        setInterval(updateLeaderboard, 10000);
+
         // CRT flicker
         setInterval(() => {
             document.body.style.filter = Math.random() > 0.98 ? 'brightness(1.05)' : 'brightness(1)';
         }, 100);
 
+        // Enter key
         [usernameInput, passwordInput].forEach(input => {
             input.addEventListener('keypress', e => {
-                if (e.key === 'Enter') {
-                    loginBtn.click();
-                }
+                if (e.key === 'Enter') loginBtn.click();
             });
         });
 
-        // Initialize when DOM is ready
+        // Init
         document.addEventListener('DOMContentLoaded', () => {
             initUpgrades();
+            updateLeaderboard();
         });
     </script>
 </body>
