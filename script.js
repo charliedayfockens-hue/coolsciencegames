@@ -1,100 +1,118 @@
-/* script.js – 100% automatic, works on GitHub Pages */
-document.addEventListener('DOMContentLoaded', async () => {
+/* script.js */
+const DEV_CODE = 'dev123';               // CHANGE THIS to any secret you want
+const STORAGE_KEY = 'gameHubGames';
+const ASSETS_URL = 'assets/';            // relative to index.html
+
+document.addEventListener('DOMContentLoaded', () => {
     const listEl = document.getElementById('game-list');
+    const devEntry = document.getElementById('dev-entry');
+    const devPanel = document.getElementById('dev-panel');
+    const enterBtn = document.getElementById('enter-btn');
+    const devCodeInput = document.getElementById('dev-code');
+    const saveBtn = document.getElementById('save-game');
+    const exitBtn = document.getElementById('exit-dev');
+    const gameNameInput = document.getElementById('game-name');
 
-    // ---------- AUTO‑DETECT REPO ----------
-    const hostname = location.hostname;
-    if (!hostname.endsWith('.github.io')) {
-        listEl.innerHTML = '<p class="loading">Error: Not on GitHub Pages</p>';
-        return;
-    }
-    const username = hostname.split('.')[0];
-    const path = location.pathname.split('/').filter(Boolean);
-    const repo = path.length ? path[0] : `${username}.github.io`;
-    const REPO = `${username}/${repo}`;
+    // ---------- LOAD GAMES ----------
+    const loadGames = () => {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        const games = saved ? JSON.parse(saved) : [];
+        renderGames(games);
+    };
 
-    // ---------- TRY BRANCHES ----------
-    const branches = ['main', 'gh-pages', 'master'];
-    let branch = null;
-    let items = null;
-
-    for (const b of branches) {
-        const url = `https://api.github.com/repos/${REPO}/contents/assets?ref=${b}`;
-        try {
-            const r = await fetch(url, { headers: { 'User-Agent': 'GameHub' } });
-            if (r.ok) {
-                items = await r.json();
-                branch = b;
-                console.log(`Found assets on branch: ${b}`);
-                break;
-            }
-        } catch (_) { /* ignore */ }
-    }
-
-    if (!items) {
-        listEl.innerHTML = `<p class="loading">Cannot find assets/ folder.<br>Repo detected as <code>${REPO}</code></p>`;
-        return;
-    }
-
-    // ---------- FIND GAMES ----------
-    const games = [];
-
-    for (const item of items) {
-        const name = item.name;
-        const type = item.type;
-
-        if (type === 'dir') {
-            // ---- FOLDER: look for ANY .html file ----
-            const folderApi = `https://api.github.com/repos/${REPO}/contents/assets/${name}?ref=${branch}`;
-            let files = [];
-            try {
-                const r = await fetch(folderApi, { headers: { 'User-Agent': 'GameHub' } });
-                if (r.ok) files = await r.json();
-            } catch (_) { continue; }
-
-            const htmlFile = files.find(f => f.type === 'file' && f.name.toLowerCase().endsWith('.html'));
-            if (htmlFile) {
-                // Use the raw GitHub Pages URL (download_url works directly)
-                const rawUrl = htmlFile.download_url;
-                games.push({
-                    name: name,
-                    url: rawUrl   // e.g. https://raw.githubusercontent.com/.../assets/MyGame/game.html
-                });
-            }
+    const renderGames = (games) => {
+        listEl.innerHTML = '';
+        if (games.length === 0) {
+            listEl.innerHTML = '<p class="loading">No games yet – activate Dev Mode to add some!</p>';
+            return;
         }
-        else if (type === 'file' && name.toLowerCase().endsWith('.html')) {
-            // ---- SINGLE HTML FILE ----
-            const gameName = name.replace(/\.html?$/i, '');
-            games.push({
-                name: gameName,
-                url: item.download_url
-            });
+        const frag = document.createDocumentFragment();
+        games.sort((a,b) => a.name.localeCompare(b.name));
+        games.forEach(g => {
+            const card = document.createElement('div');
+            card.className = 'game-card';
+            const a = document.createElement('a');
+            a.href = g.url;
+            a.target = '_blank';
+            a.rel = 'noopener';
+            a.textContent = g.name;
+            card.appendChild(a);
+            frag.appendChild(card);
+        });
+        listEl.appendChild(frag);
+    };
+
+    // ---------- DEV MODE ----------
+    enterBtn.addEventListener('click', () => {
+        if (devCodeInput.value === DEV_CODE) {
+            devEntry.classList.add('hidden');
+            devPanel.classList.remove('hidden');
+            devCodeInput.value = '';
+            alert('Dev Mode Activated!');
+        } else {
+            alert('Wrong code!');
         }
-    }
+    });
 
-    // ---------- SHOW GAMES ----------
-    games.sort((a, b) => a.name.localeCompare(b.name));
+    exitBtn.addEventListener('click', () => {
+        devPanel.classList.add('hidden');
+        devEntry.classList.remove('hidden');
+    });
 
-    if (games.length === 0) {
-        listEl.innerHTML = '<p class="loading">No games found.<br>Add a folder with any <code>.html</code> file or a single <code>.html</code> file to <code>assets/</code>.</p>';
-        return;
-    }
+    // ---------- SAVE NEW GAME ----------
+    saveBtn.addEventListener('click', () => {
+        const rawName = gameNameInput.value.trim();
+        if (!rawName) { alert('Enter a name!'); return; }
 
-    const frag = document.createDocumentFragment();
-    for (const g of games) {
-        const card = document.createElement('div');
-        card.className = 'game-card';
+        // Sanitize name: letters, numbers, dash, underscore only
+        const name = rawName.replace(/[^a-zA-Z0-9\-_]/g, '');
+        if (!name) { alert('Invalid name – use letters, numbers, - or _'); return; }
 
+        const type = document.querySelector('input[name="type"]:checked').value;
+        let url = '';
+        let folder = '';
+
+        if (type === 'folder') {
+            folder = `${ASSETS_URL}${name}/`;
+            url = `${folder}index.html`;
+            // Create minimal index.html content
+            const html = `<!DOCTYPE html><html><head><title>${name}</title></head><body><h1>${name}</h1><p>Edit this file in <code>assets/${name}/index.html</code></p></body></html>`;
+            createFile(`${name}/index.html`, html);
+        } else {
+            url = `${ASSETS_URL}${name}.html`;
+            const html = `<!DOCTYPE html><html><head><title>${name}</title></head><body><h1>${name}</h1><p>Edit this file in <code>assets/${name}.html</code></p></body></html>`;
+            createFile(`${name}.html`, html);
+        }
+
+        // Save to localStorage
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+        if (saved.some(g => g.name === name)) {
+            alert('Game with this name already exists!');
+            return;
+        }
+        saved.push({ name, url });
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
+
+        gameNameInput.value = '';
+        loadGames();
+        alert(`Game "${name}" added!`);
+    });
+
+    // ---------- FILE CREATION (via download) ----------
+    const createFile = (path, content) => {
+        const blob = new Blob([content], { type: 'text/html' });
+        const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
-        a.href = g.url;
-        a.target = '_blank';
-        a.rel = 'noopener';
-        a.textContent = g.name;
+        a.href = url;
+        a.download = path;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        // NOTE: The file is **downloaded** – you must place it manually into assets/
+        alert(`Download started for ${path}. Place it in the "assets" folder (create subfolders if needed).`);
+    };
 
-        card.appendChild(a);
-        frag.appendChild(card);
-    }
-
-    listEl.innerHTML = '';
-    listEl.appendChild(frag);
+    // ---------- INITIAL LOAD ----------
+    loadGames();
 });
