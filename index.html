@@ -3,17 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Game Hub</title>
+    <title>Game Hub</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <header>
-        <h1>My Game Hub</h1>
+        <h1>Game Hub</h1>
+        <div id="dev-entry">
+            <input type="password" id="dev-code" placeholder="Dev code">
+            <button id="enter-btn">Enter</button>
+        </div>
     </header>
 
     <main id="game-list">
         <p class="loading">Loading games…</p>
     </main>
+
+    <!-- Dev panel – hidden until activated -->
+    <section id="dev-panel" class="hidden">
+        <h2>Add New Game</h2>
+        <input type="text" id="game-name" placeholder="Game name (folder/file name)">
+        <label><input type="radio" name="type" value="folder" checked> Folder (index.html)</label>
+        <label><input type="radio" name="type" value="single"> Single .html file</label>
+        <button id="save-game">Save</button>
+        <button id="exit-dev">Exit Dev Mode</button>
+    </section>
 
     <script src="script.js"></script>
 </body>
