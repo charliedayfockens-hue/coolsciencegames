@@ -1,7 +1,7 @@
 /* script.js */
 document.addEventListener('DOMContentLoaded', async () => {
     const listEl = document.getElementById('game-list');
-    const REPO = 'charliedayfockens-hue/math-gn'; // CHANGE THIS!
+    const REPO = 'charliedayfockens-hue/coolsciencegames'; // CHANGE THIS!
     const BRANCH = 'main';                 // or 'gh-pages'
 
     // Build GitHub API URL for the assets folder
@@ -69,4 +69,5 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     listEl.innerHTML = '';
     listEl.appendChild(fragment);
+
 });
