@@ -3,760 +3,792 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clicker Master</title>
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Cinzel:wght@700&display=swap" rel="stylesheet">
+    <title>Retro Clicker Empire</title>
     <style>
-        /* Cookie Clicker Inspired Style - No Background Image */
-        body {
+        :root {
+            --bg: #0a0a0a;
+            --panel-bg: #111;
+            --text: #0f0;
+            --text-dim: #0a0;
+            --accent: #0f0;
+            --border: #0f0;
+            --button: #222;
+            --button-hover: #333;
+            --button-active: #444;
+            --gold: #ff0;
+            --red: #f44;
+        }
+
+        * {
             margin: 0;
             padding: 0;
-            background: #0a1a2f;
-            font-family: 'Cinzel', serif;
-            color: #e0e0e0;
-            overflow: hidden;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Courier New', monospace;
+            display: flex;
             height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        #game-container {
-            width: 1000px;
-            height: 600px;
-            background: rgba(10, 20, 40, 0.95);
-            border: 8px solid #8b4513;
-            border-image: url('https://i.imgur.com/7uZ5Q3L.png') 8 round;
-            box-shadow: 0 0 30px rgba(255, 215, 0, 0.6);
-            display: flex;
-            position: relative;
             overflow: hidden;
         }
 
-        /* Left Panel - Clicker */
-        #left-panel {
-            width: 400px;
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0,0,0,0.1),
+                rgba(0,0,0,0.1) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .container {
+            display: flex;
+            width: 100%;
+            height: 100%;
+        }
+
+        .game-panel {
+            flex: 1;
             padding: 20px;
-            text-align: center;
-            background: linear-gradient(to right, rgba(15, 30, 60, 0.9), rgba(20, 40, 80, 0.7));
-            border-right: 4px solid #8b4513;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-right: 3px solid var(--border);
         }
 
-        #game-title {
-            font-family: 'Press Start 2P', cursive;
-            font-size: 24px;
-            color: #ffd700;
-            text-shadow: 3px 3px 0 #8b4513;
-            margin-bottom: 10px;
-            letter-spacing: 1px;
+        h1 {
+            font-size: 36px;
+            text-shadow: 0 0 10px var(--accent);
+            margin-bottom: 20px;
+            animation: flicker 3s infinite alternate;
         }
 
-        #score-display {
-            font-size: 28px;
-            font-weight: bold;
-            color: #fff;
-            text-shadow: 2px 2px 4px #000;
+        @keyframes flicker {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.98; }
         }
 
-        #cps-display {
-            font-size: 16px;
-            color: #a0d8ff;
-            margin: 5px 0;
-        }
-
-        #prestige-display {
-            font-size: 16px;
-            color: #ffcc00;
-            margin: 5px 0;
-            text-shadow: 1px 1px 2px #000;
-        }
-
-        #click-cookie {
+        #clickButton {
             width: 180px;
             height: 180px;
-            margin: 30px auto;
+            background: var(--button);
+            border: 4px solid var(--border);
+            border-radius: 20px;
+            font-size: 28px;
+            font-weight: bold;
+            color: var(--text);
             cursor: pointer;
-            background-size: contain;
-            background-repeat: no-repeat;
-            background-position: center;
-            transition: transform 0.1s;
-            filter: drop-shadow(0 0 15px #ffcc00);
-            image-rendering: pixelated;
+            box-shadow: 0 0 20px var(--accent);
+            transition: all 0.1s;
+            margin: 30px 0;
+            text-shadow: 0 0 10px var(--accent);
         }
 
-        #click-cookie:hover {
-            transform: scale(1.05);
+        #clickButton:hover {
+            background: var(--button-hover);
+            box-shadow: 0 0 30px var(--accent);
         }
 
-        #click-cookie:active {
+        #clickButton:active {
             transform: scale(0.95);
+            box-shadow: 0 0 40px var(--accent);
         }
 
-        /* Right Panel - Upgrades */
-        #right-panel {
-            width: 600px;
-            padding: 15px;
-            background: linear-gradient(to left, rgba(15, 30, 60, 0.9), rgba(20, 40, 80, 0.7));
-            overflow-y: auto;
-            position: relative;
-        }
-
-        #upgrades-header {
-            font-family: 'Press Start 2P', cursive;
-            font-size: 18px;
-            color: #ffd700;
-            text-shadow: 2px 2px 0 #8b4513;
+        .stats {
+            margin: 20px 0;
+            font-size: 22px;
             text-align: center;
-            margin-bottom: 10px;
-            padding: 8px;
-            background: rgba(139, 69, 19, 0.3);
-            border: 2px solid #8b4513;
-            border-radius: 8px;
+            text-shadow: 0 0 5px var(--accent);
         }
 
-        .upgrade-item {
-            background: rgba(20, 40, 80, 0.8);
-            border: 2px solid #8b4513;
-            border-radius: 8px;
+        .stats p {
             margin: 8px 0;
-            padding: 10px;
+        }
+
+        .prestige-info {
+            margin: 15px 0;
+            padding: 12px;
+            background: #000;
+            border: 2px solid var(--gold);
+            border-radius: 10px;
+            text-align: center;
+            font-size: 18px;
+            color: var(--gold);
+            text-shadow: 0 0 8px var(--gold);
+        }
+
+        #prestigeButton {
+            background: var(--red);
+            color: #fff;
+            border: 3px solid var(--gold);
+            padding: 12px 24px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 10px;
+            margin: 10px 0;
+            box-shadow: 0 0 20px var(--gold);
+            transition: all 0.2s;
+        }
+
+        #prestigeButton:hover {
+            background: #c33;
+            box-shadow: 0 0 30px var(--gold);
+        }
+
+        #prestigeButton:disabled {
+            background: #444;
+            color: #777;
+            cursor: not-allowed;
+            box-shadow: none;
+            border-color: #666;
+        }
+
+        .upgrade-panel {
+            width: 480px;
+            background: var(--panel-bg);
+            border-left: 3px solid var(--border);
+            overflow-y: auto;
+            padding: 18px;
             display: flex;
-            align-items: center;
-            justify-content: space-between;
-            transition: all 0.3s;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+            flex-direction: column;
         }
 
-        .upgrade-item:hover {
-            background: rgba(30, 60, 120, 0.9);
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
+        .tier-header {
+            background: #000;
+            color: var(--accent);
+            padding: 12px;
+            margin: 18px 0 10px 0;
+            font-weight: bold;
+            text-align: center;
+            border: 2px solid var(--border);
+            text-shadow: 0 0 8px var(--accent);
+            font-size: 19px;
         }
 
-        .upgrade-info {
-            flex: 1;
+        .upgrade {
+            background: var(--button);
+            border: 2px solid var(--border);
+            margin: 8px 0;
+            padding: 14px 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+            position: relative;
+            line-height: 1.5;
+            min-height: 80px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .upgrade:hover:not(:disabled) {
+            background: var(--button-hover);
+            box-shadow: 0 0 18px var(--accent);
+            transform: translateX(3px);
+        }
+
+        .upgrade.affordable {
+            border-color: #0f0;
+            box-shadow: 0 0 10px var(--accent);
+        }
+
+        .upgrade:not(.affordable) {
+            opacity: 0.4;
+            cursor: not-allowed;
         }
 
         .upgrade-name {
             font-weight: bold;
-            color: #ffd700;
-            font-size: 12px;
-            text-shadow: 1px 1px 1px #000;
+            color: var(--text);
+            font-size: 16px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: block;
         }
 
-        .upgrade-desc {
-            font-size: 10px;
-            color: #a0d8ff;
-            margin: 3px 0;
+        .upgrade-effect {
+            font-size: 13px;
+            color: #0ff;
+            margin: 4px 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .upgrade-cost {
-            font-size: 11px;
-            color: #ff6b6b;
+            font-size: 13px;
+            color: #ff0;
+            font-weight: bold;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .upgrade-level {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            font-size: 12px;
+            color: #0ff;
+            background: #000;
+            padding: 3px 8px;
+            border: 1px solid var(--border);
+            border-radius: 5px;
             font-weight: bold;
         }
 
-        .upgrade-owned {
-            font-size: 10px;
-            color: #4ade80;
-            margin-top: 2px;
+        /* Login Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.9);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(4px);
         }
 
-        .buy-button {
-            background: linear-gradient(to bottom, #32cd32, #228b22);
-            color: white;
-            border: 2px solid #006400;
-            border-radius: 6px;
-            padding: 8px 12px;
-            font-family: 'Press Start 2P', cursive;
-            font-size: 9px;
+        .modal.active {
+            display: flex;
+        }
+
+        .login-box {
+            background: #000;
+            border: 3px solid var(--accent);
+            padding: 30px;
+            width: 380px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 0 30px var(--accent);
+        }
+
+        .login-box h2 {
+            margin-bottom: 20px;
+            font-size: 28px;
+            color: var(--accent);
+            text-shadow: 0 0 10px var(--accent);
+        }
+
+        .login-box input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            background: #111;
+            border: 2px solid var(--border);
+            color: var(--text);
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            border-radius: 8px;
+        }
+
+        .login-box button {
+            width: 48%;
+            padding: 12px;
+            margin: 10px 1%;
+            background: var(--accent);
+            color: #000;
+            border: 2px solid var(--border);
+            font-weight: bold;
+            font-size: 16px;
             cursor: pointer;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            border-radius: 8px;
             transition: all 0.2s;
         }
 
-        .buy-button:hover:not(:disabled) {
-            background: linear-gradient(to bottom, #3eff3e, #2ebd2e);
-            transform: translateY(-1px);
+        .login-box button:hover {
+            background: #0f0;
+            box-shadow: 0 0 15px #0f0;
         }
 
-        .buy-button:disabled {
-            background: #555;
-            color: #aaa;
-            border: 2px solid #333;
-            cursor: not-allowed;
-            opacity: 0.6;
-        }
-
-        /* Prestige Button */
-        #prestige-section {
-            margin: 20px 0;
-            padding: 15px;
-            background: rgba(139, 69, 19, 0.4);
-            border: 3px solid #8b4513;
-            border-radius: 10px;
-            text-align: center;
-        }
-
-        #prestige-info {
-            font-size: 12px;
-            color: #ffd700;
-            margin-bottom: 10px;
-            text-shadow: 1px 1px 1px #000;
-        }
-
-        #prestige-button {
-            background: linear-gradient(to bottom, #ff4500, #cc3700);
-            color: white;
-            border: 3px solid #8b0000;
-            border-radius: 8px;
-            padding: 12px 20px;
-            font-family: 'Press Start 2P', cursive;
-            font-size: 14px;
-            cursor: pointer;
-            width: 100%;
-            transition: all 0.3s;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.5);
-        }
-
-        #prestige-button:hover:not(:disabled) {
-            background: linear-gradient(to bottom, #ff6347, #ff4500);
-            transform: scale(1.02);
-        }
-
-        #prestige-button:disabled {
-            background: #555;
-            border: 3px solid #333;
-            color: #aaa;
-            cursor: not-allowed;
-        }
-
-        /* Scrollbar */
-        #right-panel::-webkit-scrollbar {
-            width: 12px;
-        }
-
-        #right-panel::-webkit-scrollbar-track {
-            background: rgba(0,0,0,0.3);
-            border-radius: 6px;
-        }
-
-        #right-panel::-webkit-scrollbar-thumb {
-            background: #8b4513;
-            border-radius: 6px;
-            border: 2px solid #0a1a2f;
-        }
-
-        /* Auth Screens */
-        .auth-screen {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.95);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 100;
-        }
-
-        .auth-screen h1 {
-            font-family: 'Press Start 2P', cursive;
-            color: #ffd700;
-            text-shadow: 3px 3px #8b4513;
-            margin-bottom: 30px;
-            font-size: 32px;
-        }
-
-        .auth-screen input {
-            width: 300px;
-            padding: 15px;
-            margin: 10px 0;
-            font-size: 16px;
-            background: rgba(20, 40, 80, 0.9);
-            border: 2px solid #8b4513;
+        .login-box .logout {
+            background: var(--red);
             color: #fff;
-            border-radius: 8px;
-            text-align: center;
+            margin-top: 20px;
         }
 
-        .auth-screen button {
-            margin: 15px 10px;
-            padding: 15px 30px;
-            font-family: 'Press Start 2P', cursive;
-            font-size: 16px;
-            background: linear-gradient(to bottom, #32cd32, #228b22);
-            color: white;
-            border: 3px solid #006400;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s;
+        .login-box .logout:hover {
+            background: #f44;
         }
 
-        .auth-screen button:hover {
-            background: linear-gradient(to bottom, #3eff3e, #2ebd2e);
-            transform: scale(1.05);
+        .upgrade-panel::-webkit-scrollbar {
+            width: 14px;
         }
 
-        .auth-screen .back-btn {
-            background: linear-gradient(to bottom, #ff4500, #cc3700);
-            border: 3px solid #8b0000;
+        .upgrade-panel::-webkit-scrollbar-track {
+            background: #000;
+            border: 1px solid var(--border);
         }
 
-        .auth-screen .back-btn:hover {
-            background: linear-gradient(to bottom, #ff6347, #ff4500);
+        .upgrade-panel::-webkit-scrollbar-thumb {
+            background: var(--accent);
+            border: 1px solid #000;
         }
-
-        .hidden { display: none; }
-
-        /* Cookie Evolution Filters */
-        .cookie-choco { filter: drop-shadow(0 0 15px #ffcc00); }
-        .cookie-oatmeal { filter: drop-shadow(0 0 15px #ffcc00) sepia(0.4) brightness(1.1); }
-        .cookie-peanut { filter: drop-shadow(0 0 15px #ffcc00) hue-rotate(30deg); }
-        .cookie-sugar { filter: drop-shadow(0 0 15px #ffcc00) brightness(1.4); }
-        .cookie-ginger { filter: drop-shadow(0 0 15px #ffcc00) hue-rotate(40deg) saturate(1.5); }
-        .cookie-white { filter: drop-shadow(0 0 15px #ffcc00) brightness(1.6); }
-        .cookie-matcha { filter: drop-shadow(0 0 15px #ffcc00) hue-rotate(120deg); }
-        .cookie-redvelvet { filter: drop-shadow(0 0 15px #ffcc00) hue-rotate(330deg) saturate(1.8); }
-        .cookie-purp { filter: drop-shadow(0 0 20px #cc00ff) hue-rotate(280deg) saturate(2.5) brightness(1.2); }
     </style>
 </head>
 <body>
-
-<!-- Welcome Screen -->
-<div id="welcome-screen" class="auth-screen">
-    <h1>CLICKER MASTER</h1>
-    <button onclick="showLogin()">Sign In / Log In</button>
-    <button onclick="showCreate()">Create Account</button>
-</div>
-
-<!-- Login Screen -->
-<div id="login-screen" class="auth-screen hidden">
-    <h1>LOG IN</h1>
-    <input type="text" id="login-username" placeholder="Username">
-    <input type="password" id="login-password" placeholder="Password">
-    <button onclick="login()">Submit</button>
-    <button class="back-btn" onclick="backToWelcome()">Back</button>
-</div>
-
-<!-- Create Account Screen -->
-<div id="create-screen" class="auth-screen hidden">
-    <h1>CREATE ACCOUNT</h1>
-    <input type="text" id="create-username" placeholder="Username">
-    <input type="password" id="create-password" placeholder="Password">
-    <input type="password" id="create-confirm" placeholder="Confirm Password">
-    <button onclick="createAccount()">Submit</button>
-    <button class="back-btn" onclick="backToWelcome()">Back</button>
-</div>
-
-<!-- Game Container -->
-<div id="game-container" class="hidden">
-    <!-- Left Panel -->
-    <div id="left-panel">
-        <div id="game-title">CLICKER MASTER</div>
-        <div id="score-display">0 cookies</div>
-        <div id="cps-display">per second: 0</div>
-        <div id="prestige-display">Prestige: 0</div>
-        <div id="click-cookie" onclick="clickAction()"></div>
-        <button onclick="logout()" style="margin-top: 20px; padding: 10px 20px; font-size: 12px;">Log Out</button>
-    </div>
-
-    <!-- Right Panel -->
-    <div id="right-panel">
-        <div id="upgrades-header">UPGRADES</div>
-        <div id="upgrades-list"></div>
-
-        <div id="prestige-section">
-            <div id="prestige-info">Requires 10,000,000 total cookies</div>
-            <button id="prestige-button" onclick="prestigeAction()" disabled>PRESTIGE</button>
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal active">
+        <div class="login-box">
+            <h2>RETRO CLICKER</h2>
+            <input type="text" id="username" placeholder="Username" maxlength="20">
+            <input type="password" id="password" placeholder="Password" maxlength="30">
+            <button id="loginBtn">LOG IN</button>
+            <button id="signupBtn">SIGN UP</button>
+            <button id="guestBtn" style="background:#444;">PLAY AS GUEST</button>
+            <button id="logoutBtn" class="logout" style="display:none;">LOG OUT</button>
+            <p id="loginMessage" style="margin-top:15px; color:#f88; min-height:20px;"></p>
         </div>
     </div>
-</div>
 
-<script>
-    // Game Data
-    let gameData = {
-        score: 0,
-        totalScore: 0,
-        cps: 0,
-        clickPower: 1,
-        prestige: 0,
-        upgrades: [],
-        totalClicks: 0,
-        startTime: Date.now(),
-        upgradesBought: 0
-    };
-
-    // 1000 Upgrades - Sorted from worst to best
-    const NUM_UPGRADES = 1000;
-    const MAX_LEVEL = 2000;
-    const upgradeThemes = [
-        'Wooden', 'Stone', 'Iron', 'Steel', 'Bronze', 'Silver', 'Gold', 'Platinum', 'Diamond', 'Emerald',
-        'Ruby', 'Sapphire', 'Obsidian', 'Crystal', 'Mythril', 'Adamantium', 'Titanium', 'Vibranium', 'Quantum', 'Cosmic'
-    ];
-
-    const upgradeActions = ['Clicker', 'Oven', 'Factory', 'Mine', 'Lab', 'Reactor', 'Forge', 'Portal', 'Tower', 'Vault'];
-
-    const upgrades = [];
-    for (let i = 0; i < NUM_UPGRADES; i++) {
-        const tier = Math.floor(i / 100);
-        const theme = upgradeThemes[tier % upgradeThemes.length];
-        const action = upgradeActions[i % upgradeActions.length];
-        const number = (i % 100) + 1;
-
-        const baseCost = Math.floor(15 * Math.pow(1.15, i));
-        const costMultiplier = 1.15 + (i * 0.0001);
-        const baseEffect = 0.1 + (i * 0.01);
-
-        const type = i < 400 ? 'click' : i < 700 ? 'auto' : 'multi';
-
-        upgrades.push({
-            id: i,
-            name: `${theme} ${action} #${number}`,
-            type,
-            baseCost,
-            costMultiplier,
-            baseEffect,
-            level: 0,
-            maxLevel: MAX_LEVEL
-        });
-    }
-
-    // Local Storage
-    const STORAGE_KEY = 'clickerMasterCookieStyle';
-    let accounts = JSON.parse(localStorage.getItem(STORAGE_KEY)) || { users: {} };
-    let currentUser = null;
-
-    // Cookie Evolution Images (50 unique + purple)
-    const cookieImages = [
-        'https://i.imgur.com/6j3z1sD.png', // 0: Chocolate Chip
-        'https://i.imgur.com/5v9kL2M.png', // 1: Oatmeal Raisin
-        'https://i.imgur.com/3n7pR9x.png', // 2: Peanut Butter
-        'https://i.imgur.com/8k2mQ4v.png', // 3: Sugar Cookie
-        'https://i.imgur.com/7h6jL9p.png', // 4: Gingerbread
-        'https://i.imgur.com/2m4nR7t.png', // 5: White Chocolate Macadamia
-        'https://i.imgur.com/9p3kM5x.png', // 6: Matcha
-        'https://i.imgur.com/4v8nL2q.png', // 7: Red Velvet
-        'https://i.imgur.com/6j3z1sD.png', // 8: Choco (repeat pattern)
-        'https://i.imgur.com/5v9kL2M.png',
-        'https://i.imgur.com/3n7pR9x.png',
-        'https://i.imgur.com/8k2mQ4v.png',
-        'https://i.imgur.com/7h6jL9p.png',
-        'https://i.imgur.com/2m4nR7t.png',
-        'https://i.imgur.com/9p3kM5x.png',
-        'https://i.imgur.com/4v8nL2q.png',
-        'https://i.imgur.com/6j3z1sD.png',
-        'https://i.imgur.com/5v9kL2M.png',
-        'https://i.imgur.com/3n7pR9x.png',
-        'https://i.imgur.com/8k2mQ4v.png',
-        'https://i.imgur.com/7h6jL9p.png',
-        'https://i.imgur.com/2m4nR7t.png',
-        'https://i.imgur.com/9p3kM5x.png',
-        'https://i.imgur.com/4v8nL2q.png',
-        'https://i.imgur.com/6j3z1sD.png',
-        'https://i.imgur.com/5v9kL2M.png',
-        'https://i.imgur.com/3n7pR9x.png',
-        'https://i.imgur.com/8k2mQ4v.png',
-        'https://i.imgur.com/7h6jL9p.png',
-        'https://i.imgur.com/2m4nR7t.png',
-        'https://i.imgur.com/9p3kM5x.png',
-        'https://i.imgur.com/4v8nL2q.png',
-        'https://i.imgur.com/6j3z1sD.png',
-        'https://i.imgur.com/5v9kL2M.png',
-        'https://i.imgur.com/3n7pR9x.png',
-        'https://i.imgur.com/8k2mQ4v.png',
-        'https://i.imgur.com/7h6jL9p.png',
-        'https://i.imgur.com/2m4nR7t.png',
-        'https://i.imgur.com/9p3kM5x.png',
-        'https://i.imgur.com/4v8nL2q.png',
-        'https://i.imgur.com/6j3z1sD.png',
-        'https://i.imgur.com/5v9kL2M.png',
-        'https://i.imgur.com/3n7pR9x.png',
-        'https://i.imgur.com/8k2mQ4v.png',
-        'https://i.imgur.com/7h6jL9p.png',
-        'https://i.imgur.com/2m4nR7t.png',
-        'https://i.imgur.com/9p3kM5x.png',
-        'https://i.imgur.com/4v8nL2q.png',
-        'https://i.imgur.com/6j3z1sD.png',
-        'https://i.imgur.com/5v9kL2M.png',
-        'https://i.imgur.com/6j3z1sD.png'  // 50: Purple Cookie (final)
-    ];
-
-    // Auth Functions
-    function showLogin() {
-        hideAllAuth();
-        document.getElementById('login-screen').classList.remove('hidden');
-    }
-
-    function showCreate() {
-        hideAllAuth();
-        document.getElementById('create-screen').classList.remove('hidden');
-    }
-
-    function backToWelcome() {
-        hideAllAuth();
-        document.getElementById('welcome-screen').classList.remove('hidden');
-    }
-
-    function hideAllAuth() {
-        document.querySelectorAll('.auth-screen').forEach(screen => screen.classList.add('hidden'));
-    }
-
-    function createAccount() {
-        const username = document.getElementById('create-username').value.trim();
-        const password = document.getElementById('create-password').value;
-        const confirm = document.getElementById('create-confirm').value;
-
-        if (!username || !password) {
-            alert('Username and password are required.');
-            return;
-        }
-        if (password !== confirm) {
-            alert('Passwords do not match.');
-            return;
-        }
-        if (accounts.users[username]) {
-            alert('Username already exists.');
-            return;
-        }
-
-        accounts.users[username] = {
-            password,
-            gameData: JSON.parse(JSON.stringify(gameData))
-        };
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(accounts));
-        alert('Account created! Please log in.');
-        backToWelcome();
-    }
-
-    function login() {
-        const username = document.getElementById('login-username').value.trim();
-        const password = document.getElementById('login-password').value;
-
-        const user = accounts.users[username];
-        if (!user || user.password !== password) {
-            alert('Invalid username or password.');
-            return;
-        }
-
-        currentUser = username;
-        gameData = { ...user.gameData, startTime: Date.now() };
-        hideAllAuth();
-        document.getElementById('game-container').classList.remove('hidden');
-        initGame();
-    }
-
-    function logout() {
-        saveGame();
-        currentUser = null;
-        document.getElementById('game-container').classList.add('hidden');
-        backToWelcome();
-    }
-
-    function saveGame() {
-        if (currentUser) {
-            accounts.users[currentUser].gameData = { ...gameData };
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(accounts));
-        }
-    }
-
-    // Game Logic
-    function initGame() {
-        for (let i = 0; i < NUM_UPGRADES; i++) {
-            upgrades[i].level = gameData.upgrades[i] || 0;
-        }
-        updateDisplay();
-        updateCookieAppearance();
-        renderUpgrades();
-        setInterval(autoClick, 1000);
-        setInterval(saveGame, 5000);
-        setInterval(updatePrestige, 1000);
-    }
-
-    function clickAction() {
-        const gain = gameData.clickPower * getPrestigeMultiplier();
-        gameData.score += gain;
-        gameData.totalScore += gain;
-        gameData.totalClicks++;
-        updateDisplay();
-        createCookieParticle();
-    }
-
-    function autoClick() {
-        const gain = gameData.cps * getPrestigeMultiplier();
-        gameData.score += gain;
-        gameData.totalScore += gain;
-        updateDisplay();
-    }
-
-    function getPrestigeMultiplier() {
-        return 1 + gameData.prestige * 0.1;
-    }
-
-    function buyUpgrade(index) {
-        const u = upgrades[index];
-        if (u.level >= u.maxLevel) return;
-
-        const cost = Math.floor(u.baseCost * Math.pow(u.costMultiplier, u.level));
-        if (gameData.score < cost) return;
-
-        gameData.score -= cost;
-        u.level++;
-        gameData.upgrades[index] = u.level;
-        gameData.upgradesBought++;
-
-        const effect = u.baseEffect * (1 + u.level * 0.02);
-
-        if (u.type === 'click') {
-            gameData.clickPower += effect;
-        } else if (u.type === 'auto') {
-            gameData.cps += effect;
-        } else if (u.type === 'multi') {
-            const mult = 1 + effect / 100;
-            gameData.clickPower *= mult;
-            gameData.cps *= mult;
-        }
-
-        updateDisplay();
-        updateUpgradeItem(index);
-    }
-
-    function prestigeAction() {
-        if (gameData.totalScore < 10000000) return;
-        if (!confirm("Prestige and reset for +1 point?")) return;
-
-        gameData.prestige++;
-        resetProgress();
-        updateDisplay();
-        updateCookieAppearance();
-        renderUpgrades();
-    }
-
-    function resetProgress() {
-        gameData.score = 0;
-        gameData.cps = 0;
-        gameData.clickPower = 1;
-        gameData.upgrades = [];
-        gameData.upgradesBought = 0;
-        for (let u of upgrades) u.level = 0;
-    }
-
-    function updateDisplay() {
-        document.getElementById('score-display').innerText = `${formatNumber(Math.floor(gameData.score))} cookies`;
-        document.getElementById('cps-display').innerText = `per second: ${formatNumber(Math.floor(gameData.cps))}`;
-        document.getElementById('prestige-display').innerText = `Prestige: ${gameData.prestige}`;
-    }
-
-    function updatePrestige() {
-        const btn = document.getElementById('prestige-button');
-        const info = document.getElementById('prestige-info');
-        if (gameData.totalScore >= 10000000) {
-            btn.disabled = false;
-            btn.innerText = `PRESTIGE (+1)`;
-            info.innerText = `Ready! ${formatNumber(gameData.totalScore)} total cookies`;
-        } else {
-            btn.disabled = true;
-            const need = 10000000 - gameData.totalScore;
-            info.innerText = `Need ${formatNumber(need)} more cookies`;
-        }
-    }
-
-    function updateCookieAppearance() {
-        const cookie = document.getElementById('click-cookie');
-        const p = gameData.prestige;
-
-        if (p >= 50) {
-            // Purple Cookie (final form)
-            cookie.style.backgroundImage = `url('${cookieImages[50]}')`;
-            cookie.className = 'cookie-purp';
-        } else if (p > 0) {
-            // Cycle through 50 unique cookie images
-            const imgIndex = (p - 1) % 50;
-            cookie.style.backgroundImage = `url('${cookieImages[imgIndex]}')`;
-            cookie.className = `cookie-${imgIndex % 8}`; // reuse filter classes
-        } else {
-            // Default chocolate chip
-            cookie.style.backgroundImage = `url('${cookieImages[0]}')`;
-            cookie.className = 'cookie-choco';
-        }
-    }
-
-    function renderUpgrades() {
-        const container = document.getElementById('upgrades-list');
-        container.innerHTML = '';
-        upgrades.forEach((u, i) => {
-            const item = createUpgradeElement(u, i);
-            container.appendChild(item);
-        });
-    }
-
-    function updateUpgradeItem(index) {
-        const u = upgrades[index];
-        const oldItem = document.getElementById(`upgrade-${index}`);
-        if (oldItem) {
-            const newItem = createUpgradeElement(u, index);
-            oldItem.replaceWith(newItem);
-        }
-    }
-
-    function createUpgradeElement(u, index) {
-        const cost = Math.floor(u.baseCost * Math.pow(u.costMultiplier, u.level));
-        const canAfford = gameData.score >= cost;
-
-        const div = document.createElement('div');
-        div.className = 'upgrade-item';
-        div.id = `upgrade-${index}`;
-        div.innerHTML = `
-            <div class="upgrade-info">
-                <div class="upgrade-name">${u.name}</div>
-                <div class="upgrade-desc">+${u.baseEffect.toFixed(2)} ${u.type === 'multi' ? '% multiplier' : u.type}</div>
-                <div class="upgrade-cost">Cost: ${formatNumber(cost)}</div>
-                <div class="upgrade-owned">Owned: ${u.level}/${u.maxLevel}</div>
+    <div class="container" id="gameContainer" style="display:none;">
+        <!-- Left: Game -->
+        <div class="game-panel">
+            <h1>RETRO CLICKER</h1>
+            <p style="color:#0ff; font-size:14px;">Welcome, <span id="welcomeUser">Guest</span>!</p>
+            
+            <div class="stats">
+                <p>SCORE: <span id="score">0</span></p>
+                <p>CPS: <span id="cps">0.0</span></p>
+                <p>CLICK POWER: <span id="clickPower">1.0</span></p>
+                <p>PRESTIGE: <span id="prestigeCount">0</span></p>
             </div>
-            <button class="buy-button" onclick="buyUpgrade(${index})" ${!canAfford || u.level >= u.maxLevel ? 'disabled' : ''}>
-                BUY
-            </button>
-        `;
-        return div;
-    }
 
-    function createCookieParticle() {
-        const cookie = document.getElementById('click-cookie');
-        const rect = cookie.getBoundingClientRect();
-        const particle = document.createElement('div');
-        particle.innerText = '+' + Math.floor(gameData.clickPower * getPrestigeMultiplier());
-        particle.style.position = 'absolute';
-        particle.style.left = (rect.left + rect.width / 2) + 'px';
-        particle.style.top = (rect.top + rect.height / 2) + 'px';
-        particle.style.color = gameData.prestige >= 50 ? '#cc00ff' : '#ffd700';
-        particle.style.fontWeight = 'bold';
-        particle.style.pointerEvents = 'none';
-        particle.style.fontSize = '20px';
-        particle.style.textShadow = '2px 2px 4px #000';
-        particle.style.animation = 'float 1s ease-out forwards';
-        document.body.appendChild(particle);
-        setTimeout(() => particle.remove(), 1000);
-    }
+            <button id="clickButton">CLICK!</button>
 
-    function formatNumber(num) {
-        if (num >= 1e12) return (num / 1e12).toFixed(2) + 'T';
-        if (num >= 1e9) return (num / 1e9).toFixed(2) + 'B';
-        if (num >= 1e6) return (num / 1e6).toFixed(2) + 'M';
-        if (num >= 1e3) return (num / 1e3).toFixed(1) + 'K';
-        return num.toString();
-    }
+            <div class="prestige-info">
+                <p>Next Prestige: <span id="nextPrestige">10M</span></p>
+                <p>Bonus: <span id="prestigeBonus">+0%</span></p>
+            </div>
+            <button id="prestigeButton" disabled>PRESTIGE</button>
+        </div>
 
-    // Add floating animation
-    const style = document.createElement('style');
-    style.innerHTML = `
-        @keyframes float {
-            0% { transform: translateY(0); opacity: 1; }
-            100% { transform: translateY(-100px); opacity: 0; }
+        <!-- Right: Upgrades -->
+        <div class="upgrade-panel" id="upgradePanel">
+            <!-- Upgrades injected by JS -->
+        </div>
+    </div>
+
+    <script>
+        // === AUTH & STORAGE ===
+        const STORAGE_KEY = 'retroClicker_users';
+        let currentUser = null;
+
+        function loadUsers() {
+            try {
+                const data = localStorage.getItem(STORAGE_KEY);
+                return data ? JSON.parse(data) : {};
+            } catch (e) {
+                console.error("Failed to load users:", e);
+                return {};
+            }
         }
-    `;
-    document.head.appendChild(style);
-</script>
 
+        function saveUsers(users) {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(users));
+            } catch (e) {
+                console.error("Failed to save users:", e);
+            }
+        }
+
+        function hash(str) {
+            let h = 0;
+            for (let i = 0; i < str.length; i++) {
+                h = (h * 31 + str.charCodeAt(i)) & 0xFFFFFFFF;
+            }
+            return h.toString(16);
+        }
+
+        // === DOM ELEMENTS ===
+        const modal = document.getElementById('loginModal');
+        const gameContainer = document.getElementById('gameContainer');
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+        const loginBtn = document.getElementById('loginBtn');
+        const signupBtn = document.getElementById('signupBtn');
+        const guestBtn = document.getElementById('guestBtn');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const loginMessage = document.getElementById('loginMessage');
+        const welcomeUser = document.getElementById('welcomeUser');
+
+        const scoreEl = document.getElementById('score');
+        const cpsEl = document.getElementById('cps');
+        const clickPowerEl = document.getElementById('clickPower');
+        const prestigeCountEl = document.getElementById('prestigeCount');
+        const nextPrestigeEl = document.getElementById('nextPrestige');
+        const prestigeBonusEl = document.getElementById('prestigeBonus');
+        const prestigeBtn = document.getElementById('prestigeButton');
+        const clickBtn = document.getElementById('clickButton');
+        const upgradePanel = document.getElementById('upgradePanel');
+
+        // === GAME STATE ===
+        let score = 0;
+        let clickPower = 1;
+        let cps = 0;
+        let prestigeCount = 0;
+        let prestigeBonus = 1;
+        let prestigeThreshold = 10000000;
+
+        const TIERS = 10;
+        const PER_TIER = 100;
+        const MAX_LEVEL = 2000;
+        const upgrades = [];
+
+        // Word banks
+        const prefixes = ['Quantum', 'Mega', 'Ultra', 'Hyper', 'Giga', 'Tera', 'Peta', 'Exa', 'Zetta', 'Yotta',
+                          'Nano', 'Micro', 'Milli', 'Kilo', 'Atomic', 'Plasma', 'Fusion', 'Laser', 'Photon', 'Neutron'];
+        const nouns = ['Core', 'Reactor', 'Engine', 'Booster', 'Amplifier', 'Generator', 'Converter', 'Matrix', 'Grid', 'Node',
+                       'Circuit', 'Capacitor', 'Transistor', 'Resonator', 'Oscillator', 'Modulator', 'Demodulator', 'Filter', 'Relay', 'Switch'];
+        const effects = ['Click', 'Auto'];
+
+        // === AUTH FUNCTIONS ===
+        function showMessage(msg, isError = true) {
+            loginMessage.textContent = msg;
+            loginMessage.style.color = isError ? '#f88' : '#8f8';
+        }
+
+        function login(username, password) {
+            const users = loadUsers();
+            const hashPass = hash(password);
+            if (users[username] && users[username].password === hashPass) {
+                currentUser = username;
+                loadGameData(users[username].game || getDefaultGameData());
+                showGame();
+                showMessage("Login successful!", false);
+                setTimeout(() => loginMessage.textContent = '', 2000);
+                return true;
+            }
+            showMessage("Invalid username or password");
+            return false;
+        }
+
+        function signup(username, password) {
+            if (username.length < 3 || password.length < 4) {
+                showMessage("Username >=3, Password >=4 chars");
+                return false;
+            }
+            const users = loadUsers();
+            if (users[username]) {
+                showMessage("Username already taken!");
+                return false;
+            }
+            users[username] = {
+                password: hash(password),
+                game: getDefaultGameData()
+            };
+            saveUsers(users);
+            showMessage("Account created! Logging in...", false);
+            setTimeout(() => login(username, password), 1000);
+            return true;
+        }
+
+        function logout() {
+            if (currentUser) {
+                saveGame();
+            }
+            currentUser = null;
+            modal.classList.add('active');
+            gameContainer.style.display = 'none';
+            usernameInput.value = '';
+            passwordInput.value = '';
+            showMessage('');
+        }
+
+        function playAsGuest() {
+            currentUser = null;
+            loadGameData(getDefaultGameData());
+            showGame();
+            showMessage("Playing as Guest (no save)", false);
+            setTimeout(() => loginMessage.textContent = '', 3000);
+        }
+
+        function showGame() {
+            modal.classList.remove('active');
+            gameContainer.style.display = 'flex';
+            welcomeUser.textContent = currentUser || 'Guest';
+            logoutBtn.style.display = currentUser ? 'block' : 'none';
+            updateDisplay();
+        }
+
+        // === GAME DATA ===
+        function getDefaultGameData() {
+            return {
+                score: 0,
+                clickPower: 1,
+                cps: 0,
+                prestigeCount: 0,
+                prestigeThreshold: 10000000,
+                upgrades: []
+            };
+        }
+
+        function loadGameData(data) {
+            score = data.score || 0;
+            clickPower = data.clickPower || 1;
+            cps = data.cps || 0;
+            prestigeCount = data.prestigeCount || 0;
+            prestigeThreshold = data.prestigeThreshold || 10000000;
+            prestigeBonus = 1 + (prestigeCount * 0.1);
+            clickPower *= prestigeBonus;
+            cps *= prestigeBonus;
+
+            upgrades.length = 0;
+            upgradePanel.innerHTML = '';
+            initUpgrades();
+
+            if (data.upgrades && data.upgrades.length > 0) {
+                data.upgrades.forEach(saved => {
+                    const upg = upgrades.find(u => u.id === saved.id);
+                    if (upg) {
+                        upg.level = saved.level;
+                        if (upg.type === 'cps') {
+                            cps += upg.powerPerLevel * upg.level;
+                        } else {
+                            clickPower += upg.powerPerLevel * upg.level;
+                        }
+                    }
+                });
+            }
+            updateAllUpgrades();
+            updatePrestige();
+        }
+
+        function saveGame() {
+            if (!currentUser) return;
+            const users = loadUsers();
+            users[currentUser].game = {
+                score,
+                clickPower: 1, // Save base values
+                cps: 0,
+                prestigeCount,
+                prestigeThreshold,
+                upgrades: upgrades.map(u => ({ id: u.id, level: u.level }))
+            };
+            saveUsers(users);
+        }
+
+        // === UPGRADES ===
+        function initUpgrades() {
+            let id = 0;
+            for (let tier = 1; tier <= TIERS; tier++) {
+                const header = document.createElement('div');
+                header.className = 'tier-header';
+                header.textContent = `TIER ${tier} UPGRADES`;
+                upgradePanel.appendChild(header);
+
+                let lastPower = 0.15; // Start each tier at 0.15
+
+                for (let i = 0; i < PER_TIER; i++) {
+                    const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
+                    const noun = nouns[Math.floor(Math.random() * nouns.length)];
+                    const effect = effects[Math.floor(Math.random() * effects.length)];
+
+                    const baseCost = Math.pow(10, tier) * 100 * (i + 1) * 0.5;
+                    const powerPerLevel = lastPower;
+                    lastPower *= 1.5;
+
+                    const costMultiplier = 1.15 + (tier * 0.05);
+
+                    const upgrade = {
+                        id: id++,
+                        tier,
+                        name: `${prefix} ${noun} ${effect}`,
+                        baseCost,
+                        costMultiplier,
+                        powerPerLevel,
+                        level: 0,
+                        type: effect === 'Auto' ? 'cps' : 'click',
+                        element: null
+                    };
+
+                    upgrades.push(upgrade);
+                    createUpgradeElement(upgrade);
+                }
+            }
+        }
+
+        function createUpgradeElement(upgrade) {
+            const div = document.createElement('div');
+            div.className = 'upgrade';
+            div.dataset.id = upgrade.id;
+
+            const effectText = upgrade.type === 'cps' 
+                ? `+${upgrade.powerPerLevel.toFixed(3)} CPS per level`
+                : `+${upgrade.powerPerLevel.toFixed(3)} per click`;
+
+            div.innerHTML = `
+                <span class="upgrade-name" title="${upgrade.name}">${upgrade.name}</span>
+                <span class="upgrade-effect" title="${effectText}">${effectText}</span>
+                <span class="upgrade-cost">Cost: <span class="cost-value">${formatNumber(upgrade.baseCost)}</span></span>
+                <span class="upgrade-level">0</span>
+            `;
+
+            div.addEventListener('click', () => buyUpgrade(upgrade));
+            upgrade.element = div;
+            upgradePanel.appendChild(div);
+        }
+
+        function buyUpgrade(upgrade) {
+            if (upgrade.level >= MAX_LEVEL) return;
+            
+            const cost = getUpgradeCost(upgrade);
+            if (score < cost) return;
+
+            score -= cost;
+            upgrade.level++;
+
+            if (upgrade.type === 'cps') {
+                cps += upgrade.powerPerLevel;
+            } else {
+                clickPower += upgrade.powerPerLevel;
+            }
+
+            updateUpgradeElement(upgrade);
+            updateDisplay();
+            saveGame();
+        }
+
+        function getUpgradeCost(upgrade) {
+            return Math.floor(upgrade.baseCost * Math.pow(upgrade.costMultiplier, upgrade.level));
+        }
+
+        function updateUpgradeElement(upgrade) {
+            const el = upgrade.element;
+            const nextCost = getUpgradeCost(upgrade);
+            el.querySelector('.cost-value').textContent = formatNumber(nextCost);
+            el.querySelector('.upgrade-level').textContent = upgrade.level;
+
+            const canAfford = score >= nextCost && upgrade.level < MAX_LEVEL;
+            
+            if (canAfford) {
+                el.classList.add('affordable');
+            } else {
+                el.classList.remove('affordable');
+            }
+        }
+
+        function updateAllUpgrades() {
+            upgrades.forEach(updateUpgradeElement);
+        }
+
+        // === PRESTIGE ===
+        function updatePrestige() {
+            nextPrestigeEl.textContent = formatNumber(prestigeThreshold);
+            prestigeCountEl.textContent = prestigeCount;
+            prestigeBonusEl.textContent = `+${((prestigeBonus - 1) * 100).toFixed(1)}%`;
+            prestigeBtn.disabled = score < prestigeThreshold;
+            prestigeBtn.textContent = score >= prestigeThreshold ? 'PRESTIGE NOW!' : 'PRESTIGE';
+        }
+
+        function prestige() {
+            if (score < prestigeThreshold) return;
+
+            prestigeCount++;
+            prestigeBonus = 1 + (prestigeCount * 0.1);
+            prestigeThreshold = Math.floor(prestigeThreshold * 10.67);
+
+            score = 0;
+            clickPower = 1 * prestigeBonus;
+            cps = 0;
+
+            upgrades.forEach(u => {
+                u.level = 0;
+                updateUpgradeElement(u);
+            });
+
+            updateDisplay();
+            updatePrestige();
+            saveGame();
+        }
+
+        // === DISPLAY ===
+        function updateDisplay() {
+            scoreEl.textContent = formatNumber(Math.floor(score));
+            cpsEl.textContent = formatNumber(cps.toFixed(1));
+            clickPowerEl.textContent = formatNumber(clickPower.toFixed(1));
+            updatePrestige();
+            
+            // Update ALL upgrade affordability after any change
+            updateAllUpgrades();
+        }
+
+        function formatNumber(num) {
+            if (num >= 1e12) return (num / 1e12).toFixed(2) + 'T';
+            if (num >= 1e9) return (num / 1e9).toFixed(2) + 'B';
+            if (num >= 1e6) return (num / 1e6).toFixed(2) + 'M';
+            if (num >= 1e3) return (num / 1e3).toFixed(1) + 'K';
+            return Math.floor(num).toString();
+        }
+
+        // === EVENT LISTENERS ===
+        loginBtn.addEventListener('click', () => {
+            const user = usernameInput.value.trim();
+            const pass = passwordInput.value;
+            if (!user || !pass) {
+                showMessage("Enter username & password");
+                return;
+            }
+            login(user, pass);
+        });
+
+        signupBtn.addEventListener('click', () => {
+            const user = usernameInput.value.trim();
+            const pass = passwordInput.value;
+            if (!user || !pass) {
+                showMessage("Enter username & password");
+                return;
+            }
+            signup(user, pass);
+        });
+
+        guestBtn.addEventListener('click', playAsGuest);
+        logoutBtn.addEventListener('click', logout);
+        prestigeBtn.addEventListener('click', prestige);
+
+        clickBtn.addEventListener('click', () => {
+            score += clickPower;
+            updateDisplay();
+            saveGame();
+        });
+
+        // Auto CPS - calls updateDisplay which updates all upgrades
+        setInterval(() => {
+            score += cps;
+            updateDisplay();
+            if (currentUser) saveGame();
+        }, 1000);
+
+        // CRT flicker
+        setInterval(() => {
+            document.body.style.filter = Math.random() > 0.98 ? 'brightness(1.05)' : 'brightness(1)';
+        }, 100);
+
+        [usernameInput, passwordInput].forEach(input => {
+            input.addEventListener('keypress', e => {
+                if (e.key === 'Enter') {
+                    loginBtn.click();
+                }
+            });
+        });
+
+        // Initialize when DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            initUpgrades();
+        });
+    </script>
 </body>
 </html>
