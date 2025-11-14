@@ -6,7 +6,7 @@
     <title>Clicker Master</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Cinzel:wght@700&display=swap" rel="stylesheet">
     <style>
-        /* Cookie Clicker Inspired Style - No Background Image */
+        /* Cookie Clicker Inspired Style */
         body {
             margin: 0;
             padding: 0;
@@ -50,6 +50,20 @@
             letter-spacing: 1px;
         }
 
+        #player-id-display {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 10px;
+            color: #00ffcc;
+            text-shadow: 1px 1px 2px #000;
+            margin: 8px 0;
+            word-break: break-all;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 6px;
+            border-radius: 4px;
+            border: 1px solid #00ffcc;
+            min-height: 20px;
+        }
+
         #score-display {
             font-size: 28px;
             font-weight: bold;
@@ -89,6 +103,26 @@
 
         #click-cookie:active {
             transform: scale(0.95);
+        }
+
+        /* Refresh Button */
+        #refresh-button {
+            margin-top: 15px;
+            padding: 10px 20px;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 12px;
+            background: linear-gradient(to bottom, #ffd700, #ccac00);
+            color: #8b4513;
+            border: 3px solid #8b4513;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.5);
+            transition: all 0.2s;
+        }
+
+        #refresh-button:hover {
+            background: linear-gradient(to bottom, #ffed4e, #e6c200);
+            transform: translateY(-2px);
         }
 
         /* Right Panel - Upgrades */
@@ -310,6 +344,31 @@
 
         .hidden { display: none; }
 
+        /* Login Success Message */
+        #login-success {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            border: 4px solid #ffd700;
+            border-radius: 12px;
+            padding: 30px 50px;
+            text-align: center;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 28px;
+            color: #ffd700;
+            text-shadow: 3px 3px 0 #8b4513;
+            z-index: 200;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.05); }
+            100% { transform: translate(-50%, -50%) scale(1); }
+        }
+
         /* Cookie Evolution Filters */
         .cookie-choco { filter: drop-shadow(0 0 15px #ffcc00); }
         .cookie-oatmeal { filter: drop-shadow(0 0 15px #ffcc00) sepia(0.4) brightness(1.1); }
@@ -350,16 +409,23 @@
     <button class="back-btn" onclick="backToWelcome()">Back</button>
 </div>
 
+<!-- Login Success Message -->
+<div id="login-success" class="hidden">
+    LOGGED IN, ENJOY!
+</div>
+
 <!-- Game Container -->
 <div id="game-container" class="hidden">
     <!-- Left Panel -->
     <div id="left-panel">
         <div id="game-title">CLICKER MASTER</div>
+        <div id="player-id-display">ID: Loading...</div>
         <div id="score-display">0 cookies</div>
         <div id="cps-display">per second: 0</div>
         <div id="prestige-display">Prestige: 0</div>
         <div id="click-cookie" onclick="clickAction()"></div>
-        <button onclick="logout()" style="margin-top: 20px; padding: 10px 20px; font-size: 12px;">Log Out</button>
+        <button id="refresh-button" onclick="refreshUpgrades()">REFRESH UPGRADES</button>
+        <button onclick="logout()" style="margin-top: 10px; padding: 10px 20px; font-size: 12px;">Log Out</button>
     </div>
 
     <!-- Right Panel -->
@@ -385,10 +451,11 @@
         upgrades: [],
         totalClicks: 0,
         startTime: Date.now(),
-        upgradesBought: 0
+        upgradesBought: 0,
+        playerId: ''
     };
 
-    // 1000 Upgrades - Sorted from worst to best
+    // 1000 Upgrades
     const NUM_UPGRADES = 1000;
     const MAX_LEVEL = 2000;
     const upgradeThemes = [
@@ -405,10 +472,10 @@
         const action = upgradeActions[i % upgradeActions.length];
         const number = (i % 100) + 1;
 
-        // First upgrade costs 50, each subsequent multiplies by 1.5x
-        const baseCost = i === 0 ? 50 : Math.floor(upgrades[i-1].baseCost * 1.5);
-        const costMultiplier = 1.5;
-        const baseEffect = 0.1 + (i * 0.01);
+        // First upgrade: 50 cost, 0.267 CPS
+        const baseCost = i === 0 ? 50 : Math.floor(upgrades[i-1].baseCost * 1.267);
+        const costMultiplier = 1.267;
+        const baseEffect = i === 0 ? 0.267 : upgrades[i-1].baseEffect * 1.267;
 
         const type = i < 400 ? 'click' : i < 700 ? 'auto' : 'multi';
 
@@ -429,60 +496,15 @@
     let accounts = JSON.parse(localStorage.getItem(STORAGE_KEY)) || { users: {} };
     let currentUser = null;
 
-    // Cookie Evolution Images (50 unique + purple)
-    const cookieImages = [
-        'https://i.imgur.com/6j3z1sD.png', // 0: Chocolate Chip
-        'https://i.imgur.com/5v9kL2M.png', // 1: Oatmeal Raisin
-        'https://i.imgur.com/3n7pR9x.png', // 2: Peanut Butter
-        'https://i.imgur.com/8k2mQ4v.png', // 3: Sugar Cookie
-        'https://i.imgur.com/7h6jL9p.png', // 4: Gingerbread
-        'https://i.imgur.com/2m4nR7t.png', // 5: White Chocolate Macadamia
-        'https://i.imgur.com/9p3kM5x.png', // 6: Matcha
-        'https://i.imgur.com/4v8nL2q.png', // 7: Red Velvet
-        'https://i.imgur.com/6j3z1sD.png', // 8: Choco (repeat pattern)
-        'https://i.imgur.com/5v9kL2M.png',
-        'https://i.imgur.com/3n7pR9x.png',
-        'https://i.imgur.com/8k2mQ4v.png',
-        'https://i.imgur.com/7h6jL9p.png',
-        'https://i.imgur.com/2m4nR7t.png',
-        'https://i.imgur.com/9p3kM5x.png',
-        'https://i.imgur.com/4v8nL2q.png',
-        'https://i.imgur.com/6j3z1sD.png',
-        'https://i.imgur.com/5v9kL2M.png',
-        'https://i.imgur.com/3n7pR9x.png',
-        'https://i.imgur.com/8k2mQ4v.png',
-        'https://i.imgur.com/7h6jL9p.png',
-        'https://i.imgur.com/2m4nR7t.png',
-        'https://i.imgur.com/9p3kM5x.png',
-        'https://i.imgur.com/4v8nL2q.png',
-        'https://i.imgur.com/6j3z1sD.png',
-        'https://i.imgur.com/5v9kL2M.png',
-        'https://i.imgur.com/3n7pR9x.png',
-        'https://i.imgur.com/8k2mQ4v.png',
-        'https://i.imgur.com/7h6jL9p.png',
-        'https://i.imgur.com/2m4nR7t.png',
-        'https://i.imgur.com/9p3kM5x.png',
-        'https://i.imgur.com/4v8nL2q.png',
-        'https://i.imgur.com/6j3z1sD.png',
-        'https://i.imgur.com/5v9kL2M.png',
-        'https://i.imgur.com/3n7pR9x.png',
-        'https://i.imgur.com/8k2mQ4v.png',
-        'https://i.imgur.com/7h6jL9p.png',
-        'https://i.imgur.com/2m4nR7t.png',
-        'https://i.imgur.com/9p3kM5x.png',
-        'https://i.imgur.com/4v8nL2q.png',
-        'https://i.imgur.com/6j3z1sD.png',
-        'https://i.imgur.com/5v9kL2M.png',
-        'https://i.imgur.com/3n7pR9x.png',
-        'https://i.imgur.com/8k2mQ4v.png',
-        'https://i.imgur.com/7h6jL9p.png',
-        'https://i.imgur.com/2m4nR7t.png',
-        'https://i.imgur.com/9p3kM5x.png',
-        'https://i.imgur.com/4v8nL2q.png',
-        'https://i.imgur.com/6j3z1sD.png',
-        'https://i.imgur.com/5v9kL2M.png',
-        'https://i.imgur.com/6j3z1sD.png'  // 50: Purple Cookie (final)
-    ];
+    // Generate 8-char unique Player ID
+    function generatePlayerId() {
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
+        let id = '';
+        for (let i = 0; i < 8; i++) {
+            id += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return id;
+    }
 
     // Auth Functions
     function showLogin() {
@@ -522,10 +544,22 @@
             return;
         }
 
-        accounts.users[username] = {
-            password,
-            gameData: JSON.parse(JSON.stringify(gameData))
+        const playerId = generatePlayerId();
+
+        const newGameData = {
+            score: 0,
+            totalScore: 0,
+            cps: 0,
+            clickPower: 1,
+            prestige: 0,
+            upgrades: [],
+            totalClicks: 0,
+            startTime: Date.now(),
+            upgradesBought: 0,
+            playerId
         };
+
+        accounts.users[username] = { password, gameData: newGameData };
         localStorage.setItem(STORAGE_KEY, JSON.stringify(accounts));
         alert('Account created! Please log in.');
         backToWelcome();
@@ -535,17 +569,41 @@
         const username = document.getElementById('login-username').value.trim();
         const password = document.getElementById('login-password').value;
 
+        if (!username || !password) {
+            alert('Please enter both username and password.');
+            return;
+        }
+
         const user = accounts.users[username];
-        if (!user || user.password !== password) {
-            alert('Invalid username or password.');
+        if (!user) {
+            alert('Username not found. Please create an account.');
+            return;
+        }
+        if (user.password !== password) {
+            alert('Incorrect password.');
             return;
         }
 
         currentUser = username;
         gameData = { ...user.gameData, startTime: Date.now() };
+
+        // Ensure every player has a playerId
+        if (!gameData.playerId) {
+            gameData.playerId = generatePlayerId();
+            accounts.users[currentUser].gameData.playerId = gameData.playerId;
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(accounts));
+        }
+
+        const successMsg = document.getElementById('login-success');
+        successMsg.classList.remove('hidden');
         hideAllAuth();
-        document.getElementById('game-container').classList.remove('hidden');
-        initGame();
+
+        setTimeout(() => {
+            successMsg.classList.add('hidden');
+            document.getElementById('game-container').classList.remove('hidden');
+            document.getElementById('player-id-display').innerText = `ID: ${gameData.playerId}`;
+            initGame();
+        }, 2000);
     }
 
     function logout() {
@@ -557,7 +615,8 @@
 
     function saveGame() {
         if (currentUser) {
-            accounts.users[currentUser].gameData = { ...gameData };
+            const saveData = JSON.parse(JSON.stringify(gameData));
+            accounts.users[currentUser].gameData = saveData;
             localStorage.setItem(STORAGE_KEY, JSON.stringify(accounts));
         }
     }
@@ -565,7 +624,7 @@
     // Game Logic
     function initGame() {
         for (let i = 0; i < NUM_UPGRADES; i++) {
-            upgrades[i].level = gameData.upgrades[i] || 0;
+            upgrades[i].level = (gameData.upgrades && gameData.upgrades[i]) || 0;
         }
         updateDisplay();
         updateCookieAppearance();
@@ -573,6 +632,7 @@
         setInterval(autoClick, 1000);
         setInterval(saveGame, 5000);
         setInterval(updatePrestige, 1000);
+        setInterval(refreshUpgrades, 100);
     }
 
     function clickAction() {
@@ -582,6 +642,7 @@
         gameData.totalClicks++;
         updateDisplay();
         createCookieParticle();
+        refreshUpgrades();
     }
 
     function autoClick() {
@@ -599,15 +660,15 @@
         const u = upgrades[index];
         if (u.level >= u.maxLevel) return;
 
-        const cost = Math.floor(u.baseCost * Math.pow(u.costMultiplier, u.level));
-        if (gameData.score < cost) return;
+        const currentCost = Math.floor(u.baseCost * Math.pow(u.costMultiplier, u.level));
+        if (gameData.score < currentCost) return;
 
-        gameData.score -= cost;
+        gameData.score -= currentCost;
         u.level++;
         gameData.upgrades[index] = u.level;
         gameData.upgradesBought++;
 
-        const effect = u.baseEffect * (1 + u.level * 0.02);
+        const effect = u.baseEffect;
 
         if (u.type === 'click') {
             gameData.clickPower += effect;
@@ -621,6 +682,7 @@
 
         updateDisplay();
         updateUpgradeItem(index);
+        refreshUpgrades();
     }
 
     function prestigeAction() {
@@ -632,6 +694,7 @@
         updateDisplay();
         updateCookieAppearance();
         renderUpgrades();
+        refreshUpgrades();
     }
 
     function resetProgress() {
@@ -645,7 +708,7 @@
 
     function updateDisplay() {
         document.getElementById('score-display').innerText = `${formatNumber(Math.floor(gameData.score))} cookies`;
-        document.getElementById('cps-display').innerText = `per second: ${formatNumber(Math.floor(gameData.cps))}`;
+        document.getElementById('cps-display').innerText = `per second: ${formatNumber(gameData.cps.toFixed(3))}`;
         document.getElementById('prestige-display').innerText = `Prestige: ${gameData.prestige}`;
     }
 
@@ -668,16 +731,13 @@
         const p = gameData.prestige;
 
         if (p >= 50) {
-            // Purple Cookie (final form)
             cookie.style.backgroundImage = `url('${cookieImages[50]}')`;
             cookie.className = 'cookie-purp';
         } else if (p > 0) {
-            // Cycle through 50 unique cookie images
             const imgIndex = (p - 1) % 50;
             cookie.style.backgroundImage = `url('${cookieImages[imgIndex]}')`;
-            cookie.className = `cookie-${imgIndex % 8}`; // reuse filter classes
+            cookie.className = `cookie-${imgIndex % 8}`;
         } else {
-            // Default chocolate chip
             cookie.style.backgroundImage = `url('${cookieImages[0]}')`;
             cookie.className = 'cookie-choco';
         }
@@ -702,8 +762,9 @@
     }
 
     function createUpgradeElement(u, index) {
-        const cost = Math.floor(u.baseCost * Math.pow(u.costMultiplier, u.level));
-        const canAfford = gameData.score >= cost;
+        const currentCost = Math.floor(u.baseCost * Math.pow(u.costMultiplier, u.level));
+        const canAfford = gameData.score >= currentCost;
+        const atMax = u.level >= u.maxLevel;
 
         const div = document.createElement('div');
         div.className = 'upgrade-item';
@@ -711,15 +772,29 @@
         div.innerHTML = `
             <div class="upgrade-info">
                 <div class="upgrade-name">${u.name}</div>
-                <div class="upgrade-desc">+${u.baseEffect.toFixed(2)} ${u.type === 'multi' ? '% multiplier' : u.type}</div>
-                <div class="upgrade-cost">Cost: ${formatNumber(cost)}</div>
+                <div class="upgrade-desc">+${u.type === 'multi' ? (u.baseEffect.toFixed(1) + '%') : u.baseEffect.toFixed(3)} ${u.type === 'multi' ? 'multiplier' : u.type}</div>
+                <div class="upgrade-cost">Cost: ${formatNumber(currentCost)}</div>
                 <div class="upgrade-owned">Owned: ${u.level}/${u.maxLevel}</div>
             </div>
-            <button class="buy-button" onclick="buyUpgrade(${index})" ${!canAfford || u.level >= u.maxLevel ? 'disabled' : ''}>
+            <button class="buy-button" onclick="buyUpgrade(${index})" ${!canAfford || atMax ? 'disabled' : ''}>
                 BUY
             </button>
         `;
         return div;
+    }
+
+    function refreshUpgrades() {
+        for (let i = 0; i < NUM_UPGRADES; i++) {
+            const u = upgrades[i];
+            const button = document.querySelector(`#upgrade-${i} .buy-button`);
+            if (!button) continue;
+
+            const currentCost = Math.floor(u.baseCost * Math.pow(u.costMultiplier, u.level));
+            const canAfford = gameData.score >= currentCost;
+            const atMax = u.level >= u.maxLevel;
+
+            button.disabled = !canAfford || atMax;
+        }
     }
 
     function createCookieParticle() {
@@ -741,6 +816,7 @@
     }
 
     function formatNumber(num) {
+        if (typeof num === 'string') num = parseFloat(num);
         if (num >= 1e12) return (num / 1e12).toFixed(2) + 'T';
         if (num >= 1e9) return (num / 1e9).toFixed(2) + 'B';
         if (num >= 1e6) return (num / 1e6).toFixed(2) + 'M';
@@ -757,6 +833,27 @@
         }
     `;
     document.head.appendChild(style);
+
+    // Cookie Evolution Images
+    const cookieImages = [
+        'https://i.imgur.com/6j3z1sD.png', 'https://i.imgur.com/5v9kL2M.png', 'https://i.imgur.com/3n7pR9x.png',
+        'https://i.imgur.com/8k2mQ4v.png', 'https://i.imgur.com/7h6jL9p.png', 'https://i.imgur.com/2m4nR7t.png',
+        'https://i.imgur.com/9p3kM5x.png', 'https://i.imgur.com/4v8nL2q.png', 'https://i.imgur.com/6j3z1sD.png',
+        'https://i.imgur.com/5v9kL2M.png', 'https://i.imgur.com/3n7pR9x.png', 'https://i.imgur.com/8k2mQ4v.png',
+        'https://i.imgur.com/7h6jL9p.png', 'https://i.imgur.com/2m4nR7t.png', 'https://i.imgur.com/9p3kM5x.png',
+        'https://i.imgur.com/4v8nL2q.png', 'https://i.imgur.com/6j3z1sD.png', 'https://i.imgur.com/5v9kL2M.png',
+        'https://i.imgur.com/3n7pR9x.png', 'https://i.imgur.com/8k2mQ4v.png', 'https://i.imgur.com/7h6jL9p.png',
+        'https://i.imgur.com/2m4nR7t.png', 'https://i.imgur.com/9p3kM5x.png', 'https://i.imgur.com/4v8nL2q.png',
+        'https://i.imgur.com/6j3z1sD.png', 'https://i.imgur.com/5v9kL2M.png', 'https://i.imgur.com/3n7pR9x.png',
+        'https://i.imgur.com/8k2mQ4v.png', 'https://i.imgur.com/7h6jL9p.png', 'https://i.imgur.com/2m4nR7t.png',
+        'https://i.imgur.com/9p3kM5x.png', 'https://i.imgur.com/4v8nL2q.png', 'https://i.imgur.com/6j3z1sD.png',
+        'https://i.imgur.com/5v9kL2M.png', 'https://i.imgur.com/3n7pR9x.png', 'https://i.imgur.com/8k2mQ4v.png',
+        'https://i.imgur.com/7h6jL9p.png', 'https://i.imgur.com/2m4nR7t.png', 'https://i.imgur.com/9p3kM5x.png',
+        'https://i.imgur.com/4v8nL2q.png', 'https://i.imgur.com/6j3z1sD.png', 'https://i.imgur.com/5v9kL2M.png',
+        'https://i.imgur.com/3n7pR9x.png', 'https://i.imgur.com/8k2mQ4v.png', 'https://i.imgur.com/7h6jL9p.png',
+        'https://i.imgur.com/2m4nR7t.png', 'https://i.imgur.com/9p3kM5x.png', 'https://i.imgur.com/4v8nL2q.png',
+        'https://i.imgur.com/6j3z1sD.png', 'https://i.imgur.com/5v9kL2M.png', 'https://i.imgur.com/6j3z1sD.png'
+    ];
 </script>
 
 </body>
