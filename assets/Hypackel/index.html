@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Home | Hypackel</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { 
+      height: 100%; 
+      background: #000; 
+      overflow: hidden; 
+      position: relative;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      z-index: -2;
+      opacity: 0.9;
+    }
+    #full-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      z-index: 1;
+    }
+    iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+      background: #000;
+      box-shadow: 0 0 30px rgba(100, 0, 255, 0.4);
+    }
+    .no-new-tab {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 10000;
+      pointer-events: none;
+      opacity: 0;
+    }
+  </style>
+</head>
+<body>
+  <div id="full-container">
+    <iframe 
+      src="https://d3rtzzzsiu7gdr.cloudfront.net" 
+      title="Home | Hypackel - Fullscreen Games"
+      allow="fullscreen *; autoplay; encrypted-media; gamepad; microphone"
+      allowfullscreen
+      sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-top-navigation-by-user-activation allow-downloads allow-modals allow-presentation">
+    </iframe>
+  </div>
+
+  <!-- Prevent new tabs, reloads, and keep everything in-frame -->
+  <script>
+    // Block all external navigation
+    document.addEventListener('click', (e) => {
+      const a = e.target.closest('a');
+      if (a && (a.target === '_blank' || a.href)) {
+        e.preventDefault();
+        const url = a.href;
+        if (url && !url.startsWith('javascript:')) {
+          document.querySelector('iframe').src = url;
+        }
+      }
+    }, true);
+
+    // Block middle-click, right-click new tab
+    document.addEventListener('auxclick', (e) => e.preventDefault(), true);
+
+    // Block Ctrl+T, Ctrl+N, Ctrl+W, F5, Ctrl+R
+    document.addEventListener('keydown', (e) => {
+      if (e.ctrlKey && ['t','n','w','r'].includes(e.key.toLowerCase()) || e.key === 'F5') {
+        e.preventDefault();
+        if (e.key === 'F5' || (e.ctrlKey && e.key.toLowerCase() === 'r')) {
+          document.querySelector('iframe').src = document.querySelector('iframe').src;
+        }
+      }
+    }, true);
+
+    // Override window.open
+    const originalOpen = window.open;
+    window.open = function(url) {
+      if (url) {
+        document.querySelector('iframe').src = url;
+      }
+      return null;
+    };
+
+    // Keep iframe focused
+    window.addEventListener('blur', () => {
+      setTimeout(() => {
+        const iframe = document.querySelector('iframe');
+        if (iframe) iframe.focus();
+      }, 100);
+    });
+
+    // Auto-enter fullscreen if game requests it
+    document.querySelector('iframe').addEventListener('load', () => {
+      const iframe = document.querySelector('iframe');
+      try {
+        const doc = iframe.contentDocument || iframe.contentWindow.document;
+        if (doc) {
+          // Optional: Auto-click play buttons
+          setTimeout(() => {
+            const playBtn = doc.querySelector('button, .play, [onclick*="play"], [data-action="play"]');
+            if (playBtn) playBtn.click();
+          }, 1000);
+        }
+      } catch (e) {}
+    });
+  </script>
+</body>
+</html>

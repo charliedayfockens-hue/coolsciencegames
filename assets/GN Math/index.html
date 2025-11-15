@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GN Math</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { 
+      height: 100%; 
+      background: #000; 
+      overflow: hidden; 
+      position: relative;
+      font-family: sans-serif;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      /* Placeholder bg - adjust if site has a specific one */
+      background: radial-gradient(circle, #1a1a2e 0%, #16213e 100%);
+      z-index: -2;
+      opacity: 0.1;
+    }
+    #full-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      z-index: 1;
+    }
+    /* Embed the full site */
+    iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+      background: #000;
+      transform: scale(1);
+      transform-origin: top left;
+    }
+    /* Prevent tab switching - override links/downloads */
+    iframe::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      pointer-events: none;
+      z-index: 9999;
+      background: transparent;
+    }
+    body {
+      pointer-events: auto;
+    }
+    .no-new-tab {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 10000;
+      pointer-events: none;
+      opacity: 0;
+    }
+    .no-new-tab > * {
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+  <div id="full-container">
+    <iframe 
+      src="https://lebro29.github.io/gn/" 
+      title="GN Math - Fullscreen Games"
+      allow="fullscreen *; autoplay; encrypted-media"
+      allowfullscreen
+      sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-top-navigation-by-user-activation allow-downloads">
+    </iframe>
+  </div>
+  <!-- JS to block new tabs/windows & load games in-frame -->
+  <script>
+    // Prevent new tabs or page switches
+    window.addEventListener('click', (e) => {
+      if (e.target.tagName === 'A' && (e.target.target === '_blank' || e.target.href.includes('github.io'))) {
+        e.preventDefault();
+        // Load in same frame
+        const url = e.target.href;
+        document.querySelector('iframe').src = url;
+        return false;
+      }
+    }, true);
+
+    // Block middle-click, right-click new tab, Ctrl+click
+    document.addEventListener('auxclick', (e) => e.preventDefault(), true);
+    document.addEventListener('keydown', (e) => {
+      if (e.ctrlKey && (e.key === 't' || e.key === 'n' || e.key === 'w' || e.key === 'click')) {
+        e.preventDefault();
+      }
+      if (e.key === 'F5' || (e.ctrlKey && e.key === 'r')) {
+        // Reload iframe instead
+        document.querySelector('iframe').src = document.querySelector('iframe').src;
+        e.preventDefault();
+      }
+    }, true);
+
+    // Override window.open
+    const originalOpen = window.open;
+    window.open = function() {
+      // Reload current iframe
+      document.querySelector('iframe').src = arguments[0] || 'https://lebro29.github.io/gn/';
+      return null;
+    };
+
+    // Keep focus on iframe
+    window.addEventListener('focus', () => {
+      document.querySelector('iframe').focus();
+    });
+
+    // Handle fullscreen toggle if site supports
+    document.addEventListener('fullscreenchange', () => {
+      if (!document.fullscreenElement) {
+        document.querySelector('iframe').requestFullscreen().catch(() => {});
+      }
+    });
+  </script>
+</body>
+</html>
