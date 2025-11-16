@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KBH Games</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { 
+      height: 100%; 
+      background: #000; 
+      overflow: hidden; 
+      position: fixed;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: linear-gradient(135deg, #ff4757, #ff6b81, #ffa502, #ff9f1a);
+      z-index: -2;
+      opacity: 0.96;
+    }
+    #full-container {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      overflow: hidden;
+      z-index: 1;
+    }
+    iframe {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      border: none;
+      background: #000;
+      box-shadow: 0 0 45px rgba(255, 71, 87, 0.9);
+    }
+    .error {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: #000;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      z-index: 10;
+      text-align: center;
+      padding: 20px;
+    }
+    .error button {
+      margin-top: 15px;
+      background: #ff4757;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="full-container">
+    <iframe 
+      id="kbh-iframe"
+      src="https://kbhgames.com"
+      title="KBH Games"
+      allow="fullscreen *; autoplay; encrypted-media; gamepad; microphone"
+      allowfullscreen
+      referrerpolicy="no-referrer"
+      onload="onLoad()"
+      onerror="showError()">
+    </iframe>
+  </div>
+
+  <div id="error" class="error" style="display: none;">
+    <h2>KBH Games Failed to Load</h2>
+    <p>Try:</p>
+    <ul style="text-align: left; margin: 10px 0;">
+      <li>Refreshing this page</li>
+      <li>Using <strong>Chrome</strong> or <strong>Edge</strong></li>
+      <li>Disabling ad-blockers or privacy extensions</li>
+    </ul>
+    <button onclick="reload()">Retry</button>
+  </div>
+
+  <script>
+    const iframe = document.getElementById('kbh-iframe');
+    const errorDiv = document.getElementById('error');
+
+    // === 1. LOCK NAVIGATION INSIDE IFRAME ===
+    function lockNavigation() {
+      try {
+        const doc = iframe.contentDocument || iframe.contentWindow.document;
+        if (!doc) return;
+
+        // Force all links to stay in iframe
+        doc.querySelectorAll('a').forEach(a => {
+          a.target = '_self';
+          a.rel = 'noopener';
+        });
+
+        // Override window.open
+        const script = doc.createElement('script');
+        script.textContent = `
+          (function() {
+            const origOpen = window.open;
+            window.open = function(url) {
+              if (url) {
+                window.top.document.getElementById('kbh-iframe').src = url;
+              }
+              return null;
+            };
+          })();
+        `;
+        doc.head.appendChild(script);
+
+      } catch (e) {
+        // Cross-origin: still safe
+      }
+    }
+
+    // === 2. GLOBAL CLICK BLOCKER ===
+    document.addEventListener('click', (e) => {
+      const a = e.target.closest('a');
+      if (a && a.href && !a.href.startsWith('javascript:')) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        iframe.src = a.href;
+      }
+    }, true);
+
+    document.addEventListener('auxclick', (e) => e.preventDefault(), true);
+
+    // === 3. KEYBOARD LOCK ===
+    document.addEventListener('keydown', (e) => {
+      if (
+        e.ctrlKey && ['t','n','w','r','l'].includes(e.key.toLowerCase()) ||
+        e.key === 'F5' ||
+        (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'i')
+      ) {
+        e.preventDefault();
+        if (e.key === 'F5' || (e.ctrlKey && e.key.toLowerCase() === 'r')) {
+          reload();
+        }
+      }
+    }, true);
+
+    // === 4. HISTORY & URL LOCK ===
+    history.pushState = () => {};
+    history.replaceState = () => {};
+    window.onpopstate = () => false;
+
+    // === 5. AD REMOVAL (KBH uses popups & Google ads) ===
+    function removeAds() {
+      try {
+        const doc = iframe.contentDocument || iframe.contentWindow.document;
+        if (!doc) return;
+
+        const style = doc.createElement('style');
+        style.textContent = `
+          /* Block all ads */
+          ins, .adsbygoogle, [class*="ad"], [id*="ad"], 
+          iframe[src*="ads"], iframe[src*="doubleclick"], iframe[src*="google"], 
+          div[data-ad], .advertisement, .ad-banner, .ad-container,
+          .popup, .modal, .overlay, .interstitial,
+          [style*="position: fixed"], [style*="z-index: 9999"],
+          .adblock-warning, .adblock-notice,
+          /* KBH-specific */
+          .adsbygoogle-noablate, .adblocker-detector,
+          .adsbygoogle-status, .ad-unit, .ad-wrapper {
+            display: none !important;
+            visibility: hidden !important;
+            height: 0 !important;
+            width: 0 !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
+          }
+          /* Remove ad scripts */
+          script[src*="ads"], script[src*="google"], script[src*="doubleclick"], 
+          script[src*="pop"], script[src*="adman"] { display: none !important; }
+        `;
+        doc.head.appendChild(style);
+
+        // Remove ad scripts
+        doc.querySelectorAll('script[src*="ads"], script[src*="google"], script[src*="pop"]').forEach(s => s.remove());
+
+        // Close any popup windows
+        if (window.open) {
+          setTimeout(() => {
+            try { window.close(); } catch (e) {}
+          }, 1000);
+        }
+      } catch (e) {}
+    }
+
+    // === 6. LOAD HANDLING ===
+    function onLoad() {
+      errorDiv.style.display = 'none';
+      setTimeout(() => {
+        lockNavigation();
+        removeAds();
+      }, 800);
+    }
+
+    function showError() {
+      errorDiv.style.display = 'flex';
+    }
+
+    function reload() {
+      iframe.src = 'https://kbhgames.com';
+    }
+
+    // === 7. AUTO-FULLSCREEN + FOCUS ===
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        iframe.requestFullscreen().catch(() => {});
+      }, 2200);
+    });
+
+    window.addEventListener('blur', () => {
+      setTimeout(() => iframe.focus(), 100);
+    });
+
+    // === 8. PERSISTENT RELOCK & AD KILL (every 2.5s) ===
+    setInterval(() => {
+      lockNavigation();
+      removeAds();
+    }, 2500);
+  </script>
+</body>
+</html>
