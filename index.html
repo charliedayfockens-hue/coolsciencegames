@@ -3,31 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Game Hub</title>
+    <title>Cool Science Games</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <header>
-        <h1>Game Hub</h1>
-        <div id="dev-entry">
-            <input type="password" id="dev-code" placeholder="Dev code">
-            <button id="enter-btn">Enter</button>
-        </div>
+        <h1>Cool Science Games</h1>
     </header>
 
-    <main id="game-list">
-        <p class="loading">Loading games…</p>
+    <input type="text" id="search-bar" placeholder="Search for a game...">
+
+    <div id="game-counter">Loading games...</div>
+
+    <main>
+        <div id="game-list">
+            <p class="loading">Loading your awesome games...</p>
+        </div>
     </main>
 
-    <!-- Dev panel – hidden until activated -->
-    <section id="dev-panel" class="hidden">
-        <h2>Add New Game</h2>
-        <input type="text" id="game-name" placeholder="Game name (folder/file name)">
-        <label><input type="radio" name="type" value="folder" checked> Folder (index.html)</label>
-        <label><input type="radio" name="type" value="single"> Single .html file</label>
-        <button id="save-game">Save</button>
-        <button id="exit-dev">Exit Dev Mode</button>
-    </section>
+    <footer>
+        Total games auto-detected from your <code>assets/</code> folder
+    </footer>
 
     <script src="script.js"></script>
 </body>
