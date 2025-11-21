@@ -43,27 +43,32 @@ h1 {
     margin: 10px 0 20px;
     font-weight: bold;
 }
-main { max-width: 1400px; margin: 0 auto; padding: 20px; }
+main { 
+    max-width: 1600px; 
+    margin: 0 auto; 
+    padding: 20px; 
+}
 
-/* THIS IS THE ONLY LINE YOU NEEDED TO CHANGE */
+/* THIS IS THE ONLY PART THAT MATTERS — FORCES 5 PER ROW */
 #game-list {
     display: grid;
-    gap: 24px;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 28px;
+    grid-template-columns: repeat(5, 1fr);   /* ← FORCES 5 COLUMNS */
+    padding: 10px;
 }
 
-/* Force 5 columns on large screens */
-@media (min-width: 1200px) {
-    #game-list {
-        grid-template-columns: repeat(5, 1fr);
-    }
+/* Mobile & tablet fallback (still looks good) */
+@media (max-width: 1200px) {
+    #game-list { grid-template-columns: repeat(4, 1fr); }
 }
-
-/* 4 columns on medium-large screens */
-@media (min-width: 900px) and (max-width: 1199px) {
-    #game-list {
-        grid-template-columns: repeat(4, 1fr);
-    }
+@media (max-width: 900px) {
+    #game-list { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 600px) {
+    #game-list { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 400px) {
+    #game-list { grid-template-columns: 1fr; }
 }
 
 .game-card {
@@ -74,12 +79,12 @@ main { max-width: 1400px; margin: 0 auto; padding: 20px; }
     box-shadow: 0 8px 25px rgba(0,0,0,0.4);
 }
 .game-card:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 20px 40px rgba(79,195,247,0.4);
+    transform: translateY(-12px);
+    box-shadow: 0 24px 50px rgba(79,195,247,0.5);
 }
 .game-card a {
     display: block;
-    padding: 30px 20px;
+    padding: 32px 20px;
     color: white;
     text-decoration: none;
     text-align: center;
@@ -94,15 +99,15 @@ main { max-width: 1400px; margin: 0 auto; padding: 20px; }
 }
 .loading {
     text-align: center;
-    font-size: 1.4rem;
+    font-size: 1.5rem;
     color: #888;
     grid-column: 1 / -1;
-    padding: 40px;
+    padding: 50px;
 }
 footer {
     text-align: center;
-    padding: 30px;
+    padding: 40px;
     color: #666;
     font-size: 0.9rem;
-    margin-top: 50px;
+    margin-top: 60px;
 }
