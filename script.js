@@ -1,82 +1,87 @@
-/* script.js – FINAL FIX: Opens games as real webpages on GitHub Pages */
 document.addEventListener('DOMContentLoaded', async () => {
     const listEl = document.getElementById('game-list');
+    const searchInput = document.getElementById('search-bar');
+    const counterEl = document.getElementById('game-counter');
 
-    // Auto-detect GitHub Pages base URL
     const baseUrl = location.origin + location.pathname.split('/').slice(0, -1).join('/') + '/';
-    console.log('Base URL:', baseUrl); // Debug: Check console
-
-    // GitHub API: List everything in /assets
     const owner = 'charliedayfockens-hue';
     const repo = 'coolsciencegames';
     const branch = 'main';
-    const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/assets?ref=${branch}`;
 
-    let items = [];
+    let allGames = [];
+
     try {
-        const resp = await fetch(apiUrl, {
-            headers: { 'User-Agent': 'GameHub-Fix' }
-        });
-        if (!resp.ok) throw new Error(`GitHub API ${resp.status}`);
-        items = await resp.json();
-    } catch (e) {
-        listEl.innerHTML = `<p class="loading">Error loading games: ${e.message}</p>`;
-        return;
-    }
+        const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/assets?ref=${branch}`;
+        const resp = await fetch(apiUrl, { headers: { 'User-Agent': 'GameHub' } });
+        if (!resp.ok) throw new Error('Failed to load games');
+        const items = await resp.json();
 
-    const games = [];
+        for (const item of items) {
+            const name = item.name;
 
-    // Scan each item in assets/
-    for (const item of items) {
-        const name = item.name;
-
-        if (item.type === 'dir') {
-            // Folder: Look inside for any .html file
-            const folderApi = `https://api.github.com/repos/${owner}/${repo}/contents/assets/${name}?ref=${branch}`;
-            let files = [];
-            try {
-                const r = await fetch(folderApi, { headers: { 'User-Agent': 'GameHub-Fix' } });
-                if (r.ok) files = await r.json();
-            } catch (_) { continue; }
-
-            const htmlFile = files.find(f => f.name.toLowerCase().endsWith('.html'));
-            if (htmlFile) {
-                // GitHub Pages URL: RENDERS HTML PROPERLY
-                const gameUrl = `${baseUrl}assets/${name}/${htmlFile.name}`;
-                games.push({ name, url: gameUrl });
+            if (item.type === 'dir') {
+                const folderApi = `https://api.github.com/repos/${owner}/${repo}/contents/assets/${name}?ref=${branch}`;
+                const r = await fetch(folderApi, { headers: { 'User-Agent': 'GameHub' } });
+                if (!r.ok) continue;
+                const files = await r.json();
+                const htmlFile = files.find(f => f.name.toLowerCase().endsWith('.html'));
+                if (htmlFile) {
+                    allGames.push({
+                        name: name,
+                        url: `${baseUrl}assets/${name}/${htmlFile.name}`,
+                        lowerName: name.toLowerCase()
+                    });
+                }
+            }
+            else if (item.name.toLowerCase().endsWith('.html')) {
+                const gameName = item.name.replace(/\.html?$/i, '');
+                allGames.push({
+                    name: gameName,
+                    url: `${baseUrl}assets/${item.name}`,
+                    lowerName: gameName.toLowerCase()
+                });
             }
         }
-        else if (item.type === 'file' && name.toLowerCase().endsWith('.html')) {
-            // Single .html file
-            const gameName = name.replace(/\.html?$/i, '');
-            const gameUrl = `${baseUrl}assets/${name}`;
-            games.push({ name: gameName, url: gameUrl });
-        }
-    }
 
-    // Sort and render
-    games.sort((a, b) => a.name.localeCompare(b.name));
-
-    if (games.length === 0) {
-        listEl.innerHTML = '<p class="loading">No games found in assets/ – add a folder with an .html file!</p>';
+        allGames.sort((a, b) => a.name.localeCompare(b.name));
+    } catch (e) {
+        listEl.innerHTML = `<p class="loading">Error loading games. Check internet or repo.</p>`;
         return;
     }
 
-    const frag = document.createDocumentFragment();
-    for (const g of games) {
-        const card = document.createElement('div');
-        card.className = 'game-card';
+    const render = (games) => {
+        listEl.innerHTML = '';
+        counterEl.textContent = `${games.length} Game${games.length === 1 ? '' : 's'} Available`;
 
-        const a = document.createElement('a');
-        a.href = g.url;
-        a.target = '_blank';
-        a.rel = 'noopener noreferrer';
-        a.textContent = g.name;
+        if (games.length === 0) {
+            listEl.innerHTML = '<p class="loading">No games match your search.</p>';
+            return;
+        }
 
-        card.appendChild(a);
-        frag.appendChild(card);
-    }
+        const frag = document.createDocumentFragment();
+        games.forEach(g => {
+            const card = document.createElement('div');
+            card.className = 'game-card';
+            const a = document.createElement('a');
+            a.href = g.url;
+            a.target = '_blank';
+            a.rel = 'noopener noreferrer';
+            a.textContent = g.name;
+            card.appendChild(a);
+            frag.appendChild(card);
+        });
+        listEl.appendChild(frag);
+    };
 
-    listEl.innerHTML = '';
-    listEl.appendChild(frag);
+    render(allGames);
+
+    searchInput.addEventListener('input', () => {
+        const query = searchInput.value.trim().toLowerCase();
+        if (!query) {
+            render(allGames);
+            return;
+        }
+        const filtered = allGames.filter(g => g.lowerName.includes(query));
+        render(filtered);
+    });
 });
