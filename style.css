@@ -16,7 +16,6 @@ h1 {
     background: linear-gradient(90deg, #4fc3f7, #9575cd);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    margin-bottom: 0.5rem;
 }
 #search-bar {
     width: 90%;
@@ -35,7 +34,7 @@ h1 {
 }
 #search-bar:focus {
     border-color: #9575cd;
-    box-shadow: 0 0 20px rgba(149, 117, 205, 0.4);
+    box-shadow: 0 0 20px rgba(149,117,205,0.4);
 }
 #game-counter {
     text-align: center;
@@ -44,11 +43,7 @@ h1 {
     margin: 10px 0 20px;
     font-weight: bold;
 }
-main {
-    max-width: 1000px;
-    margin: 0 auto;
-    padding: 20px;
-}
+main { max-width: 1000px; margin: 0 auto; padding: 20px; }
 #game-list {
     display: grid;
     gap: 20px;
@@ -63,7 +58,7 @@ main {
 }
 .game-card:hover {
     transform: translateY(-10px);
-    box-shadow: 0 20px 40px rgba(79, 195, 247, 0.4);
+    box-shadow: 0 20px 40px rgba(79,195,247,0.4);
 }
 .game-card a {
     display: block;
