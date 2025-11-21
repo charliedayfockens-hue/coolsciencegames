@@ -43,12 +43,29 @@ h1 {
     margin: 10px 0 20px;
     font-weight: bold;
 }
-main { max-width: 1000px; margin: 0 auto; padding: 20px; }
+main { max-width: 1400px; margin: 0 auto; padding: 20px; }
+
+/* THIS IS THE ONLY LINE YOU NEEDED TO CHANGE */
 #game-list {
     display: grid;
-    gap: 20px;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
 }
+
+/* Force 5 columns on large screens */
+@media (min-width: 1200px) {
+    #game-list {
+        grid-template-columns: repeat(5, 1fr);
+    }
+}
+
+/* 4 columns on medium-large screens */
+@media (min-width: 900px) and (max-width: 1199px) {
+    #game-list {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
 .game-card {
     background: #16213e;
     border-radius: 16px;
