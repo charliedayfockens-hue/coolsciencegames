@@ -3,32 +3,33 @@ document.addEventListener('DOMContentLoaded', async () => {
     const searchInput = document.getElementById('search-bar');
     const counterEl = document.getElementById('game-counter');
 
-    const baseUrl = location.origin + location.pathname.split('/').slice(0, -1).join('/') + '/';
-    const owner = 'charliedayfockens-hue';
-    const repo = 'coolsciencegames';
-    const branch = 'main';
+    // AUTO-FIX: Correct base URL for GitHub Pages
+    const isGitHubPages = location.hostname.includes('github.io');
+    const basePath = isGitHubPages 
+        ? '/coolsciencegames/' 
+        : '/';
+    const baseUrl = location.origin + basePath;
 
     let allGames = [];
 
     try {
-        const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/assets?ref=${branch}`;
-        const resp = await fetch(apiUrl, { headers: { 'User-Agent': 'GameHub' } });
-        if (!resp.ok) throw new Error('Failed to load games');
+        const resp = await fetch('https://api.github.com/repos/charliedayfockens-hue/coolsciencegames/contents/assets?ref=main', {
+            headers: { 'User-Agent': 'GameHub' }
+        });
+        if (!resp.ok) throw new Error('API failed');
         const items = await resp.json();
 
         for (const item of items) {
             const name = item.name;
 
             if (item.type === 'dir') {
-                const folderApi = `https://api.github.com/repos/${owner}/${repo}/contents/assets/${name}?ref=${branch}`;
-                const r = await fetch(folderApi, { headers: { 'User-Agent': 'GameHub' } });
-                if (!r.ok) continue;
+                const r = await fetch(item.url);
                 const files = await r.json();
                 const htmlFile = files.find(f => f.name.toLowerCase().endsWith('.html'));
                 if (htmlFile) {
                     allGames.push({
                         name: name,
-                        url: `${baseUrl}assets/${name}/${htmlFile.name}`,
+                        url: `${baseUrl}assets/${encodeURIComponent(name)}/${htmlFile.name}`,
                         lowerName: name.toLowerCase()
                     });
                 }
@@ -45,7 +46,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         allGames.sort((a, b) => a.name.localeCompare(b.name));
     } catch (e) {
-        listEl.innerHTML = `<p class="loading">Error loading games. Check internet or repo.</p>`;
+        listEl.innerHTML = `<p class="loading">Error loading games. Check internet.</p>`;
         return;
     }
 
@@ -77,11 +78,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     searchInput.addEventListener('input', () => {
         const query = searchInput.value.trim().toLowerCase();
-        if (!query) {
-            render(allGames);
-            return;
-        }
-        const filtered = allGames.filter(g => g.lowerName.includes(query));
+        const filtered = query 
+            ? allGames.filter(g => g.lowerName.includes(query))
+            : allGames;
         render(filtered);
     });
 });
