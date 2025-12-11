@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>The Oregon Trail (1978 MECC Version)</title>
+<style>
+  body {
+    font-family: 'Courier New', monospace;
+    background: #000;
+    color: #0f0;
+    padding: 20px;
+    max-width: 800px;
+    margin: 0 auto;
+    line-height: 1.4;
+  }
+  pre, input {
+    font-family: 'Courier New', monospace;
+    font-size: 16px;
+  }
+  input {
+    background: #000;
+    color: #0f0;
+    border: 1px solid #0f0;
+    padding: 5px;
+  }
+  #output {
+    margin-bottom: 15px;
+    white-space: pre-wrap;
+  }
+  h1 {
+    text-align: center;
+    color: #0f0;
+    text-shadow: 0 0 10px #0f0;
+  }
+</style>
+</head>
+<body>
+<h1>THE OREGON TRAIL</h1>
+<div id="output"></div>
+<input type="text" id="input" placeholder="Type here and press Enter" autofocus autocomplete="off">
+
+<script>
+// === The Oregon Trail 1978 - Ported to JavaScript ===
+// Original BASIC by Bill Heinemann, Don Rawitsch, Paul Dillenbergerger
+// HTML/JS port with love for retro computing fans
+
+const output = document.getElementById('output');
+const inputBox = document.getElementById('input');
+
+let A, B, C, F, M, M1, T, D3 = 0;
+let M2, F1 = 0, F2 = 0, K8 = 0, S4 = 0, M9 = 0, L1 = 0, C1 = 0;
+let D9 = 3; // default shooting skill (3 = fair)
+let E; // eating choice
+let shootingWord = "";
+let shootStartTime = 0;
+
+function print(text = "") {
+  output.textContent += text + "\n";
+  output.scrollTop = output.scrollHeight;
+}
+
+function clearInput() {
+  inputBox.value = "";
+}
+
+function ask(question, callback) {
+  print(question);
+  inputBox.onkeydown = function(e) {
+    if (e.key === "Enter") {
+      const answer = inputBox.value.trim().toUpperCase();
+      clearInput();
+      callback(answer);
+    }
+  };
+  inputBox.focus();
+}
+
+function askNumber(question, callback) {
+  print(question);
+  inputBox.onkeydown = function(e) {
+    if (e.key === "Enter") {
+      const num = parseFloat(inputBox.value);
+      clearInput();
+      if (isNaN(num)) {
+        print("INVALID NUMBER");
+        askNumber(question, callback);
+      } else {
+        callback(num);
+      }
+    }
+  };
+  inputBox.focus();
+}
+
+// Shooting subroutine - timed "BANG" style
+function shoot(callback) {
+  const words = ["BANG", "BLAM", "POW", "WHAM"];
+  const word = words[Math.floor(Math.random() * words.length)];
+  shootingWord = word;
+  print(`TYPE ${word}`);
+  shootStartTime = performance.now();
+  
+  inputBox.onkeydown = function(e) {
+    if (e.key === "Enter") {
+      const typed = inputBox.value.trim().toUpperCase();
+      const timeTaken = performance.now() - shootStartTime;
+      clearInput();
+      
+      let B1 = 9; // default = miss
+      if (typed === word) {
+        B1 = Math.max(1, Math.floor(timeTaken / 100) - (D9 - 1));
+        if (B1 < 1) B1 = 1;
+      }
+      callback(B1);
+    }
+  };
+}
+
+// Main game start
+function startGame() {
+  print("\n".repeat(10));
+  print("***************************************");
+  print("*                                     *");
+  print("*       THE OREGON TRAIL 1847         *");
+  print("*   (1978 MECC BASIC VERSION PORT)    *");
+  print("*                                     *");
+  print("***************************************\n");
+
+  ask("DO YOU NEED INSTRUCTIONS (YES/NO)?", function(ans) {
+    if (ans === "YES" || ans === "Y") {
+      print("\nTHIS PROGRAM SIMULATES A TRIP OVER THE OREGON TRAIL FROM");
+      print("INDEPENDENCE, MISSOURI TO OREGON CITY, OREGON IN 1847.");
+      print("YOUR FAMILY OF FIVE WILL COVER THE 2040 MILE OREGON TRAIL");
+      print("IN 5-6 MONTHS --- IF YOU MAKE IT ALIVE.\n");
+      print("YOU HAD SAVED $900 TO SPEND FOR THE TRIP, AND YOU'VE JUST");
+      print("PAID $200 FOR A WAGON.\n");
+      print("YOU WILL NEED TO SPEND THE REST OF YOUR MONEY ON THE");
+      print("FOLLOWING ITEMS:\n");
+      print(" OXEN - $200-$300 (MORE = FASTER TRAVEL)");
+      print(" FOOD - THE MORE THE BETTER");
+      print(" AMMUNITION - $1 = 50 BULLETS");
+      print(" CLOTHING - IMPORTANT IN MOUNTAINS");
+      print(" MISCELLANEOUS SUPPLIES - MEDICINE, REPAIRS\n");
+      print("YOU CAN BUY MORE AT FORTS (BUT MORE EXPENSIVE).");
+      print("WHEN HUNTING OR FIGHTING, TYPE THE WORD THAT APPEARS");
+      print("AS FAST AS YOU CAN!\n");
+      print("GOOD LUCK!!!\n");
+    }
+
+    askShootingSkill();
+  });
+}
+
+function askShootingSkill() {
+  print("HOW GOOD A SHOT ARE YOU WITH YOUR RIFLE?");
+  print(" (1) ACE MARKSMAN");
+  print(" (2) GOOD SHOT");
+  print(" (3) FAIR TO MIDDLIN'");
+  print(" (4) NEED MORE PRACTICE");
+  print(" (5) SHAKY KNEES");
+  askNumber("ENTER ONE OF THE ABOVE:", function(n) {
+    D9 = Math.max(1, Math.min(5, Math.floor(n)));
+    if (D9 < 1 || D9 > 5) D9 = 3;
+    initialPurchases();
+  });
+}
+
+function initialPurchases() {
+  print("\nHOW MUCH DO YOU WANT TO SPEND ON YOUR OXEN TEAM?");
+  askNumber("", function(a) {
+    if (a < 200) { print("NOT ENOUGH"); initialPurchases(); return; }
+    if (a > 300) { print("TOO MUCH"); initialPurchases(); return; }
+    A = a;
+
+    print("HOW MUCH DO YOU WANT TO SPEND ON FOOD?");
+    askNumber("", function(f) {
+      if (f < 0) { print("IMPOSSIBLE"); initialPurchases(); return; }
+      F = f;
+
+      print("HOW MUCH DO YOU WANT TO SPEND ON AMMUNITION?");
+      askNumber("", function(b) {
+        if (b < 0) { print("IMPOSSIBLE"); initialPurchases(); return; }
+        B = b * 50; // 50 bullets per dollar
+
+        print("HOW MUCH DO YOU WANT TO SPEND ON CLOTHING?");
+        askNumber("", function(c) {
+          if (c < 0) { print("IMPOSSIBLE"); initialPurchases(); return; }
+          C = c;
+
+          print("HOW MUCH DO YOU WANT TO SPEND ON MISCELLANEOUS SUPPLIES?");
+          askNumber("", function(m1) {
+            if (m1 < 0) { print("IMPOSSIBLE"); initialPurchases(); return; }
+            M1 = m1;
+
+            T = 700 - A - f - b - c - m1;
+            if (T < 0) {
+              print("YOU OVERSPENT--YOU ONLY HAD $700 TO SPEND. BUY AGAIN");
+              initialPurchases();
+              return;
+            }
+
+            print(`\nAFTER ALL YOUR PURCHASES, YOU NOW HAVE ${T} DOLLARS LEFT\n`);
+            print("MONDAY MARCH 29 1847\n");
+            M = 0;
+            M2 = 0;
+            turn();
+          });
+        });
+      });
+    });
+  });
+}
+
+function turn() {
+  if (M >= 2040) { arrival(); return; }
+
+  // Advance date
+  D3++;
+  print("MONDAY ");
+  const dates = [
+    "APRIL 12", "APRIL 26", "MAY 10", "MAY 24", "JUNE 7", "JUNE 21",
+    "JULY 5", "JULY 19", "AUGUST 2", "AUGUST 16", "AUGUST 31",
+    "SEPTEMBER 13", "SEPTEMBER 27", "OCTOBER 11", "OCTOBER 25",
+    "NOVEMBER 8", "NOVEMBER 22", "DECEMBER 6", "DECEMBER 20"
+  ];
+  if (D3 > 19) {
+    print("YOU HAVE BEEN ON THE TRAIL TOO LONG ------");
+    print("YOUR FAMILY DIES IN THE FIRST BLIZZARD OF WINTER");
+    death();
+    death();
+    return;
+  }
+  print(dates[D3-1] + " 1847\n");
+
+  // Doctor bill?
+  if (S4 || K8) {
+    T -= 20;
+    if (T < 0) { T = 0; print("YOU CAN'T AFFORD A DOCTOR"); }
+    else print("DOCTOR'S BILL IS $20");
+    S4 = K8 = 0;
+  }
+
+  // Status
+  if (M9) print("TOTAL MILEAGE IS 950");
+  else print("TOTAL MILEAGE IS " + M);
+
+  print("FOOD\tBULLETS\tCLOTHING\tMISC.SUPP.\tCASH");
+  print(`${Math.floor(F)}\t${Math.floor(B)}\t${Math.floor(C)}\t${Math.floor(M1)}\t${Math.floor(T)}`);
+
+  if (F < 13) print("YOU'D BETTER DO SOME HUNTING OR BUY FOOD SOON!!!!");
+
+  // Choose action
+  if (M < 950) {
+    ask("DO YOU WANT TO (1) HUNT, OR (2) CONTINUE?", function(x) {
+      let choice = parseInt(x);
+      if (isNaN(choice) || choice < 1 || choice > 2) choice = 2;
+      if (choice === 1 && B <= 39) {
+        print("TOUGH---YOU NEED MORE BULLETS TO GO HUNTING");
+        turn();
+      } else {
+        action(choice === 1 ? hunt : continueTravel)();
+      }
+    });
+  } else {
+    ask("DO YOU WANT TO (1) STOP AT THE NEXT FORT, (2) HUNT, OR (3) CONTINUE?", function(x) {
+      let choice = parseInt(x);
+      if (isNaN(choice) || choice < 1 || choice > 3) choice = 3;
+      if (choice === 2 && B <= 39) {
+        print("TOUGH---YOU NEED MORE BULLETS TO GO HUNTING");
+        turn();
+      } else {
+        if (choice === 1) fort();
+        else if (choice === 2) hunt();
+        else continueTravel();
+      }
+    });
+  }
+}
+
+function fort() {
+  print("\nENTER WHAT YOU WISH TO SPEND ON THE FOLLOWING");
+  buyItem("FOOD", v => F += (2/3)*v);
+  buyItem("AMMUNITION", v => B += (2/3)*v*50);
+  buyItem("CLOTHING", v => C += (2/3)*v);
+  buyItem("MISCELLANEOUS SUPPLIES", v => M1 += (2/3)*v);
+  M -= 45;
+  continueTravel();
+}
+
+function buyItem(item, apply) {
+  askNumber(item + "?", function(p) {
+    if (p < 0) p = 0;
+    if (p > T) {
+      print("YOU DON'T HAVE THAT MUCH--KEEP YOUR SPENDING DOWN");
+      p = 0;
+    }
+    T -= p;
+    apply(p);
+  });
+}
+
+function hunt() {
+  if (B <= 39) { print("NOT ENOUGH BULLETS"); turn(); return; }
+  M -= 45;
+  shoot(function(B1) {
+    if (B1 <= 1) {
+      print("RIGHT BETWEEN THE EYES---YOU GOT A BIG ONE!!!!");
+      F += 52 + Math.random()*6;
+      B -= 10 + Math.random()*4;
+    } else if (Math.random() < 13*B1/100) {
+      print("YOU MISSED---AND YOUR DINNER GOT AWAY.....");
+    } else {
+      print("NICE SHOT--RIGHT ON TARGET--GOOD EATIN' TONIGHT!!");
+      F += 48 - 2*B1;
+      B -= 10 + 3*B1;
+    }
+    continueTravel();
+  });
+}
+
+function continueTravel() {
+  // Eating
+  ask("DO YOU WANT TO EAT (1) POORLY (2) MODERATELY OR (3) WELL?", function(e) {
+    E = Math.max(1, Math.min(3, parseInt(e) || 2));
+    F -= 8 + 5*E;
+    if (F < 0) {
+      print("YOU CAN'T EAT THAT WELL");
+      F = 0;
+    }
+
+    // Travel distance
+    M += 200 + (A-220)/3 + 10*Math.random();
+    
+    // Random events
+    const r = Math.random() * 100;
+    const events = [6,11,13,15,17,22,32,35,37,42,44,54,64,69,95];
+    let eventIndex = events.findIndex(e => r <= e);
+    if (eventIndex === -1) eventIndex = 15;
+
+    switch(eventIndex+1) {
+      case 1: print("WAGON BREAKS DOWN"); M -= 15+5*Math.random(); M1 -= 8; break;
+      case 2: print("OX INJURES LEG"); M -= 25; A -= 20; break;
+      case 3: print("DAUGHTER BROKE HER ARM"); M -= 5+4*Math.random(); M1 -= 2+3*Math.random(); break;
+      case 4: print("OX WANDERS OFF"); M -= 17; break;
+      case 5: print("YOUR SON GETS LOST"); M -= 10; break;
+      case 6: print("UNSAFE WATER"); M -= 10*Math.random()+2; break;
+      case 7: if (M<=950) { print("HEAVY RAINS"); F-=10; B-=500; M1-=15; M-=10*Math.random()+5; } break;
+      case 8: bandits(); return;
+      case 9: print("FIRE IN WAGON!"); F-=40; B-=400; M1-=Math.random()*8+3; M-=15; break;
+      case 10: print("HEAVY FOG"); M -= 10+5*Math.random(); break;
+      case 11: snakebite(); return;
+      case 12: print("SWAMPED CROSSING"); F-=30; C-=20; M-=20+20*Math.random(); break;
+      case 13: wildAnimals(); return;
+      case 14: if (M>950) { coldWeather(); return; }
+      case 15: hailStorm(); M-=5+10*Math.random(); B-=200; M1-=4+3*Math.random(); break;
+      case 16: illness(); return;
+      case 17: print("HELPFUL INDIANS SHOW YOU WHERE TO FIND MORE FOOD"); F += 14; break;
+    }
+
+    if (F < 0) { print("YOU RAN OUT OF FOOD AND STARVED TO DEATH"); death(); return; }
+    if (M >= 2040) { arrival(); return; }
+    turn();
+  });
+}
+
+function bandits() {
+  print("BANDITS ATTACK");
+  shoot(function(B1) {
+    B -= 20*B1;
+    if (B < 0) {
+      print("YOU RAN OUT OF BULLETS---THEY GET LOTS OF CASH");
+      T /= 3;
+    } else if (B1 > 1) {
+      print("YOU GOT SHOT IN THE LEG");
+      K8 = 1;
+      A -= 20;
+      M1 -= 5;
+    } else {
+      print("QUICKEST DRAW OUTSIDE OF DODGE CITY!!! YOU GOT 'EM!");
+    }
+    continueTravel();
+  });
+}
+
+function wildAnimals() {
+  print("WILD ANIMALS ATTACK!");
+  shoot(function(B1) {
+    if (B <= 39) {
+      print("TOO LOW ON BULLETS - THE WOLVES OVERPOWERED YOU");
+      K8 = 1;
+      death();
+    } else if (B1 <= 2) {
+      print("NICE SHOOTIN' PARDNER---THEY DIDN'T GET MUCH");
+    } else {
+      print("SLOW ON THE DRAW---THEY GOT AT YOUR FOOD AND CLOTHES");
+      C -= B1*4;
+      F -= B1*8;
+    }
+    B -= 20*B1;
+    continueTravel();
+  });
+}
+
+function snakebite() {
+  print("YOU KILLED A POISONOUS SNAKE AFTER IT BIT YOU");
+  B -= 10;
+  M1 -= 5;
+  if (M1 < 0) {
+    print("YOU DIE OF SNAKEBITE SINCE YOU HAVE NO MEDICINE");
+    death();
+  } else {
+    continueTravel();
+  }
+}
+
+function coldWeather() {
+  print("COLD WEATHER---BRRRRRRR!--YOU ");
+  if (C < 22 + 4*Math.random()) {
+    print("DON'T HAVE ENOUGH CLOTHING TO KEEP YOU WARM");
+    illness();
+  } else {
+    print("HAVE ENOUGH CLOTHING");
+    continueTravel();
+  }
+}
+
+function illness() {
+  const chance = Math.random()*100;
+  if (chance < 10 + 35*(E-1)) {
+    print("SERIOUS ILLNESS---YOU MUST STOP FOR MEDICAL ATTENTION");
+    M1 -= 10;
+    S4 = 1;
+  } else if (chance < 100 - (40 / Math.pow(4, E-1))) {
+    print("BAD ILLNESS---MEDICINE USED");
+    M -= 5; M1 -= 2;
+  } else {
+    print("MILD ILLNESS---MEDICINE USED");
+    M -= 5; M1 -= 2;
+  }
+  if (M1 < 0) { print("YOU RAN OUT OF MEDICAL SUPPLIES"); death(); return; }
+  continueTravel();
+}
+
+function arrival() {
+  print("\nYOU FINALLY ARRIVED AT OREGON CITY");
+  print("AFTER 2040 LONG MILES---HOORAY!!!!!");
+  print("A REAL PIONEER!\n");
+
+  const days = Math.floor((2040 - M2) / (M - M2) * 14) + D3*14;
+  const months = ["JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"];
+  let monthIndex = 3; // July
+  let day = days - 93;
+  while (day > 31) {
+    day -= 31;
+    monthIndex++;
+  }
+  print(`YOU ARRIVED ON ${months[monthIndex-3]} ${day} 1847\n`);
+
+  print("FINAL STATS:");
+  print(`FOOD: ${Math.floor(F)}  BULLETS: ${Math.floor(B)}  CLOTHING: ${Math.floor(C)}  MISC: ${Math.floor(M1)}  CASH: ${Math.floor(T)}`);
+  print("\nPRESIDENT JAMES K. POLK SENDS YOU HIS HEARTIEST CONGRATULATIONS");
+  print("AND WISHES YOU A PROSPEROUS LIFE AHEAD AT YOUR NEW HOME");
+
+  ask("\nPlay again? (YES/NO)", function(a) {
+    if (a === "YES") location.reload();
+  });
+}
+
+function death() {
+  print("\nYOU DIED OF " + (K8 ? "INJURIES" : "PNEUMONIA"));
+  print("\nWOULD YOU LIKE A MINISTER?");
+  ask("", () => {
+    print("WOULD YOU LIKE A FANCY FUNERAL?");
+    ask("", () => {
+      print("WOULD YOU LIKE US TO INFORM YOUR NEXT OF KIN?");
+      ask("", function(ans) {
+        if (ans === "YES") print("THAT WILL BE $4.50 FOR THE TELEGRAPH CHARGE.");
+        print("\nBETTER LUCK NEXT TIME\n");
+        print("SINCERELY,");
+        print("THE OREGON CITY CHAMBER OF COMMERCE");
+        ask("\nPlay again? (YES/NO)", function(a) {
+          if (a === "YES") location.reload();
+        });
+      });
+    });
+  });
+}
+
+// Start the game
+startGame();
+</script>
+</body>
+</html>
