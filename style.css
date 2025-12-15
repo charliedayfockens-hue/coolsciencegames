@@ -153,9 +153,5 @@ footer {
     opacity: 0.8;
     font-size: 1rem;
 }
-#game-list {
-    display: grid;
-    gap: 28px;
-    grid-template-columns: repeat(5, 1fr);
-    padding: 10px;
-    align-items: stretch; /* Makes all cards same height */
+
+
