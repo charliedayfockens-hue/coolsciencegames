@@ -121,6 +121,8 @@ main {
     background: linear-gradient(135deg, #2a5298, #4fc3f7);
 }
 .card-bottom {
+    position: relative; /* Important for the overlay */
+    overflow: hidden;   /* Keeps the overlay inside the card */
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -131,14 +133,44 @@ main {
     gap: 10px;
 }
 
+/* Tie-dye overlay that appears on hover */
+.card-bottom::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: 
+        radial-gradient(circle at 70% 30%, #9575cd88, transparent 50%),
+        radial-gradient(circle at 20% 80%, #4fc3f788, transparent 50%),
+        conic-gradient(from 0deg at 50% 50%, #4fc3f7 0deg, #9575cd 90deg, #1a1a2e 180deg, #4fc3f7 270deg, #9575cd 360deg);
+    background-size: 200% 200%, 150% 150%, 100% 100%;
+    background-position: center;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Show the tie-dye when hovering the whole card */
+.game-card:hover .card-bottom::before {
+    opacity: 0.6; /* Change this number (0.4 to 0.8) if you want it stronger or lighter */
+}
+}
 .game-title {
+    position: relative;
+    z-index: 2;
     color: white;
     font-weight: bold;
     font-size: 1.4rem;
     text-align: center;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.6); /* Helps text pop over the tie-dye */
 }
 
 .game-desc {
+    position: relative;
+    z-index: 2;
     color: #bbb;
     font-size: 1rem;
     text-align: center;
@@ -146,3 +178,5 @@ main {
     padding: 0 10px;
     line-height: 1.4;
 }
+}
+
