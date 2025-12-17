@@ -59,12 +59,50 @@ document.addEventListener('DOMContentLoaded', async () => {
         counterEl.textContent = '0 Games';
         return;
     }
+const render = (games) => {
+    listEl.innerHTML = '';
+    counterEl.textContent = `${games.length} Game${games.length === 1 ? '' : 's'} Available`;
 
-    // Render function
-    const render = (games) => {
-        listEl.innerHTML = '';
-        counterEl.textContent = `${games.length} Game${games.length === 1 ? '' : 's'} Available`;
+    if (games.length === 0) {
+        listEl.innerHTML = '<p class="loading">No games match your search.</p>';
+        return;
+    }
 
+    const frag = document.createDocumentFragment();
+
+    games.forEach(g => {
+        const card = document.createElement('div');
+        card.className = 'game-card';
+
+        // Image on top
+        if (g.image) {
+            const img = document.createElement('img');
+            img.src = g.image;
+            img.alt = g.name;
+            img.loading = 'lazy';
+            card.appendChild(img);
+        }
+
+        // Title (not clickable)
+        const titleDiv = document.createElement('div');
+        titleDiv.className = 'game-title';
+        titleDiv.textContent = g.name;
+        card.appendChild(titleDiv);
+
+        // Play button (clickable, opens in new tab)
+        const playLink = document.createElement('a');
+        playLink.href = g.url;
+        playLink.target = '_blank';
+        playLink.rel = 'noopener noreferrer';
+        playLink.className = 'play-button';
+        playLink.textContent = 'Play';
+        card.appendChild(playLink);
+
+        frag.appendChild(card);
+    });
+
+    listEl.appendChild(frag);
+};
         if (games.length === 0) {
             listEl.innerHTML = '<p class="loading">No games match your search.</p>';
             return;
@@ -97,3 +135,4 @@ document.addEventListener('DOMContentLoaded', async () => {
         render(filtered);
     });
 });
+
