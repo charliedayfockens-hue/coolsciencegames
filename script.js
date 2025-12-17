@@ -74,7 +74,7 @@ const render = (games) => {
         const card = document.createElement('div');
         card.className = 'game-card';
 
-        // Image on top
+        // Image on top (if it exists)
         if (g.image) {
             const img = document.createElement('img');
             img.src = g.image;
@@ -83,6 +83,20 @@ const render = (games) => {
             card.appendChild(img);
         }
 
+        // Clickable title area (opens game in new tab)
+        const a = document.createElement('a');
+        a.href = g.url;
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        a.textContent = g.name;
+        a.className = 'game-title-link';  // we'll style this nicely
+        card.appendChild(a);
+
+        frag.appendChild(card);
+    });
+
+    listEl.appendChild(frag);
+};
         // Title (not clickable)
         const titleDiv = document.createElement('div');
         titleDiv.className = 'game-title';
@@ -135,4 +149,5 @@ const render = (games) => {
         render(filtered);
     });
 });
+
 
