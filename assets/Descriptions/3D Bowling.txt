@@ -1,1 +1,1 @@
-Have fun in this 3D bowling adventure. Score spares, strikes, and even turkeys!
+3D Bowling is a realistic 3D ten-pin bowling game with accurate physics and intuitive swipe controls. Play solo, vs AI, or local multiplayer across various alleys and balls.
