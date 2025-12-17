@@ -187,3 +187,32 @@ footer {
     opacity: 0.8;
     font-size: 1rem;
 }
+.game-title {
+    color: white;
+    font-weight: bold;
+    font-size: 1.4rem;
+    text-align: center;
+    padding: 20px 10px 10px;
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
+}
+
+.play-button {
+    display: block;
+    margin: 0 20px 30px;
+    padding: 14px 20px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    text-align: center;
+    color: white;
+    background: linear-gradient(135deg, #0d1b2a, #1b263b);
+    border: 2px solid #4fc3f7;
+    border-radius: 50px;
+    text-decoration: none;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.5);
+    transition: all 0.3s;
+}
+
+.play-button:hover {
+    background: linear-gradient(135deg, #4fc3f7, #9575cd);
+    transform: translateY(-4px);
+}
