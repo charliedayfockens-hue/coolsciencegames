@@ -22,33 +22,30 @@ document.addEventListener('DOMContentLoaded', async () => {
         const htmlPaths = data.tree.filter(item =>
             item.type === 'blob' &&
             item.path.startsWith('assets/') &&
-            item.path.toLowerCase().endsWith('.html')
+            item.path.toLowerCase().endsWith('.html') &&
+            !item.path.includes('/Images/') && !item.path.includes('/Descriptions/')
         );
 
         allGames = htmlPaths.map(item => {
-            const fullPath = item.path;
-            let fileName = fullPath.split('/').pop();
-            let folderPath = fullPath.substring(0, fullPath.lastIndexOf('/'));
+            const fullPath = item.path; // e.g. "assets/Tunnel Rush.html"
+            const fileName = fullPath.split('/').pop();
+            const baseName = fileName.replace(/\.html?$/i, ''); // "Tunnel Rush"
 
-            if (fileName === 'index.html') {
-                fileName = folderPath.split('/').pop() + '.html';
-            }
-
-            const cleanName = fileName.replace(/\.html?$/i, '')
+            const cleanName = baseName
                 .replace(/[-_]/g, ' ')
                 .replace(/\b\w/g, c => c.toUpperCase());
 
-            // Look for thumbnail
-            const possibleThumbs = [
-                `${folderPath}/thumbnail.jpg`,
-                `${folderPath}/thumbnail.png`,
-                `${folderPath}/cover.jpg`,
-                `${folderPath}/preview.png`
+            // Possible image paths in assets/Images/
+            const possibleImages = [
+                `assets/Images/${baseName}.jpg`,
+                `assets/Images/${baseName}.png`,
+                `assets/Images/${baseName}.jpeg`,
+                `assets/Images/${baseName}.webp`
             ];
-            const thumbPath = possibleThumbs.find(thumb => data.tree.some(t => t.path === thumb));
+            const imagePath = possibleImages.find(img => data.tree.some(t => t.path === img));
 
-            // Look for description.txt
-            const descPath = `${folderPath}/description.txt`;
+            // Description in assets/Descriptions/
+            const descPath = `assets/Descriptions/${baseName}.txt`;
             const hasDesc = data.tree.some(t => t.path === descPath);
             const descUrl = hasDesc ? `${baseUrl}${descPath}` : null;
 
@@ -56,7 +53,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 name: cleanName,
                 url: `${baseUrl}${fullPath}`,
                 lowerName: cleanName.toLowerCase(),
-                image: thumbPath ? `${baseUrl}${thumbPath}` : null,
+                image: imagePath ? `${baseUrl}${imagePath}` : null,
                 descriptionUrl: descUrl
             };
         });
@@ -70,14 +67,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
     }
 
-    // Fetch descriptions asynchronously
+    // Fetch descriptions
     for (const game of allGames) {
         if (game.descriptionUrl) {
             try {
-                const descResp = await fetch(game.descriptionUrl);
-                if (descResp.ok) {
-                    game.description = await descResp.text();
-                    game.description = game.description.trim().replace(/\n/g, ' '); // clean up
+                const resp = await fetch(game.descriptionUrl);
+                if (resp.ok) {
+                    game.description = (await resp.text()).trim().replace(/\n/g, ' ');
                 }
             } catch (e) {
                 game.description = '';
@@ -102,7 +98,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             const card = document.createElement('div');
             card.className = 'game-card';
 
-            // Image
             if (g.image) {
                 const img = document.createElement('img');
                 img.src = g.image;
@@ -111,7 +106,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 card.appendChild(img);
             }
 
-            // Bottom section with title + description
             const bottom = document.createElement('div');
             bottom.className = 'card-bottom';
 
@@ -127,7 +121,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 bottom.appendChild(desc);
             }
 
-            // Clickable link over whole bottom
             const a = document.createElement('a');
             a.href = g.url;
             a.target = '_blank';
