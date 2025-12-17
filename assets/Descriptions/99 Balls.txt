@@ -1,1 +1,1 @@
-Shoot 99 balls at cubes to win. Get stars and more balls to win!
+99 Balls: Shoot to destroy descending numbered balls. Numbers show hits needed; collect rings for more shots.
