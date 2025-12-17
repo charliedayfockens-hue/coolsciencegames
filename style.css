@@ -150,26 +150,25 @@ footer {
     object-fit: cover;          /* Crops nicely, keeps aspect ratio */
     border-bottom: 3px solid #4fc3f7;
 }
-
 .game-card a {
-    display: block;
-    padding: 20px;              /* Reduced padding since image takes space */
+    display: flex;
+    flex-direction: column;        /* Stack children vertically */
+    align-items: center;           /* Horizontally center everything */
+    justify-content: center;       /* Vertically center in the available space */
+    padding: 20px;
     color: white;
     text-decoration: none;
     text-align: center;
     font-weight: bold;
     font-size: 1.4rem;
     background: linear-gradient(135deg, #1e3c72, #2a5298);
-    flex-grow: 1;               /* Makes button fill remaining space */
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    flex-grow: 1;
+    gap: 8px;                      /* Nice spacing between "Play" and title */
 }
 
 .game-card a::before {
-    content: "Play ";
+    content: "Play";
     opacity: 0.8;
     font-size: 1rem;
+    font-weight: normal;           /* Optional: makes "Play" less bold than title */
 }
-
-
