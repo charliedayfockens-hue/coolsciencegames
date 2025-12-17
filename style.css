@@ -130,28 +130,39 @@ footer {
     object-fit: cover;
     border-bottom: 3px solid #4fc3f7;
 }
-
 .game-card a {
-    display: flex !important;          /* Force flex */
-    flex-direction: column !important; /* Stack vertically - this is the key */
-    align-items: center !important;
-    justify-content: center !important;
-    gap: 10px !important;              /* Space between "Play" and title - adjust if needed */
-    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 24px 16px 32px; /* extra bottom padding for the button */
     color: white;
     text-decoration: none;
-    text-align: center;
-    font-weight: bold;
-    font-size: 1.4rem;
     background: linear-gradient(135deg, #1e3c72, #2a5298);
     flex-grow: 1;
+    gap: 16px; /* space between title and play button */
 }
 
-.game-card a::before {
-    content: "Play" !important;        /* Removed trailing space */
-    display: block !important;         /* Ensures it's treated as a block item */
-    opacity: 0.8;
-    font-size: 1rem;
-    font-weight: normal;               /* Optional: less bold than title */
-    margin: 0 !important;              /* Reset any margins */
+.game-card a .game-title { /* this is the actual text node (the game name) */
+    font-weight: bold;
+    font-size: 1.4rem;
+    line-height: 1.2;
+}
+
+.game-card a::after {
+    content: "Play";
+    font-size: 1.1rem;
+    font-weight: bold;
+    padding: 10px 28px;
+    background: linear-gradient(135deg, #0d1b2a, #1b263b); /* much darker blue */
+    border: 2px solid #4fc3f7;
+    border-radius: 50px;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+    transition: all 0.3s ease;
+}
+
+.game-card a:hover::after {
+    background: linear-gradient(135deg, #4fc3f7, #9575cd);
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(79, 195, 247, 0.6);
 }
