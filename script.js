@@ -27,29 +27,37 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         allGames = htmlPaths.map(item => {
             const fullPath = item.path;
-            const fileName = fullPath.split('/').pop();
+            let fileName = fullPath.split('/').pop();
+            let folderPath = fullPath.substring(0, fullPath.lastIndexOf('/'));
+
+            if (fileName === 'index.html') {
+                fileName = folderPath.split('/').pop() + '.html';
+            }
+
             const cleanName = fileName.replace(/\.html?$/i, '')
                 .replace(/[-_]/g, ' ')
                 .replace(/\b\w/g, c => c.toUpperCase());
 
-            const folderPath = fullPath.substring(0, fullPath.lastIndexOf('/'));
-
-            const possibleImages = [
+            // Look for thumbnail
+            const possibleThumbs = [
                 `${folderPath}/thumbnail.jpg`,
+                `${folderPath}/thumbnail.png`,
                 `${folderPath}/cover.jpg`,
-                `${folderPath}/preview.png`,
-                `${folderPath}/image.jpg`,
-                `${folderPath}/thumb.jpg`,
-                `${folderPath}/screenshot.jpg`
+                `${folderPath}/preview.png`
             ];
+            const thumbPath = possibleThumbs.find(thumb => data.tree.some(t => t.path === thumb));
 
-            const imagePath = possibleImages.find(img => data.tree.some(treeItem => treeItem.path === img));
+            // Look for description.txt
+            const descPath = `${folderPath}/description.txt`;
+            const hasDesc = data.tree.some(t => t.path === descPath);
+            const descUrl = hasDesc ? `${baseUrl}${descPath}` : null;
 
             return {
                 name: cleanName,
                 url: `${baseUrl}${fullPath}`,
                 lowerName: cleanName.toLowerCase(),
-                image: imagePath ? `${baseUrl}${imagePath}` : null
+                image: thumbPath ? `${baseUrl}${thumbPath}` : null,
+                descriptionUrl: descUrl
             };
         });
 
@@ -60,6 +68,23 @@ document.addEventListener('DOMContentLoaded', async () => {
         listEl.innerHTML = '<p class="loading">Error loading games.</p>';
         counterEl.textContent = '0 Games';
         return;
+    }
+
+    // Fetch descriptions asynchronously
+    for (const game of allGames) {
+        if (game.descriptionUrl) {
+            try {
+                const descResp = await fetch(game.descriptionUrl);
+                if (descResp.ok) {
+                    game.description = await descResp.text();
+                    game.description = game.description.trim().replace(/\n/g, ' '); // clean up
+                }
+            } catch (e) {
+                game.description = '';
+            }
+        } else {
+            game.description = '';
+        }
     }
 
     const render = (games) => {
@@ -77,7 +102,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const card = document.createElement('div');
             card.className = 'game-card';
 
-            // Image on top
+            // Image
             if (g.image) {
                 const img = document.createElement('img');
                 img.src = g.image;
@@ -86,12 +111,28 @@ document.addEventListener('DOMContentLoaded', async () => {
                 card.appendChild(img);
             }
 
-            // Clickable title (whole bottom area)
+            // Bottom section with title + description
+            const bottom = document.createElement('div');
+            bottom.className = 'card-bottom';
+
+            const title = document.createElement('div');
+            title.className = 'game-title';
+            title.textContent = g.name;
+            bottom.appendChild(title);
+
+            if (g.description) {
+                const desc = document.createElement('p');
+                desc.className = 'game-desc';
+                desc.textContent = g.description;
+                bottom.appendChild(desc);
+            }
+
+            // Clickable link over whole bottom
             const a = document.createElement('a');
             a.href = g.url;
             a.target = '_blank';
             a.rel = 'noopener noreferrer';
-            a.textContent = g.name;
+            a.appendChild(bottom);
             card.appendChild(a);
 
             frag.appendChild(card);
@@ -104,7 +145,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     searchInput.addEventListener('input', () => {
         const query = searchInput.value.trim().toLowerCase();
-        const filtered = query ? allGames.filter(g => g.lowerName.includes(query)) : allGames;
+        const filtered = query ? allGames.filter(g => 
+            g.lowerName.includes(query) || (g.description && g.description.toLowerCase().includes(query))
+        ) : allGames;
         render(filtered);
     });
 });
