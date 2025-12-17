@@ -33,17 +33,20 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             const cleanName = baseName
                 .replace(/[-_]/g, ' ')
-                .replace(/\b\w/g, c => c.toUpperCase());
+                .replace(/\b\w/g, c => c.toUpperCase()); 
+            
+const baseName = fileName.replace(/\.html?$/i, ''); // e.g. "12 Mini Battles"
 
-            // Possible image paths in assets/Images/
-            const possibleImages = [
-                `assets/Images/${baseName}.jpg`,
-                `assets/Images/${baseName}.png`,
-                `assets/Images/${baseName}.jpeg`,
-                `assets/Images/${baseName}.webp`
-            ];
-            const imagePath = possibleImages.find(img => data.tree.some(t => t.path === img));
+const possibleImages = [
+    `assets/Images/${baseName}.jpg`,
+    `assets/Images/${baseName}.png`,
+    `assets/Images/${baseName}.jpeg`,
+    `assets/Images/${baseName}.webp`
+];
 
+const imagePath = possibleImages.find(img => data.tree.some(t => t.path === img));
+
+image: imagePath ? `${baseUrl}${imagePath}` : null
             // Description in assets/Descriptions/
             const descPath = `assets/Descriptions/${baseName}.txt`;
             const hasDesc = data.tree.some(t => t.path === descPath);
@@ -144,3 +147,4 @@ document.addEventListener('DOMContentLoaded', async () => {
         render(filtered);
     });
 });
+
