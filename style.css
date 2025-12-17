@@ -144,21 +144,43 @@ footer {
     border-bottom: 3px solid #4fc3f7;
 }
 .game-card a {
-    display: block;
-    padding: 20px; /* Reduced padding since image takes space */
-    color: white;
-    text-decoration: none;
-    text-align: center;
-    font-weight: bold;
-    font-size: 1.4rem;
-    background: linear-gradient(135deg, #1e3c72, #2a5298);
-    flex-grow: 1; /* Makes button fill remaining space */
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: flex;
+    flex-direction: column;     /* Stacks title and "Play" vertically */
+    align-items: center;        /* Centers everything horizontally */
+    justify-content: center;    /* Centers vertically in the space */
+    gap: 12px;                  /* Space between title and Play - adjust if needed */
+    padding: 30px 20px;         /* More padding for breathing room */
+    color: white;
+    text-decoration: none;
+    text-align: center;
+    font-weight: bold;
+    font-size: 1.4rem;
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
+    flex-grow: 1;
+    position: relative;         /* Needed for pseudo-element positioning */
 }
+
+.game-card a .text-content {
+    /* This targets the actual game title text */
+    order: 1;                   /* Ensures title is on top */
+}
+
 .game-card a::before {
-    content: "Play ";
-    opacity: 0.8;
-    font-size: 1rem;
+    content: "Play";
+    order: 2;                   /* Ensures "Play" is below title */
+    font-size: 1.1rem;
+    font-weight: bold;
+    opacity: 1;
+    padding: 12px 36px;
+    background: linear-gradient(135deg, #0d1b2a, #1b263b); /* darker blue for button */
+    border: 2px solid #4fc3f7;
+    border-radius: 50px;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.5);
+    transition: all 0.3s ease;
+}
+
+.game-card a:hover::before {
+    background: linear-gradient(135deg, #4fc3f7, #9575cd);
+    transform: translateY(-4px);
+    box-shadow: 0 12px 25px rgba(79, 195, 247, 0.6);
 }
