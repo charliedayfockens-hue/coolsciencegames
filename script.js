@@ -164,6 +164,24 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     render(allGames);
 
+    // === RANDOM GAME BUTTON ===
+if (allGames.length > 0) {
+    // Create the button
+    const randomBtn = document.createElement('button');
+    randomBtn.id = 'random-game-btn';
+    randomBtn.innerHTML = '<span>Random Game</span>';
+    randomBtn.title = 'Play a random game!';
+
+    // Click event: pick random game and open
+    randomBtn.addEventListener('click', () => {
+        const randomIndex = Math.floor(Math.random() * allGames.length);
+        const randomGame = allGames[randomIndex];
+        window.open(randomGame.url, '_blank', 'noopener,noreferrer');
+    });
+
+    // Add to page
+    document.body.appendChild(randomBtn);
+}
     searchInput.addEventListener('input', () => {
         const query = searchInput.value.trim().toLowerCase();
         const filtered = query ? allGames.filter(g => 
@@ -172,3 +190,4 @@ document.addEventListener('DOMContentLoaded', async () => {
         render(filtered);
     });
 });
+
