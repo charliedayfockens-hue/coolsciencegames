@@ -189,3 +189,24 @@ document.addEventListener('DOMContentLoaded', async () => {
         render(filtered);
     });
 });
+// Credits Modal Functionality
+const creditsBtn = document.getElementById('credits-btn');
+const creditsModal = document.getElementById('credits-modal');
+const closeCredits = document.getElementById('close-credits');
+
+if (creditsBtn && creditsModal && closeCredits) {
+    creditsBtn.addEventListener('click', () => {
+        creditsModal.classList.add('show');
+    });
+
+    closeCredits.addEventListener('click', () => {
+        creditsModal.classList.remove('show');
+    });
+
+    // Close when clicking outside
+    creditsModal.addEventListener('click', (e) => {
+        if (e.target === creditsModal) {
+            creditsModal.classList.remove('show');
+        }
+    });
+}
