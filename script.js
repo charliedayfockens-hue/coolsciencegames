@@ -190,4 +190,18 @@ if (allGames.length > 0) {
         render(filtered);
     });
 });
+// === RANDOM GAME BUTTON ===
+if (allGames.length > 0) {
+    const randomBtn = document.createElement('button');
+    randomBtn.id = 'random-game-btn';
+    randomBtn.innerHTML = '<span>Random Game</span>';
+    randomBtn.title = 'Play a random game! 🎲';
 
+    randomBtn.addEventListener('click', () => {
+        const randomIndex = Math.floor(Math.random() * allGames.length);
+        const randomGame = allGames[randomIndex];
+        window.open(randomGame.url, '_blank', 'noopener,noreferrer');
+    });
+
+    document.body.appendChild(randomBtn);
+}
