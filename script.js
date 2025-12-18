@@ -170,3 +170,47 @@ document.addEventListener('DOMContentLoaded', async () => {
         render(filteredCats || {});
     });
 });
+/* Random Game Button - Top Right Floating */
+#random-game-btn {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    background: linear-gradient(135deg, #4fc3f7, #9575cd);
+    color: white;
+    border: none;
+    padding: 14px 24px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border-radius: 50px;
+    box-shadow: 0 8px 20px rgba(79, 195, 247, 0.4);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+#random-game-btn:hover {
+    transform: translateY(-4px) scale(1.05);
+    box-shadow: 0 12px 30px rgba(149, 117, 205, 0.6);
+    background: linear-gradient(135deg, #9575cd, #4fc3f7);
+}
+
+#random-game-btn::before {
+    content: "🎲";
+    font-size: 1.4rem;
+}
+
+#random-game-btn span {
+    display: block;
+}
+
+@media (max-width: 600px) {
+    #random-game-btn {
+        padding: 12px 20px;
+        font-size: 1rem;
+        top: 15px;
+        right: 15px;
+    }
+}
