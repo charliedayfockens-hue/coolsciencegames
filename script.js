@@ -82,13 +82,34 @@ document.addEventListener('DOMContentLoaded', async () => {
             favoritesBtn.classList.toggle('active', showingFavorites);
             favoritesBtn.querySelector('span').textContent = showingFavorites ? 'Show All Games' : 'My Favorites';
             const favorites = JSON.parse(localStorage.getItem('gameFavorites') || '[]');
-            const filtered = showingFavorites ? allGames.filter(g => favorites.includes(g.url)) : allGames;
-            render(filtered);
+            render(showingFavorites ? allGames.filter(g => favorites.includes(g.url)) : allGames);
         });
         document.body.appendChild(favoritesBtn);
 
+        // === DARK/LIGHT MODE TOGGLE ===
+        const themeToggleBtn = document.createElement('button');
+        themeToggleBtn.id = 'theme-toggle-btn';
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'light') {
+            document.body.classList.add('light-mode');
+            themeToggleBtn.textContent = '☀️';
+        } else {
+            themeToggleBtn.textContent = '🌙';
+        }
+        themeToggleBtn.addEventListener('click', () => {
+            document.body.classList.toggle('light-mode');
+            if (document.body.classList.contains('light-mode')) {
+                themeToggleBtn.textContent = '☀️';
+                localStorage.setItem('theme', 'light');
+            } else {
+                themeToggleBtn.textContent = '🌙';
+                localStorage.setItem('theme', 'dark');
+            }
+        });
+        document.body.appendChild(themeToggleBtn);
+
     } catch (error) {
-        listEl.innerHTML = '<p class="loading">Error loading games — try refresh.</p>';
+        listEl.innerHTML = '<p class="loading">Error loading games — try refresh later.</p>';
     }
 
     function render(games) {
@@ -116,23 +137,23 @@ document.addEventListener('DOMContentLoaded', async () => {
                 card.appendChild(img);
             }
 
-            // Heart favorite
-            const favBtn = document.createElement('button');
-            favBtn.className = 'favorite-btn';
-            favBtn.innerHTML = favorites.includes(g.url) ? '❤️' : '♡';
-            favBtn.addEventListener('click', (e) => {
+            // Favorite heart
+            const heart = document.createElement('button');
+            heart.className = 'favorite-btn';
+            heart.innerHTML = favorites.includes(g.url) ? '❤️' : '♡';
+            heart.addEventListener('click', (e) => {
                 e.stopPropagation();
                 let favs = JSON.parse(localStorage.getItem('gameFavorites') || '[]');
                 if (favs.includes(g.url)) {
                     favs = favs.filter(u => u !== g.url);
-                    favBtn.innerHTML = '♡';
+                    heart.innerHTML = '♡';
                 } else {
                     favs.push(g.url);
-                    favBtn.innerHTML = '❤️';
+                    heart.innerHTML = '❤️';
                 }
                 localStorage.setItem('gameFavorites', JSON.stringify(favs));
             });
-            card.appendChild(favBtn);
+            card.appendChild(heart);
 
             const bottom = document.createElement('div');
             bottom.className = 'card-bottom';
@@ -168,70 +189,3 @@ document.addEventListener('DOMContentLoaded', async () => {
         render(filtered);
     });
 });
-// === CREDITS BUTTON ===
-const creditsBtn = document.getElementById('credits-btn');
-const creditsModal = document.getElementById('credits-modal');
-const closeCredits = document.getElementById('close-credits');
-
-creditsBtn.addEventListener('click', () => {
-    creditsModal.classList.add('show');
-});
-
-closeCredits.addEventListener('click', () => {
-    creditsModal.classList.remove('show');
-});
-
-// Close when clicking outside
-creditsModal.addEventListener('click', (e) => {
-    if (e.target === creditsModal) {
-        creditsModal.classList.remove('show');
-    }
-});
-// === EJECT BUTTON - Close tab ===
-const ejectBtn = document.getElementById('eject-btn');
-
-if (ejectBtn) {
-    ejectBtn.addEventListener('click', () => {
-        if (confirm('Are you sure you want to eject (close this tab)?')) {
-            window.close();
-            // Fallback if window.close() is blocked (e.g., not opened by script)
-            // Opens a blank page as a "close" effect
-            window.location.href = 'about:blank';
-        }
-    });
-}
-// === DARK/LIGHT MODE TOGGLE ===
-const themeToggleBtn = document.getElementById('theme-toggle-btn');
-const body = document.body;
-
-// Load saved theme or default to dark
-const savedTheme = localStorage.getItem('theme');
-if (savedTheme === 'light') {
-    body.classList.add('light-mode');
-    themeToggleBtn.textContent = '☀️';
-} else {
-    body.classList.remove('light-mode');
-    themeToggleBtn.textContent = '🌙';
-}
-
-// Toggle on click
-themeToggleBtn.addEventListener('click', () => {
-    body.classList.toggle('light-mode');
-    if (body.classList.contains('light-mode')) {
-        themeToggleBtn.textContent = '☀️';
-        localStorage.setItem('theme', 'light');
-    } else {
-        themeToggleBtn.textContent = '🌙';
-        localStorage.setItem('theme', 'dark');
-    }
-});
-// === REQUEST GAME BUTTON ===
-const requestBtn = document.getElementById('request-btn');
-
-if (requestBtn) {
-    requestBtn.addEventListener('click', () => {
-        // Replace with YOUR Google Doc/Form link
-        const requestUrl = https://docs.google.com/forms/d/e/1FAIpQLSfYt5L-HBW50bcu3c1DFOSo64KATNP9yb7MOKlixG48hd4Iuw/viewform?usp=sharing&ouid=115662772157417268917
-        window.open(requestUrl, '_blank');
-    });
-}
