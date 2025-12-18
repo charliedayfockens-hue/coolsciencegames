@@ -444,3 +444,105 @@ body.light-mode #digital-clock {
     content: "🧙‍♂️"; /* Magic cloak emoji — fun! */
     font-size: 1.4rem;
 }
+/* Settings Button - Below Request or wherever in stack */
+#settings-btn {
+    position: fixed;
+    top: 200px; /* Adjust based on your current stack (e.g., after Request at 200px) */
+    left: 20px;
+    z-index: 1000;
+    background: linear-gradient(135deg, #607d8b, #455a64);
+    color: white;
+    border: none;
+    padding: 14px 24px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border-radius: 50px;
+    box-shadow: 0 8px 20px rgba(96,125,139,0.4);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+#settings-btn:hover {
+    transform: translateY(-4px) scale(1.05);
+    box-shadow: 0 12px 30px rgba(96,125,139,0.6);
+}
+
+#settings-btn::before {
+    content: "⚙️";
+    font-size: 1.4rem;
+}
+
+/* Settings Modal (same style as credits) */
+#settings-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.7);
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+}
+
+#settings-modal.show {
+    display: flex;
+}
+
+#settings-content {
+    background: #16213e;
+    padding: 30px;
+    border-radius: 20px;
+    max-width: 500px;
+    text-align: center;
+    color: #eee;
+    box-shadow: 0 20px 50px rgba(79,195,247,0.5);
+    border: 2px solid #4fc3f7;
+}
+
+.setting-item {
+    margin: 20px 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+}
+
+#theme-toggle-in-modal {
+    padding: 10px 20px;
+    border-radius: 30px;
+    background: #4fc3f7;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+.cloaking-options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 20px 0;
+}
+
+.cloak-option {
+    padding: 12px;
+    background: #2c3e50;
+    border: none;
+    color: white;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.cloak-option:hover {
+    background: #4fc3f7;
+}
+
+body.light-mode #settings-content {
+    background: #ffffff;
+    color: #333;
+    border: 2px solid #333;
+}
