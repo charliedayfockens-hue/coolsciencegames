@@ -225,3 +225,13 @@ themeToggleBtn.addEventListener('click', () => {
         localStorage.setItem('theme', 'dark');
     }
 });
+// === REQUEST GAME BUTTON ===
+const requestBtn = document.getElementById('request-btn');
+
+if (requestBtn) {
+    requestBtn.addEventListener('click', () => {
+        // Replace with YOUR Google Doc/Form link
+        const requestUrl = https://docs.google.com/forms/d/e/1FAIpQLSfYt5L-HBW50bcu3c1DFOSo64KATNP9yb7MOKlixG48hd4Iuw/viewform?usp=sharing&ouid=115662772157417268917
+        window.open(requestUrl, '_blank');
+    });
+}
