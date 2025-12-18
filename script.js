@@ -8,23 +8,43 @@ document.addEventListener('DOMContentLoaded', async () => {
     const baseUrl = location.origin + basePath;
 
     let allGames = [];
-    let categories = {};
+    const CACHE_KEY = 'gamesCache';
+    const CACHE_TIME = 10 * 60 * 1000; // 10 minutes
 
     listEl.innerHTML = '<p class="loading">Loading your awesome games...</p>';
 
+    // Try cached version first
+    const cached = localStorage.getItem(CACHE_KEY);
+    if (cached) {
+        const { games, timestamp } = JSON.parse(cached);
+        if (Date.now() - timestamp < CACHE_TIME) {
+            allGames = games;
+            await loadDescriptions(allGames);
+            render(allGames);
+        }
+    }
+
+    // Always try to refresh from GitHub
     try {
         const resp = await fetch('https://api.github.com/repos/charliedayfockens-hue/coolsciencegames/git/trees/main?recursive=1', {
             headers: { 'User-Agent': 'CoolScienceGames-Site' }
         });
-        if (!resp.ok) throw new Error('API error');
+
+        if (!resp.ok) {
+            if (resp.status === 403) {
+                listEl.innerHTML = '<p class="loading">GitHub rate limit hit — using cached games (refresh in ~1 hour).</p>';
+            }
+            throw new Error('API error');
+        }
 
         const data = await resp.json();
 
-        // Get games
         const htmlPaths = data.tree.filter(item =>
             item.type === 'blob' &&
             item.path.startsWith('assets/') &&
-            item.path.toLowerCase().endsWith('.html')
+            item.path.toLowerCase().endsWith('.html') &&
+            !item.path.includes('/Images/') &&
+            !item.path.includes('/Descriptions/')
         );
 
         allGames = htmlPaths.map(item => {
@@ -32,185 +52,123 @@ document.addEventListener('DOMContentLoaded', async () => {
             const fileName = fullPath.split('/').pop();
             const baseName = fileName.replace(/\.html?$/i, '');
 
-            const cleanName = baseName.replace(/[-_]/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+            const cleanName = baseName
+                .replace(/[-_]/g, ' ')
+                .replace(/\b\w/g, c => c.toUpperCase());
 
-            const possibleImages = [`assets/Images/${baseName}.jpg`, `assets/Images/${baseName}.png`];
+            // Images
+            const possibleImages = [
+                `assets/Images/${baseName}.jpg`,
+                `assets/Images/${baseName}.png`,
+                `assets/Images/${baseName}.jpeg`
+            ];
             const imagePath = possibleImages.find(img => data.tree.some(t => t.path === img));
 
+            // Descriptions
             const descPath = `assets/Descriptions/${baseName}.txt`;
-            const descUrl = data.tree.some(t => t.path === descPath) ? `${baseUrl}${descPath}` : null;
+            const hasDesc = data.tree.some(t => t.path === descPath);
+            const descUrl = hasDesc ? `${baseUrl}${descPath}` : null;
 
             return {
                 name: cleanName,
-                file: fileName,
                 url: `${baseUrl}${fullPath}`,
                 lowerName: cleanName.toLowerCase(),
                 image: imagePath ? `${baseUrl}${imagePath}` : null,
-                descriptionUrl: descUrl
+                descriptionUrl: descUrl,
+                description: ''
             };
         });
 
         allGames.sort((a, b) => a.name.localeCompare(b.name));
 
-        // Get categories
-        const catFiles = data.tree.filter(item => item.path.startsWith('assets/Categories/') && item.path.endsWith('.txt'));
-        for (const catItem of catFiles) {
-            const catName = catItem.path.split('/').pop().replace('.txt', '');
-            const catUrl = `${baseUrl}${catItem.path}`;
-            const catResp = await fetch(catUrl);
-            if (catResp.ok) {
-                const text = await catResp.text();
-                const gameFiles = text.split('\n').map(l => l.trim()).filter(l => l);
-                categories[catName] = allGames.filter(g => gameFiles.includes(g.file));
-            }
-        }
+        // Save to cache
+        localStorage.setItem(CACHE_KEY, JSON.stringify({
+            games: allGames,
+            timestamp: Date.now()
+        }));
+
+        await loadDescriptions(allGames);
 
     } catch (error) {
-        console.error(error);
-        listEl.innerHTML = '<p class="loading">Error loading — try refresh later.</p>';
-        return;
-    }
-
-    // Fetch descriptions
-    for (const game of allGames) {
-        if (game.descriptionUrl) {
-            try {
-                const resp = await fetch(game.descriptionUrl);
-                if (resp.ok) game.description = (await resp.text()).trim().replace(/\n/g, ' ');
-            } catch {}
+        console.warn('GitHub refresh failed:', error);
+        if (allGames.length === 0) {
+            listEl.innerHTML = '<p class="loading">No cached games available — try again later.</p>';
+            counterEl.textContent = '0 Games';
+            return;
         }
     }
 
-    const render = (gamesByCat) => {
-        listEl.innerHTML = '';
-        let total = 0;
+    async function loadDescriptions(games) {
+        for (const game of games) {
+            if (game.descriptionUrl) {
+                try {
+                    const resp = await fetch(game.descriptionUrl + '?t=' + Date.now());
+                    if (resp.ok) {
+                        game.description = (await resp.text()).trim().replace(/\n/g, ' ');
+                    }
+                } catch (e) {}
+            }
+        }
+    }
 
-        if (Object.keys(gamesByCat).length === 0) {
-            listEl.innerHTML = '<p class="loading">No categories yet — add files to assets/Categories/</p>';
+    function render(games) {
+        listEl.innerHTML = '';
+        counterEl.textContent = `${games.length} Game${games.length === 1 ? '' : 's'} Available`;
+
+        if (games.length === 0) {
+            listEl.innerHTML = '<p class="loading">No games match your search.</p>';
             return;
         }
 
         const frag = document.createDocumentFragment();
 
-        Object.keys(gamesByCat).sort().forEach(cat => {
-            const games = gamesByCat[cat];
-            if (games.length === 0) return;
-            total += games.length;
+        games.forEach(g => {
+            const card = document.createElement('div');
+            card.className = 'game-card';
 
-            // Category heading
-            const heading = document.createElement('h2');
-            heading.textContent = `${cat} Games (${games.length})`;
-            heading.style.gridColumn = '1 / -1';
-            heading.style.textAlign = 'center';
-            heading.style.margin = '40px 0 20px';
-            heading.style.fontSize = '2rem';
-            heading.style.color = '#4fc3f7';
-            frag.appendChild(heading);
+            if (g.image) {
+                const img = document.createElement('img');
+                img.src = g.image;
+                img.alt = g.name;
+                img.loading = 'lazy';
+                card.appendChild(img);
+            }
 
-            games.forEach(g => {
-                const card = document.createElement('div');
-                card.className = 'game-card';
+            const bottom = document.createElement('div');
+            bottom.className = 'card-bottom';
 
-                if (g.image) {
-                    const img = document.createElement('img');
-                    img.src = g.image;
-                    img.alt = g.name;
-                    img.loading = 'lazy';
-                    card.appendChild(img);
-                }
+            const title = document.createElement('div');
+            title.className = 'game-title';
+            title.textContent = g.name;
+            bottom.appendChild(title);
 
-                const bottom = document.createElement('div');
-                bottom.className = 'card-bottom';
+            if (g.description) {
+                const desc = document.createElement('p');
+                desc.className = 'game-desc';
+                desc.textContent = g.description;
+                bottom.appendChild(desc);
+            }
 
-                const title = document.createElement('div');
-                title.className = 'game-title';
-                title.textContent = g.name;
-                bottom.appendChild(title);
+            const a = document.createElement('a');
+            a.href = g.url;
+            a.target = '_blank';
+            a.rel = 'noopener noreferrer';
+            a.appendChild(bottom);
+            card.appendChild(a);
 
-                if (g.description) {
-                    const desc = document.createElement('p');
-                    desc.className = 'game-desc';
-                    desc.textContent = g.description;
-                    bottom.appendChild(desc);
-                }
-
-                const a = document.createElement('a');
-                a.href = g.url;
-                a.target = '_blank';
-                a.rel = 'noopener noreferrer';
-                a.appendChild(bottom);
-                card.appendChild(a);
-
-                frag.appendChild(card);
-            });
+            frag.appendChild(card);
         });
 
-        counterEl.textContent = `${total} Game${total === 1 ? '' : 's'} Available`;
         listEl.appendChild(frag);
-    };
+    }
 
-    // Show categorized games
-    render(categories);
+    render(allGames);
 
-    // Search across all games
     searchInput.addEventListener('input', () => {
         const query = searchInput.value.trim().toLowerCase();
-        if (!query) {
-            render(categories);
-            return;
-        }
-
-        const filteredCats = {};
-        Object.keys(categories).forEach(cat => {
-            const filtered = categories[cat].filter(g => 
-                g.lowerName.includes(query) || (g.description && g.description.toLowerCase().includes(query))
-            );
-            if (filtered.length > 0) filteredCats[cat] = filtered;
-        });
-        render(filteredCats || {});
+        const filtered = query ? allGames.filter(g => 
+            g.lowerName.includes(query) || (g.description && g.description.toLowerCase().includes(query))
+        ) : allGames;
+        render(filtered);
     });
 });
-/* Random Game Button - Top Right Floating */
-#random-game-btn {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    z-index: 1000;
-    background: linear-gradient(135deg, #4fc3f7, #9575cd);
-    color: white;
-    border: none;
-    padding: 14px 24px;
-    font-size: 1.1rem;
-    font-weight: bold;
-    border-radius: 50px;
-    box-shadow: 0 8px 20px rgba(79, 195, 247, 0.4);
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-#random-game-btn:hover {
-    transform: translateY(-4px) scale(1.05);
-    box-shadow: 0 12px 30px rgba(149, 117, 205, 0.6);
-    background: linear-gradient(135deg, #9575cd, #4fc3f7);
-}
-
-#random-game-btn::before {
-    content: "🎲";
-    font-size: 1.4rem;
-}
-
-#random-game-btn span {
-    display: block;
-}
-
-@media (max-width: 600px) {
-    #random-game-btn {
-        padding: 12px 20px;
-        font-size: 1rem;
-        top: 15px;
-        right: 15px;
-    }
-}
