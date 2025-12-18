@@ -211,6 +211,47 @@ if (ejectBtn) {
         window.location.href = 'about:blank';
     });
 }
+// === SETTINGS MODAL ===
+const settingsBtn = document.getElementById('settings-btn');
+const settingsModal = document.getElementById('settings-modal');
+const closeSettings = document.getElementById('close-settings');
+const themeToggleModal = document.getElementById('theme-toggle-in-modal');
+
+if (settingsBtn && settingsModal) {
+    settingsBtn.addEventListener('click', () => settingsModal.classList.add('show'));
+
+    closeSettings.addEventListener('click', () => settingsModal.classList.remove('show'));
+
+    settingsModal.addEventListener('click', (e) => {
+        if (e.target === settingsModal) settingsModal.classList.remove('show');
+    });
+
+    // Theme toggle in settings
+    themeToggleModal.addEventListener('click', () => {
+        document.body.classList.toggle('light-mode');
+        if (document.body.classList.contains('light-mode')) {
+            themeToggleModal.textContent = '☀️ Light Mode';
+            localStorage.setItem('theme', 'light');
+        } else {
+            themeToggleModal.textContent = '🌙 Dark Mode';
+            localStorage.setItem('theme', 'dark');
+        }
+    });
+
+    // Tab cloaking in settings
+    document.querySelectorAll('.cloak-option').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const title = btn.dataset.title;
+            const favicon = btn.dataset.favicon;
+            document.title = title;
+            let link = document.querySelector("link[rel*='icon']") || document.createElement('link');
+            link.type = 'image/x-icon';
+            link.rel = 'shortcut icon';
+            link.href = favicon;
+            document.head.appendChild(link);
+        });
+    });
+}
 // === DIGITAL CLOCK ===
 const clockEl = document.getElementById('digital-clock');
 
@@ -221,14 +262,16 @@ function updateClock() {
     const seconds = now.getSeconds().toString().padStart(2, '0');
     const ampm = hours >= 12 ? 'PM' : 'AM';
 
+    // Convert to 12-hour format
     hours = hours % 12;
-    hours = hours ? hours : 12; // 0 → 12
+    hours = hours ? hours : 12; // the hour '0' should be '12'
     hours = hours.toString().padStart(2, '0');
 
     clockEl.textContent = `${hours}:${minutes}:${seconds} ${ampm}`;
 }
 
+// Only run if the clock element exists
 if (clockEl) {
-    updateClock(); // initial
-    setInterval(updateClock, 1000); // update every second
+    updateClock(); // Show time immediately
+    setInterval(updateClock, 1000); // Update every second
 }
