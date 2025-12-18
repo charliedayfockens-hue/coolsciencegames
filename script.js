@@ -13,38 +13,28 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     listEl.innerHTML = '<p class="loading">Loading your awesome games...</p>';
 
-    // Try cached version first
+    // Load from cache
     const cached = localStorage.getItem(CACHE_KEY);
     if (cached) {
         const { games, timestamp } = JSON.parse(cached);
         if (Date.now() - timestamp < CACHE_TIME) {
             allGames = games;
-            await loadDescriptions(allGames);
             render(allGames);
         }
     }
 
-    // Always try to refresh from GitHub
     try {
         const resp = await fetch('https://api.github.com/repos/charliedayfockens-hue/coolsciencegames/git/trees/main?recursive=1', {
             headers: { 'User-Agent': 'CoolScienceGames-Site' }
         });
-
-        if (!resp.ok) {
-            if (resp.status === 403) {
-                listEl.innerHTML = '<p class="loading">GitHub rate limit hit — using cached games (refresh in ~1 hour).</p>';
-            }
-            throw new Error('API error');
-        }
+        if (!resp.ok) throw new Error('API error');
 
         const data = await resp.json();
 
         const htmlPaths = data.tree.filter(item =>
             item.type === 'blob' &&
             item.path.startsWith('assets/') &&
-            item.path.toLowerCase().endsWith('.html') &&
-            !item.path.includes('/Images/') &&
-            !item.path.includes('/Descriptions/')
+            item.path.toLowerCase().endsWith('.html')
         );
 
         allGames = htmlPaths.map(item => {
@@ -52,22 +42,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             const fileName = fullPath.split('/').pop();
             const baseName = fileName.replace(/\.html?$/i, '');
 
-            const cleanName = baseName
-                .replace(/[-_]/g, ' ')
-                .replace(/\b\w/g, c => c.toUpperCase());
+            const cleanName = baseName.replace(/[-_]/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 
-            // Images
-            const possibleImages = [
-                `assets/Images/${baseName}.jpg`,
-                `assets/Images/${baseName}.png`,
-                `assets/Images/${baseName}.jpeg`
-            ];
+            const possibleImages = [`assets/Images/${baseName}.jpg`, `assets/Images/${baseName}.png`];
             const imagePath = possibleImages.find(img => data.tree.some(t => t.path === img));
 
-            // Descriptions
             const descPath = `assets/Descriptions/${baseName}.txt`;
-            const hasDesc = data.tree.some(t => t.path === descPath);
-            const descUrl = hasDesc ? `${baseUrl}${descPath}` : null;
+            const descUrl = data.tree.some(t => t.path === descPath) ? `${baseUrl}${descPath}` : null;
 
             return {
                 name: cleanName,
@@ -81,33 +62,24 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         allGames.sort((a, b) => a.name.localeCompare(b.name));
 
-        // Save to cache
-        localStorage.setItem(CACHE_KEY, JSON.stringify({
-            games: allGames,
-            timestamp: Date.now()
-        }));
+        localStorage.setItem(CACHE_KEY, JSON.stringify({ games: allGames, timestamp: Date.now() }));
 
-        await loadDescriptions(allGames);
-
-    } catch (error) {
-        console.warn('GitHub refresh failed:', error);
-        if (allGames.length === 0) {
-            listEl.innerHTML = '<p class="loading">No cached games available — try again later.</p>';
-            counterEl.textContent = '0 Games';
-            return;
-        }
-    }
-
-    async function loadDescriptions(games) {
-        for (const game of games) {
+        // Load descriptions
+        for (const game of allGames) {
             if (game.descriptionUrl) {
                 try {
-                    const resp = await fetch(game.descriptionUrl + '?t=' + Date.now());
-                    if (resp.ok) {
-                        game.description = (await resp.text()).trim().replace(/\n/g, ' ');
-                    }
-                } catch (e) {}
+                    const dResp = await fetch(game.descriptionUrl);
+                    if (dResp.ok) game.description = (await dResp.text()).trim().replace(/\n/g, ' ');
+                } catch {}
             }
+        }
+
+        render(allGames);
+
+    } catch (error) {
+        console.warn('Load failed:', error);
+        if (allGames.length === 0) {
+            listEl.innerHTML = '<p class="loading">Try again later.</p>';
         }
     }
 
@@ -116,15 +88,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         counterEl.textContent = `${games.length} Game${games.length === 1 ? '' : 's'} Available`;
 
         if (games.length === 0) {
-            listEl.innerHTML = '<p class="loading">No games match your search.</p>';
+            listEl.innerHTML = '<p class="loading">No games found.</p>';
             return;
         }
 
         const frag = document.createDocumentFragment();
 
+        // Load favorites from localStorage
+        const favorites = JSON.parse(localStorage.getItem('gameFavorites') || '[]');
+
         games.forEach(g => {
             const card = document.createElement('div');
             card.className = 'game-card';
+            card.style.position = 'relative'; // for heart positioning
 
             if (g.image) {
                 const img = document.createElement('img');
@@ -133,6 +109,28 @@ document.addEventListener('DOMContentLoaded', async () => {
                 img.loading = 'lazy';
                 card.appendChild(img);
             }
+
+            // Favorites Heart
+            const favBtn = document.createElement('button');
+            favBtn.className = 'favorite-btn';
+            favBtn.innerHTML = favorites.includes(g.url) ? '❤️' : '♡';
+            favBtn.title = 'Toggle favorite';
+
+            favBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                let favs = JSON.parse(localStorage.getItem('gameFavorites') || '[]');
+                if (favs.includes(g.url)) {
+                    favs = favs.filter(u => u !== g.url);
+                    favBtn.innerHTML = '♡';
+                } else {
+                    favs.push(g.url);
+                    favBtn.innerHTML = '❤️';
+                }
+                localStorage.setItem('gameFavorites', JSON.stringify(favs));
+            });
+
+            card.appendChild(favBtn);
 
             const bottom = document.createElement('div');
             bottom.className = 'card-bottom';
@@ -162,46 +160,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         listEl.appendChild(frag);
     }
 
-    render(allGames);
-
-    // === RANDOM GAME BUTTON ===
-if (allGames.length > 0) {
-    // Create the button
-    const randomBtn = document.createElement('button');
-    randomBtn.id = 'random-game-btn';
-    randomBtn.innerHTML = '<span>Random Game</span>';
-    randomBtn.title = 'Play a random game!';
-
-    // Click event: pick random game and open
-    randomBtn.addEventListener('click', () => {
-        const randomIndex = Math.floor(Math.random() * allGames.length);
-        const randomGame = allGames[randomIndex];
-        window.open(randomGame.url, '_blank', 'noopener,noreferrer');
-    });
-
-    // Add to page
-    document.body.appendChild(randomBtn);
-}
     searchInput.addEventListener('input', () => {
         const query = searchInput.value.trim().toLowerCase();
-        const filtered = query ? allGames.filter(g => 
-            g.lowerName.includes(query) || (g.description && g.description.toLowerCase().includes(query))
-        ) : allGames;
+        const filtered = query ? allGames.filter(g => g.lowerName.includes(query) || (g.description && g.description.toLowerCase().includes(query))) : allGames;
         render(filtered);
     });
 });
-// === RANDOM GAME BUTTON ===
-if (allGames.length > 0) {
-    const randomBtn = document.createElement('button');
-    randomBtn.id = 'random-game-btn';
-    randomBtn.innerHTML = '<span>Random Game</span>';
-    randomBtn.title = 'Play a random game! 🎲';
-
-    randomBtn.addEventListener('click', () => {
-        const randomIndex = Math.floor(Math.random() * allGames.length);
-        const randomGame = allGames[randomIndex];
-        window.open(randomGame.url, '_blank', 'noopener,noreferrer');
-    });
-
-    document.body.appendChild(randomBtn);
-}
