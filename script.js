@@ -8,20 +8,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const baseUrl = location.origin + basePath;
 
     let allGames = [];
-    const CACHE_KEY = 'gamesCache';
-    const CACHE_TIME = 10 * 60 * 1000; // 10 minutes
 
     listEl.innerHTML = '<p class="loading">Loading your awesome games...</p>';
-
-    // Load from cache first
-    const cached = localStorage.getItem(CACHE_KEY);
-    if (cached) {
-        const { games, timestamp } = JSON.parse(cached);
-        if (Date.now() - timestamp < CACHE_TIME) {
-            allGames = games;
-            render(allGames);
-        }
-    }
 
     try {
         const resp = await fetch('https://api.github.com/repos/charliedayfockens-hue/coolsciencegames/git/trees/main?recursive=1', {
@@ -62,8 +50,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         allGames.sort((a, b) => a.name.localeCompare(b.name));
 
-        localStorage.setItem(CACHE_KEY, JSON.stringify({ games: allGames, timestamp: Date.now() }));
-
         // Load descriptions
         for (const game of allGames) {
             if (game.descriptionUrl) {
@@ -76,11 +62,33 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         render(allGames);
 
+        // === RANDOM GAME BUTTON ===
+        const randomBtn = document.createElement('button');
+        randomBtn.id = 'random-game-btn';
+        randomBtn.innerHTML = '<span>Random Game</span>';
+        randomBtn.addEventListener('click', () => {
+            const randomIndex = Math.floor(Math.random() * allGames.length);
+            window.open(allGames[randomIndex].url, '_blank');
+        });
+        document.body.appendChild(randomBtn);
+
+        // === MY FAVORITES BUTTON ===
+        const favoritesBtn = document.createElement('button');
+        favoritesBtn.id = 'favorites-btn';
+        favoritesBtn.innerHTML = '<span>My Favorites</span>';
+        let showingFavorites = false;
+        favoritesBtn.addEventListener('click', () => {
+            showingFavorites = !showingFavorites;
+            favoritesBtn.classList.toggle('active', showingFavorites);
+            favoritesBtn.querySelector('span').textContent = showingFavorites ? 'Show All Games' : 'My Favorites';
+            const favorites = JSON.parse(localStorage.getItem('gameFavorites') || '[]');
+            const filtered = showingFavorites ? allGames.filter(g => favorites.includes(g.url)) : allGames;
+            render(filtered);
+        });
+        document.body.appendChild(favoritesBtn);
+
     } catch (error) {
-        console.warn('Load failed:', error);
-        if (allGames.length === 0) {
-            listEl.innerHTML = '<p class="loading">Try again later.</p>';
-        }
+        listEl.innerHTML = '<p class="loading">Error loading games — try refresh.</p>';
     }
 
     function render(games) {
@@ -93,8 +101,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         const frag = document.createDocumentFragment();
-
-        // Load favorites for hearts
         const favorites = JSON.parse(localStorage.getItem('gameFavorites') || '[]');
 
         games.forEach(g => {
@@ -110,15 +116,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                 card.appendChild(img);
             }
 
-            // Heart button (favorites)
+            // Heart favorite
             const favBtn = document.createElement('button');
             favBtn.className = 'favorite-btn';
             favBtn.innerHTML = favorites.includes(g.url) ? '❤️' : '♡';
-            favBtn.title = 'Toggle favorite';
-
             favBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
-                e.preventDefault();
                 let favs = JSON.parse(localStorage.getItem('gameFavorites') || '[]');
                 if (favs.includes(g.url)) {
                     favs = favs.filter(u => u !== g.url);
@@ -129,7 +132,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
                 localStorage.setItem('gameFavorites', JSON.stringify(favs));
             });
-
             card.appendChild(favBtn);
 
             const bottom = document.createElement('div');
@@ -165,47 +167,4 @@ document.addEventListener('DOMContentLoaded', async () => {
         const filtered = query ? allGames.filter(g => g.lowerName.includes(query) || (g.description && g.description.toLowerCase().includes(query))) : allGames;
         render(filtered);
     });
-
-    // === RANDOM GAME BUTTON ===
-    if (allGames.length > 0) {
-        const randomBtn = document.createElement('button');
-        randomBtn.id = 'random-game-btn';
-        randomBtn.innerHTML = '<span>Random Game</span>';
-        randomBtn.title = 'Play a random game!';
-
-        randomBtn.addEventListener('click', () => {
-            const randomIndex = Math.floor(Math.random() * allGames.length);
-            const randomGame = allGames[randomIndex];
-            window.open(randomGame.url, '_blank', 'noopener,noreferrer');
-        });
-
-        document.body.appendChild(randomBtn);
-    }
-
-    // === MY FAVORITES BUTTON (below random) ===
-    if (allGames.length > 0) {
-        const favoritesBtn = document.createElement('button');
-        favoritesBtn.id = 'favorites-btn';
-        favoritesBtn.innerHTML = '<span>My Favorites</span>';
-        favoritesBtn.title = 'Show only your favorited games';
-
-        let showingFavorites = false;
-
-        favoritesBtn.addEventListener('click', () => {
-            showingFavorites = !showingFavorites;
-            favoritesBtn.classList.toggle('active', showingFavorites);
-            favoritesBtn.querySelector('span').textContent = showingFavorites ? 'Show All Games' : 'My Favorites';
-
-            const favorites = JSON.parse(localStorage.getItem('gameFavorites') || '[]');
-            const filteredGames = showingFavorites 
-                ? allGames.filter(g => favorites.includes(g.url))
-                : allGames;
-
-            render(filteredGames);
-
-            counterEl.textContent = `${filteredGames.length} Game${filteredGames.length === 1 ? '' : 's'} ${showingFavorites ? '(Favorites)' : 'Available'}`;
-        });
-
-        document.body.appendChild(favoritesBtn);
-    }
 });
