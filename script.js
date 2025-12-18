@@ -274,4 +274,3 @@ function updateClock() {
 if (clockEl) {
     updateClock(); // Show time immediately
     setInterval(updateClock, 1000); // Update every second
-}
