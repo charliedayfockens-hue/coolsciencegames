@@ -440,10 +440,10 @@ body.light-mode #digital-clock {
     content: "🧙‍♂️"; /* Magic cloak emoji — fun! */
     font-size: 1.4rem;
 }
-/* Settings Button - Below Request or wherever in stack */
+/* Settings Button - Right below Eject Button */
 #settings-btn {
     position: fixed;
-    top: 200px; /* Adjust based on your current stack (e.g., after Request at 200px) */
+    top: 140px; /* Was higher — now right below Eject (which is at 80px) */
     left: 20px;
     z-index: 1000;
     background: linear-gradient(135deg, #607d8b, #455a64);
@@ -470,7 +470,6 @@ body.light-mode #digital-clock {
     content: "⚙️";
     font-size: 1.4rem;
 }
-
 /* Settings Modal (same style as credits) */
 #settings-modal {
     display: none;
@@ -557,4 +556,5 @@ body.light-mode #settings-content {
 body.light-mode #search-hint {
     color: #666;
 }
+
 
