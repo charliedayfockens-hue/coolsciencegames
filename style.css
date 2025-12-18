@@ -311,3 +311,34 @@ main {
     background: #9575cd;
     transform: scale(1.05);
 }
+/* Eject Button - Below Credits Button */
+#eject-btn {
+    position: fixed;
+    top: 80px; /* below credits button (20px + 60px height) */
+    left: 20px;
+    z-index: 1000;
+    background: linear-gradient(135deg, #ff4444, #ff6666);
+    color: white;
+    border: none;
+    padding: 14px 24px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border-radius: 50px;
+    box-shadow: 0 8px 20px rgba(255, 68, 68, 0.4);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+#eject-btn:hover {
+    transform: translateY(-4px) scale(1.05);
+    box-shadow: 0 12px 30px rgba(255, 68, 68, 0.6);
+    background: linear-gradient(135deg, #ff6666, #ff8888);
+}
+
+#eject-btn::before {
+    content: "🚪";
+    font-size: 1.4rem;
+}
