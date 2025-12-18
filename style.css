@@ -364,12 +364,11 @@ body.light-mode .game-card a, body.light-mode .card-bottom {
 body.light-mode .game-title {
     color: #333;
 }
-
-/* Dark/Light Toggle Button - Left of Random Button */
+/* Dark/Light Toggle Button - Further left of Random Button */
 #theme-toggle-btn {
     position: fixed;
     top: 20px;
-    right: 140px; /* Adjust left of random button (random is at right:20px) */
+    right: 220px; /* Increased from 140px to 220px — adjust more if needed (e.g., 260px for extra space) */
     z-index: 1000;
     background: linear-gradient(135deg, #ffd700, #ffaa00);
     color: white;
