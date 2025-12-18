@@ -390,33 +390,3 @@ body.light-mode .game-title {
     transform: translateY(-4px) scale(1.1);
     box-shadow: 0 12px 30px rgba(255, 215, 0, 0.6);
 }
-/* Request Game Button - Below Eject */
-#request-btn {
-    position: fixed;
-    top: 140px; /* Adjust based on your stack: credits 20px, eject 80px, this 140px */
-    left: 20px;
-    z-index: 1000;
-    background: linear-gradient(135deg, #4caf50, #66bb6a);
-    color: white;
-    border: none;
-    padding: 14px 24px;
-    font-size: 1.1rem;
-    font-weight: bold;
-    border-radius: 50px;
-    box-shadow: 0 8px 20px rgba(76, 175, 80, 0.4);
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-#request-btn:hover {
-    transform: translateY(-4px) scale(1.05);
-    box-shadow: 0 12px 30px rgba(76, 175, 80, 0.6);
-}
-
-#request-btn::before {
-    content: "✉️";
-    font-size: 1.4rem;
-}
