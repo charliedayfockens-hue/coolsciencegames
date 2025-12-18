@@ -223,5 +223,12 @@ if (ejectBtn) {
         window.location.href = 'about:blank';
     });
 }
-
-
+// === REQUEST A GAME BUTTON ===
+const requestBtn = document.getElementById('request-btn');
+if (requestBtn) {
+    requestBtn.addEventListener('click', () => {
+        // REPLACE WITH YOUR ACTUAL GOOGLE FORM/DOC LINK
+        const requestUrl = 'https://padlet.com/lucasnollner3/coolsciencegames-punj3laeztb3s179';
+        window.open(requestUrl, '_blank');
+    });
+}
