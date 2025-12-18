@@ -122,17 +122,74 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const frag = document.createDocumentFragment();
 
-        games.forEach(g => {
-            const card = document.createElement('div');
-            card.className = 'game-card';
+      games.forEach(g => {
+    const card = document.createElement('div');
+    card.className = 'game-card';
 
-            if (g.image) {
-                const img = document.createElement('img');
-                img.src = g.image;
-                img.alt = g.name;
-                img.loading = 'lazy';
-                card.appendChild(img);
-            }
+    if (g.image) {
+        const img = document.createElement('img');
+        img.src = g.image;
+        img.alt = g.name;
+        img.loading = 'lazy';
+        card.appendChild(img);
+    }
+
+    // Favorites Heart Button
+    const favBtn = document.createElement('button');
+    favBtn.className = 'favorite-btn';
+    favBtn.innerHTML = '♡'; // empty heart
+    favBtn.title = 'Add to favorites';
+
+    // Check if already favorited
+    const favorites = JSON.parse(localStorage.getItem('gameFavorites') || '[]');
+    const isFavorited = favorites.includes(g.url);
+    if (isFavorited) {
+        favBtn.innerHTML = '❤️';
+        favBtn.classList.add('favorited');
+    }
+
+    // Toggle favorite on click
+    favBtn.addEventListener('click', (e) => {
+        e.stopPropagation(); // prevent opening game
+        let favorites = JSON.parse(localStorage.getItem('gameFavorites') || '[]');
+        if (favorites.includes(g.url)) {
+            favorites = favorites.filter(url => url !== g.url);
+            favBtn.innerHTML = '♡';
+            favBtn.classList.remove('favorited');
+        } else {
+            favorites.push(g.url);
+            favBtn.innerHTML = '❤️';
+            favBtn.classList.add('favorited');
+        }
+        localStorage.setItem('gameFavorites', JSON.stringify(favorites));
+    });
+
+    card.appendChild(favBtn);
+
+    const bottom = document.createElement('div');
+    bottom.className = 'card-bottom';
+
+    const title = document.createElement('div');
+    title.className = 'game-title';
+    title.textContent = g.name;
+    bottom.appendChild(title);
+
+    if (g.description) {
+        const desc = document.createElement('p');
+        desc.className = 'game-desc';
+        desc.textContent = g.description;
+        bottom.appendChild(desc);
+    }
+
+    const a = document.createElement('a');
+    a.href = g.url;
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    a.appendChild(bottom);
+    card.appendChild(a);
+
+    frag.appendChild(card);
+});
 
             const bottom = document.createElement('div');
             bottom.className = 'card-bottom';
@@ -205,3 +262,4 @@ if (allGames.length > 0) {
 
     document.body.appendChild(randomBtn);
 }
+
