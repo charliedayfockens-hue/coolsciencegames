@@ -223,3 +223,17 @@ if (ejectBtn) {
         window.location.href = 'about:blank';
     });
 }
+// === REQUEST A GAME BUTTON ===
+const requestBtn = document.getElementById('request-btn');
+
+if (requestBtn) {
+    requestBtn.addEventListener('click', () => {
+        // REPLACE THIS URL WITH YOUR ACTUAL GOOGLE FORM OR DOC LINK
+        const requestUrl = 'https://docs.google.com/forms/d/e/YOUR_FORM_ID_HERE/viewform'; 
+        
+        // Or if you use a Google Doc:
+        // const requestUrl = https://docs.google.com/forms/d/e/1FAIpQLSfYt5L-HBW50bcu3c1DFOSo64KATNP9yb7MOKlixG48hd4Iuw/viewform?usp=sharing&ouid=115662772157417268917;
+
+        window.open(requestUrl, '_blank', 'noopener,noreferrer');
+    });
+}
