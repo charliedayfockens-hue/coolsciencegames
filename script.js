@@ -189,38 +189,25 @@ document.addEventListener('DOMContentLoaded', async () => {
         render(filtered);
     });
 });
-// Credits Modal Functionality
+
+// === CREDITS MODAL ===
 const creditsBtn = document.getElementById('credits-btn');
 const creditsModal = document.getElementById('credits-modal');
 const closeCredits = document.getElementById('close-credits');
 
 if (creditsBtn && creditsModal && closeCredits) {
-    creditsBtn.addEventListener('click', () => {
-        creditsModal.classList.add('show');
-    });
-
-    closeCredits.addEventListener('click', () => {
-        creditsModal.classList.remove('show');
-    });
-
-    // Close when clicking outside
+    creditsBtn.addEventListener('click', () => creditsModal.classList.add('show'));
+    closeCredits.addEventListener('click', () => creditsModal.classList.remove('show'));
     creditsModal.addEventListener('click', (e) => {
-        if (e.target === creditsModal) {
-            creditsModal.classList.remove('show');
-        }
+        if (e.target === creditsModal) creditsModal.classList.remove('show');
     });
 }
-// === EJECT BUTTON - Close tab immediately (no confirmation) ===
-const ejectBtn = document.getElementById('eject-btn');
 
+// === EJECT BUTTON ===
+const ejectBtn = document.getElementById('eject-btn');
 if (ejectBtn) {
     ejectBtn.addEventListener('click', () => {
-        // Try to close the tab/window
         window.close();
-
-        // Fallback if the browser blocks window.close() (e.g., not opened by script)
-        // Opens a blank page — feels like "ejected"
         window.location.href = 'about:blank';
     });
 }
-        
