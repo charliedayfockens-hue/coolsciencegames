@@ -43,10 +43,34 @@
 </div>
     <!-- Eject Button -->
 <button id="eject-btn"><span>Eject</span></button>
-    <!-- Dark/Light Mode Toggle Button -->
-<button id="theme-toggle-btn" title="Toggle Dark/Light Mode">🌙</button>
     <div id="digital-clock"></div>
-    <!-- Tab Cloaking Button -->  
-<button id="cloak-btn">Cloak Tab</button>  
+    <!-- Settings Button -->
+<button id="settings-btn"><span>Settings</span></button>
+
+<!-- Settings Modal -->
+<div id="settings-modal">
+    <div id="settings-content">
+        <h2>Settings</h2>
+        
+        <!-- Dark/Light Mode Toggle -->
+        <div class="setting-item">
+            <span>Theme:</span>
+            <button id="theme-toggle-in-modal">🌙 Dark Mode</button>
+        </div>
+        
+        <!-- Tab Cloaking Options -->
+        <h3>Tab Cloaking</h3>
+        <p>Click to disguise the tab title & icon:</p>
+        <div class="cloaking-options">
+            <button class="cloak-option" data-title="Google Classroom" data-favicon="https://ssl.gstatic.com/classroom/favicon.png">Google Classroom</button>
+            <button class="cloak-option" data-title="Google Docs" data-favicon="https://ssl.gstatic.com/docs/doclist/images/icon_11_document_list.png">Google Docs</button>
+            <button class="cloak-option" data-title="YouTube" data-favicon="https://www.youtube.com/s/desktop/68e694c7/img/favicon_32x32.png">YouTube</button>
+            <button class="cloak-option" data-title="Calculator" data-favicon="https://www.google.com/images/icons/product/chrome_web_store-32.png">Calculator</button>
+        </div>
+        
+        <button id="close-settings">Close</button>
+    </div>
+</div>
 </body>
 </html>
+
