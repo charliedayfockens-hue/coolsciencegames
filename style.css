@@ -556,5 +556,65 @@ body.light-mode #settings-content {
 body.light-mode #search-hint {
     color: #666;
 }
+/* Multiple Themes */
 
+/* Default Dark (already your base) */
 
+/* Light Theme */
+body.theme-light {
+    background: #f5f5f5;
+    color: #333;
+}
+body.theme-light header { background: linear-gradient(135deg, #e0e0ff, #c0c0ff); }
+body.theme-light .game-card { background: #ffffff; box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
+body.theme-light .card-bottom { background: linear-gradient(135deg, #a0c4ff, #c0c0ff); }
+body.theme-light .game-title { color: #333; }
+
+/* Neon Theme */
+body.theme-neon {
+    background: #0a0a0a;
+    color: #0ff;
+}
+body.theme-neon header { background: linear-gradient(135deg, #ff00ff, #00ffff); }
+body.theme-neon .game-card { background: #1a1a1a; box-shadow: 0 0 20px #0ff; }
+body.theme-neon .card-bottom { background: linear-gradient(135deg, #ff00ff, #00ffff); }
+body.theme-neon .game-title { color: #0ff; text-shadow: 0 0 10px #0ff; }
+
+/* Ocean Theme */
+body.theme-ocean {
+    background: #001f3f;
+    color: #7fdbff;
+}
+body.theme-ocean header { background: linear-gradient(135deg, #0074d9, #7fdbff); }
+body.theme-ocean .game-card { background: #003366; }
+body.theme-ocean .card-bottom { background: linear-gradient(135deg, #0074d9, #001f3f); }
+body.theme-ocean .game-title { color: #7fdbff; }
+
+/* Forest Theme */
+body.theme-forest {
+    background: #1e3f1e;
+    color: #90ee90;
+}
+body.theme-forest header { background: linear-gradient(135deg, #228b22, #90ee90); }
+body.theme-forest .game-card { background: #2f4f2f; }
+body.theme-forest .card-bottom { background: linear-gradient(135deg, #228b22, #1e3f1e); }
+body.theme-forest .game-title { color: #90ee90; }
+
+/* Retro Theme */
+body.theme-retro {
+    background: #2c213f;
+    color: #ff69b4;
+}
+body.theme-retro header { background: linear-gradient(135deg, #8b008b, #ff69b4); }
+body.theme-retro .game-card { background: #4b0082; }
+body.theme-retro .card-bottom { background: linear-gradient(135deg, #8b008b, #2c213f); }
+body.theme-retro .game-title { color: #ff69b4; }
+
+/* Theme selector styling */
+#theme-selector {
+    padding: 10px;
+    border-radius: 10px;
+    background: #16213e;
+    color: white;
+    border: 2px solid #4fc3f7;
+}
