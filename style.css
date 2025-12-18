@@ -185,3 +185,39 @@ main {
     background: rgba(255,68,68,0.5);
     transform: scale(1.1);
 }
+/* My Favorites Button - Below Random Button */
+#favorites-btn {
+    position: fixed;
+    top: 80px; /* below random button (20px top + 60px height) */
+    right: 20px;
+    z-index: 1000;
+    background: linear-gradient(135deg, #ff4444, #ff6666);
+    color: white;
+    border: none;
+    padding: 14px 24px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border-radius: 50px;
+    box-shadow: 0 8px 20px rgba(255, 68, 68, 0.4);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+#favorites-btn:hover {
+    transform: translateY(-4px) scale(1.05);
+    box-shadow: 0 12px 30px rgba(255, 68, 68, 0.6);
+    background: linear-gradient(135deg, #ff6666, #ff4444);
+}
+
+#favorites-btn::before {
+    content: "❤️";
+    font-size: 1.4rem;
+}
+
+#favorites-btn.active {
+    background: linear-gradient(135deg, #ff6666, #ff8888);
+    box-shadow: 0 12px 30px rgba(255, 68, 68, 0.8);
+}
