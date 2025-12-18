@@ -200,3 +200,28 @@ if (ejectBtn) {
         }
     });
 }
+// === DARK/LIGHT MODE TOGGLE ===
+const themeToggleBtn = document.getElementById('theme-toggle-btn');
+const body = document.body;
+
+// Load saved theme or default to dark
+const savedTheme = localStorage.getItem('theme');
+if (savedTheme === 'light') {
+    body.classList.add('light-mode');
+    themeToggleBtn.textContent = '☀️';
+} else {
+    body.classList.remove('light-mode');
+    themeToggleBtn.textContent = '🌙';
+}
+
+// Toggle on click
+themeToggleBtn.addEventListener('click', () => {
+    body.classList.toggle('light-mode');
+    if (body.classList.contains('light-mode')) {
+        themeToggleBtn.textContent = '☀️';
+        localStorage.setItem('theme', 'light');
+    } else {
+        themeToggleBtn.textContent = '🌙';
+        localStorage.setItem('theme', 'dark');
+    }
+});
