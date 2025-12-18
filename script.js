@@ -187,3 +187,16 @@ creditsModal.addEventListener('click', (e) => {
         creditsModal.classList.remove('show');
     }
 });
+// === EJECT BUTTON - Close tab ===
+const ejectBtn = document.getElementById('eject-btn');
+
+if (ejectBtn) {
+    ejectBtn.addEventListener('click', () => {
+        if (confirm('Are you sure you want to eject (close this tab)?')) {
+            window.close();
+            // Fallback if window.close() is blocked (e.g., not opened by script)
+            // Opens a blank page as a "close" effect
+            window.location.href = 'about:blank';
+        }
+    });
+}
