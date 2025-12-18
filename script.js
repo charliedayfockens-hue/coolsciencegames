@@ -86,26 +86,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
         document.body.appendChild(favoritesBtn);
 
-        // === DARK/LIGHT MODE TOGGLE ===
-        const themeToggleBtn = document.createElement('button');
-        themeToggleBtn.id = 'theme-toggle-btn';
-        const savedTheme = localStorage.getItem('theme');
-        if (savedTheme === 'light') {
-            document.body.classList.add('light-mode');
-            themeToggleBtn.textContent = '☀️';
-        } else {
-            themeToggleBtn.textContent = '🌙';
-        }
-        themeToggleBtn.addEventListener('click', () => {
-            document.body.classList.toggle('light-mode');
-            if (document.body.classList.contains('light-mode')) {
-                themeToggleBtn.textContent = '☀️';
-                localStorage.setItem('theme', 'light');
-            } else {
-                themeToggleBtn.textContent = '🌙';
-                localStorage.setItem('theme', 'dark');
-            }
-        });
+     
         document.body.appendChild(themeToggleBtn);
 
     } catch (error) {
@@ -232,17 +213,58 @@ if (clockEl) {
     updateClock(); // initial
     setInterval(updateClock, 1000); // update every second
 }
-// Tab Cloaking – hides the tab name and favicon  
-document.getElementById('cloak-btn').addEventListener('click', () => {  
-    // change title to something innocent  
-    document.title = "Google Classroom";  
+// === SETTINGS BUTTON & MODAL ===
+const settingsBtn = document.getElementById('settings-btn');
+const settingsModal = document.getElementById('settings-modal');
+const closeSettings = document.getElementById('close-settings');
+const themeToggleModal = document.getElementById('theme-toggle-in-modal');
 
-    // change favicon to google classroom icon (or any safe icon)  
-    let link = document.querySelector("link[rel*='icon']") || document.createElement('link');  
-    link.type = 'image/x-icon';  
-    link.rel = 'shortcut icon';  
-    link.href = 'https://www.google.com/favicon.ico';  
-    document.getElementsByTagName('head')[0].appendChild(link);  
+if (settingsBtn && settingsModal) {
+    settingsBtn.addEventListener('click', () => {
+        settingsModal.classList.add('show');
+        // Sync theme button text
+        if (document.body.classList.contains('light-mode')) {
+            themeToggleModal.textContent = '☀️ Light Mode';
+        } else {
+            themeToggleModal.textContent = '🌙 Dark Mode';
+        }
+    });
 
-    alert("Tab cloaked! Now looks like Google Classroom when minimized.\n(You can click again to cloak to something else if you want)");  
-});  
+    closeSettings.addEventListener('click', () => {
+        settingsModal.classList.remove('show');
+    });
+
+    settingsModal.addEventListener('click', (e) => {
+        if (e.target === settingsModal) settingsModal.classList.remove('show');
+    });
+
+    // Theme toggle in modal
+    themeToggleModal.addEventListener('click', () => {
+        document.body.classList.toggle('light-mode');
+        if (document.body.classList.contains('light-mode')) {
+            themeToggleModal.textContent = '☀️ Light Mode';
+            localStorage.setItem('theme', 'light');
+        } else {
+            themeToggleModal.textContent = '🌙 Dark Mode';
+            localStorage.setItem('theme', 'dark');
+        }
+    });
+
+    // Tab Cloaking options
+    document.querySelectorAll('.cloak-option').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const title = btn.dataset.title;
+            const favicon = btn.dataset.favicon;
+
+            document.title = title;
+
+            let link = document.querySelector("link[rel*='icon']") || document.createElement('link');
+            link.type = 'image/x-icon';
+            link.rel = 'shortcut icon';
+            link.href = favicon;
+            document.head.appendChild(link);
+
+            alert(`Tab cloaked as "${title}"!`);
+        });
+    });
+}
