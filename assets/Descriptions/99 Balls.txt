@@ -1,1 +1,0 @@
-99 Balls: Shoot to destroy descending numbered balls. Numbers show hits needed; collect rings for more shots.
