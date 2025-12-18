@@ -212,17 +212,21 @@ if (settingsBtn && settingsModal) {
     settingsModal.addEventListener('click', (e) => {
         if (e.target === settingsModal) settingsModal.classList.remove('show');
     });
+    // Theme selector in settings
+const themeSelector = document.getElementById('theme-selector');
 
-    // Theme toggle in settings
-    themeToggleModal.addEventListener('click', () => {
-        document.body.classList.toggle('light-mode');
-        if (document.body.classList.contains('light-mode')) {
-            themeToggleModal.textContent = '☀️ Light Mode';
-            localStorage.setItem('theme', 'light');
-        } else {
-            themeToggleModal.textContent = '🌙 Dark Mode';
-            localStorage.setItem('theme', 'dark');
-        }
+if (themeSelector) {
+    // Load saved theme
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    themeSelector.value = savedTheme;
+    document.body.className = `theme-${savedTheme}`;
+
+    themeSelector.addEventListener('change', () => {
+        const newTheme = themeSelector.value;
+        document.body.className = `theme-${newTheme}`;
+        localStorage.setItem('theme', newTheme);
+    });
+}
     });
 
     // Tab cloaking in settings
@@ -261,3 +265,4 @@ if (clockEl) {
     updateClock(); // show immediately
     setInterval(updateClock, 1000); // update every second
 }
+
