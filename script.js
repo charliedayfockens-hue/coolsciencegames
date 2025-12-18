@@ -210,15 +210,16 @@ if (creditsBtn && creditsModal && closeCredits) {
         }
     });
 }
-// Eject Button - Close tab
+// === EJECT BUTTON - Close tab immediately (no confirmation) ===
 const ejectBtn = document.getElementById('eject-btn');
 
 if (ejectBtn) {
     ejectBtn.addEventListener('click', () => {
-        if (confirm('Are you sure you want to eject (close this tab)?')) {
-            window.close();
-            // Fallback
-            window.location.href = 'about:blank';
-        }
+        // Try to close the tab/window
+        window.close();
+
+        // Fallback if the browser blocks window.close() (e.g., not opened by script)
+        // Opens a blank page — feels like "ejected"
+        window.location.href = 'about:blank';
     });
 }
