@@ -232,3 +232,17 @@ if (clockEl) {
     updateClock(); // initial
     setInterval(updateClock, 1000); // update every second
 }
+// Tab Cloaking – hides the tab name and favicon  
+document.getElementById('cloak-btn').addEventListener('click', () => {  
+    // change title to something innocent  
+    document.title = "Google Classroom";  
+
+    // change favicon to google classroom icon (or any safe icon)  
+    let link = document.querySelector("link[rel*='icon']") || document.createElement('link');  
+    link.type = 'image/x-icon';  
+    link.rel = 'shortcut icon';  
+    link.href = 'https://www.google.com/favicon.ico';  
+    document.getElementsByTagName('head')[0].appendChild(link);  
+
+    alert("Tab cloaked! Now looks like Google Classroom when minimized.\n(You can click again to cloak to something else if you want)");  
+});  
