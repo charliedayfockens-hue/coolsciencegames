@@ -342,3 +342,52 @@ main {
     content: "🚪";
     font-size: 1.4rem;
 }
+/* Light Mode Styles (overrides your dark theme) */
+body.light-mode {
+    background: #f0f0f0;
+    color: #333;
+}
+
+body.light-mode header {
+    background: linear-gradient(135deg, #e0e0ff, #c0c0ff);
+}
+
+body.light-mode .game-card {
+    background: #ffffff;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+}
+
+body.light-mode .game-card a, body.light-mode .card-bottom {
+    background: linear-gradient(135deg, #a0c4ff, #c0c0ff);
+}
+
+body.light-mode .game-title {
+    color: #333;
+}
+
+/* Dark/Light Toggle Button - Left of Random Button */
+#theme-toggle-btn {
+    position: fixed;
+    top: 20px;
+    right: 140px; /* Adjust left of random button (random is at right:20px) */
+    z-index: 1000;
+    background: linear-gradient(135deg, #ffd700, #ffaa00);
+    color: white;
+    border: none;
+    padding: 14px 20px;
+    font-size: 1.4rem;
+    border-radius: 50%;
+    box-shadow: 0 8px 20px rgba(255, 215, 0, 0.4);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#theme-toggle-btn:hover {
+    transform: translateY(-4px) scale(1.1);
+    box-shadow: 0 12px 30px rgba(255, 215, 0, 0.6);
+}
