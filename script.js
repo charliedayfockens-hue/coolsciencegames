@@ -210,3 +210,15 @@ if (creditsBtn && creditsModal && closeCredits) {
         }
     });
 }
+// Eject Button - Close tab
+const ejectBtn = document.getElementById('eject-btn');
+
+if (ejectBtn) {
+    ejectBtn.addEventListener('click', () => {
+        if (confirm('Are you sure you want to eject (close this tab)?')) {
+            window.close();
+            // Fallback
+            window.location.href = 'about:blank';
+        }
+    });
+}
