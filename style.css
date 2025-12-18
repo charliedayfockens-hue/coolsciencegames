@@ -414,3 +414,24 @@ body.light-mode #digital-clock {
     color: #333;
     box-shadow: 0 4px 15px rgba(0,0,0,0.1);
 }
+#cloak-btn {  
+    position: fixed;  
+    top: 200px;  
+    left: 20px;  
+    z-index: 1000;  
+    background: linear-gradient(135deg, #8e44ad, #9b59b6);  
+    color: white;  
+    border: none;  
+    padding: 14px 24px;  
+    font-size: 1.1rem;  
+    font-weight: bold;  
+    border-radius: 50px;  
+    box-shadow: 0 8px 20px rgba(142,68,173,0.4);  
+    cursor: pointer;  
+    transition: all 0.3s ease;  
+}  
+
+#cloak-btn:hover {  
+    transform: translateY(-4px);  
+    box-shadow: 0 12px 30px rgba(142,68,173,0.6);  
+}  
