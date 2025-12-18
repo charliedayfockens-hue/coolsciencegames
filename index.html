@@ -47,19 +47,29 @@
     <div id="digital-clock"></div>
     <!-- Settings Button -->
 <button id="settings-btn"><span>Settings</span></button>
-
 <!-- Settings Modal -->
 <div id="settings-modal">
     <div id="settings-content">
         <h2>Settings</h2>
         
-        <!-- Dark/Light Mode Toggle -->
+        <!-- Theme Selector -->
+        <div class="setting-item">
+            <span>Choose Theme:</span>
+            <select id="theme-selector">
+                <option value="dark">Dark (Default)</option>
+                <option value="light">Light</option>
+                <option value="neon">Neon Glow</option>
+                <option value="ocean">Ocean Blue</option>
+                <option value="forest">Forest Green</option>
+                <option value="retro">Retro Purple</option>
+            </select>
+        </div>
+            <!-- Dark/Light Mode Toggle -->
         <div class="setting-item">
             <span>Theme:</span>
             <button id="theme-toggle-in-modal">🌙 Dark Mode</button>
         </div>
-        
-        <!-- Tab Cloaking Options -->
+        <!-- Tab Cloaking Options (keep your existing ones) -->
         <h3>Tab Cloaking</h3>
         <p>Click to disguise the tab title & icon:</p>
         <div class="cloaking-options">
@@ -72,7 +82,17 @@
         <button id="close-settings">Close</button>
     </div>
 </div>
+
+        
+        <!-- Dark/Light Mode Toggle -->
+        <div class="setting-item">
+            <span>Theme:</span>
+            <button id="theme-toggle-in-modal">🌙 Dark Mode</button>
+        </div>
+        
+        
 </body>
 </html>
+
 
 
