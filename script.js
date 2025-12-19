@@ -136,15 +136,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 img.loading = 'lazy';
                 card.appendChild(img);
             }
-            // === EJECT BUTTON - Close tab immediately ===
-const ejectBtn = document.getElementById('eject-btn');
 
-if (ejectBtn) {
-    ejectBtn.addEventListener('click', () => {
-        window.close();
-        window.location.href = 'about:blank'; // fallback
-    });
-}
             // Favorite heart
             const heart = document.createElement('button');
             heart.className = 'favorite-btn';
@@ -210,7 +202,38 @@ if (creditsBtn && creditsModal && closeCredits) {
         if (e.target === creditsModal) creditsModal.classList.remove('show');
     });
 }
+
+// === EJECT BUTTON ===
+const ejectBtn = document.getElementById('eject-btn');
+if (ejectBtn) {
+    ejectBtn.addEventListener('click', () => {
+        window.close();
+        window.location.href = 'about:blank';
+    });
 }
+
+// === CLOAK TAB BUTTON ===
+const cloakBtn = document.getElementById('cloak-btn');
+if (cloakBtn) {
+    cloakBtn.addEventListener('click', () => {
+        document.title = "Google Classroom";
+        let link = document.querySelector("link[rel*='icon']") || document.createElement('link');
+        link.type = 'image/x-icon';
+        link.rel = 'shortcut icon';
+        link.href = 'https://ssl.gstatic.com/classroom/favicon.png';
+        document.head.appendChild(link);
+    });
+}
+
+// === REQUEST A GAME BUTTON ===
+const requestBtn = document.getElementById('request-btn');
+if (requestBtn) {
+    requestBtn.addEventListener('click', () => {
+        const requestUrl = 'https://docs.google.com/forms/d/e/YOUR_FORM_ID/viewform'; // CHANGE TO YOUR LINK
+        window.open(requestUrl, '_blank');
+    });
+}
+
 // === SETTINGS MODAL ===
 const settingsBtn = document.getElementById('settings-btn');
 const settingsModal = document.getElementById('settings-modal');
