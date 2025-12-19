@@ -311,10 +311,9 @@ main {
     background: #9575cd;
     transform: scale(1.05);
 }
-/* Eject Button - Below Credits Button */
 #eject-btn {
     position: fixed;
-    top: 80px; /* below credits button (20px + 60px height) */
+    top: 80px; /* below Credits at 20px */
     left: 20px;
     z-index: 1000;
     background: linear-gradient(135deg, #ff4444, #ff6666);
@@ -335,7 +334,6 @@ main {
 #eject-btn:hover {
     transform: translateY(-4px) scale(1.05);
     box-shadow: 0 12px 30px rgba(255, 68, 68, 0.6);
-    background: linear-gradient(135deg, #ff6666, #ff8888);
 }
 
 #eject-btn::before {
@@ -598,5 +596,6 @@ body.theme-retro .game-title { color: #ff69b4; }
     color: white;
     border: 2px solid #4fc3f7;
 }
+
 
 
