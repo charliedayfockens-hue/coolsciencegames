@@ -262,15 +262,15 @@ function updateClock() {
     const seconds = now.getSeconds().toString().padStart(2, '0');
     const ampm = hours >= 12 ? 'PM' : 'AM';
 
-    // Convert to 12-hour format
     hours = hours % 12;
-    hours = hours ? hours : 12; // the hour '0' should be '12'
+    hours = hours ? hours : 12;
     hours = hours.toString().padStart(2, '0');
 
     clockEl.textContent = `${hours}:${minutes}:${seconds} ${ampm}`;
 }
 
-// Only run if the clock element exists
 if (clockEl) {
-    updateClock(); // Show time immediately
-    setInterval(updateClock, 1000); // Update every second
+    updateClock();
+    setInterval(updateClock, 1000);
+}
+
