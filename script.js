@@ -136,7 +136,15 @@ document.addEventListener('DOMContentLoaded', async () => {
                 img.loading = 'lazy';
                 card.appendChild(img);
             }
+            // === EJECT BUTTON - Close tab immediately ===
+const ejectBtn = document.getElementById('eject-btn');
 
+if (ejectBtn) {
+    ejectBtn.addEventListener('click', () => {
+        window.close();
+        window.location.href = 'about:blank'; // fallback
+    });
+}
             // Favorite heart
             const heart = document.createElement('button');
             heart.className = 'favorite-btn';
@@ -242,14 +250,5 @@ if (settingsBtn && settingsModal) {
             link.href = favicon;
             document.head.appendChild(link);
         });
-    });
-}
-// === EJECT BUTTON - Close tab immediately ===
-const ejectBtn = document.getElementById('eject-btn');
-
-if (ejectBtn) {
-    ejectBtn.addEventListener('click', () => {
-        window.close();
-        window.location.href = 'about:blank'; // fallback
     });
 }
