@@ -217,24 +217,25 @@ if (ejectBtn) {
         window.location.href = 'about:blank';
     });
 }
+// === TAB CLOAK DROPDOWN ===
+const cloakDropdown = document.getElementById('cloak-dropdown');
 
-// === TAB CLOAK TO SCHOOLOGY ===
-const cloakBtn = document.getElementById('cloak-btn');
+if (cloakDropdown) {
+    document.querySelectorAll('.cloak-option').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const title = btn.dataset.title;
+            const favicon = btn.dataset.favicon;
 
-if (cloakBtn) {
-    cloakBtn.addEventListener('click', () => {
-        // Change tab title to Schoology
-        document.title = "Schoology";
+            document.title = title;
 
-        // Change favicon to real Schoology icon
-        let link = document.querySelector("link[rel*='icon']") || document.createElement('link');
-        link.type = 'image/x-icon';
-        link.rel = 'shortcut icon';
-        link.href = 'https://asset-cdn.schoology.com/sites/all/themes/schoology_theme/favicon.ico';
-        document.getElementsByTagName('head')[0].appendChild(link);
+            let link = document.querySelector("link[rel*='icon']") || document.createElement('link');
+            link.type = 'image/x-icon';
+            link.rel = 'shortcut icon';
+            link.href = favicon;
+            document.head.appendChild(link);
 
-        // Optional: small confirmation
-        alert("Tab cloaked as Schoology! Safe from teachers/parents 👀");
+            alert(`Tab cloaked as ${title}! 👀`);
+        });
     });
 }
 
@@ -288,6 +289,7 @@ if (settingsBtn && settingsModal) {
         });
     });
 }
+
 
 
 
