@@ -139,11 +139,12 @@ function render(games) {
         ratingDiv.className = 'rating-container';
 
         const gameId = g.url;
-        if (!ratings[gameId]) ratings[gameId] = { likes: 0, dislikes: 0 };
+        if (!ratings[gameId]) ratings[gameId] = { likes: 0, dislikes: 0, userVote: null };
 
         // Like button
         const likeBtn = document.createElement('button');
         likeBtn.className = 'like-btn';
+        if (ratings[gameId].userVote === 'like') likeBtn.classList.add('liked');
         likeBtn.innerHTML = '👍';
 
         const likeCount = document.createElement('span');
@@ -152,14 +153,31 @@ function render(games) {
 
         likeBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            ratings[gameId].likes++;
+            const currentVote = ratings[gameId].userVote;
+
+            if (currentVote === 'like') {
+                // Undo like
+                ratings[gameId].likes--;
+                ratings[gameId].userVote = null;
+                likeBtn.classList.remove('liked');
+            } else {
+                // Add like (remove dislike if exists)
+                if (currentVote === 'dislike') ratings[gameId].dislikes--;
+                ratings[gameId].likes++;
+                ratings[gameId].userVote = 'like';
+                likeBtn.classList.add('liked');
+                dislikeBtn.classList.remove('disliked');
+            }
+
             likeCount.textContent = ratings[gameId].likes;
+            dislikeCount.textContent = ratings[gameId].dislikes;
             localStorage.setItem(ratingsKey, JSON.stringify(ratings));
         });
 
         // Dislike button
         const dislikeBtn = document.createElement('button');
         dislikeBtn.className = 'dislike-btn';
+        if (ratings[gameId].userVote === 'dislike') dislikeBtn.classList.add('disliked');
         dislikeBtn.innerHTML = '👎';
 
         const dislikeCount = document.createElement('span');
@@ -168,7 +186,23 @@ function render(games) {
 
         dislikeBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            ratings[gameId].dislikes++;
+            const currentVote = ratings[gameId].userVote;
+
+            if (currentVote === 'dislike') {
+                // Undo dislike
+                ratings[gameId].dislikes--;
+                ratings[gameId].userVote = null;
+                dislikeBtn.classList.remove('disliked');
+            } else {
+                // Add dislike (remove like if exists)
+                if (currentVote === 'like') ratings[gameId].likes--;
+                ratings[gameId].dislikes++;
+                ratings[gameId].userVote = 'dislike';
+                dislikeBtn.classList.add('disliked');
+                likeBtn.classList.remove('liked');
+            }
+
+            likeCount.textContent = ratings[gameId].likes;
             dislikeCount.textContent = ratings[gameId].dislikes;
             localStorage.setItem(ratingsKey, JSON.stringify(ratings));
         });
@@ -179,7 +213,7 @@ function render(games) {
         ratingDiv.appendChild(dislikeCount);
         card.appendChild(ratingDiv);
 
-        // Card bottom (title + description)
+        // Card bottom
         const bottom = document.createElement('div');
         bottom.className = 'card-bottom';
 
@@ -297,5 +331,6 @@ themeOptions.forEach(option => {
         updateButtonText(newTheme); 
     }); 
 });         
+
 
 
