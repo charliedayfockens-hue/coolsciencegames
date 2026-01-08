@@ -212,16 +212,23 @@ if (ejectBtn) {
     });
 }
 
-// === CLOAK TAB BUTTON ===
+// === TAB CLOAK TO SCHOOLOGY ===
 const cloakBtn = document.getElementById('cloak-btn');
+
 if (cloakBtn) {
     cloakBtn.addEventListener('click', () => {
-        document.title = "Google Classroom";
+        // Change tab title to Schoology
+        document.title = "Schoology";
+
+        // Change favicon to real Schoology icon
         let link = document.querySelector("link[rel*='icon']") || document.createElement('link');
         link.type = 'image/x-icon';
         link.rel = 'shortcut icon';
-        link.href = 'https://ssl.gstatic.com/classroom/favicon.png';
-        document.head.appendChild(link);
+        link.href = 'https://asset-cdn.schoology.com/sites/all/themes/schoology_theme/favicon.ico';
+        document.getElementsByTagName('head')[0].appendChild(link);
+
+        // Optional: small confirmation
+        alert("Tab cloaked as Schoology! Safe from teachers/parents 👀");
     });
 }
 
@@ -275,3 +282,4 @@ if (settingsBtn && settingsModal) {
         });
     });
 }
+
