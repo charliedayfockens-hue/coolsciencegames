@@ -145,13 +145,13 @@ function render(games) {
         const likeBtn = document.createElement('button');
         likeBtn.className = 'like-btn';
         likeBtn.innerHTML = '👍';
+
         const likeCount = document.createElement('span');
         likeCount.className = 'rating-count';
         likeCount.textContent = ratings[gameId].likes;
 
         likeBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            if (!ratings[gameId]) ratings[gameId] = { likes: 0, dislikes: 0 };
             ratings[gameId].likes++;
             likeCount.textContent = ratings[gameId].likes;
             localStorage.setItem(ratingsKey, JSON.stringify(ratings));
@@ -161,13 +161,13 @@ function render(games) {
         const dislikeBtn = document.createElement('button');
         dislikeBtn.className = 'dislike-btn';
         dislikeBtn.innerHTML = '👎';
+
         const dislikeCount = document.createElement('span');
         dislikeCount.className = 'rating-count';
         dislikeCount.textContent = ratings[gameId].dislikes;
 
         dislikeBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            if (!ratings[gameId]) ratings[gameId] = { likes: 0, dislikes: 0 };
             ratings[gameId].dislikes++;
             dislikeCount.textContent = ratings[gameId].dislikes;
             localStorage.setItem(ratingsKey, JSON.stringify(ratings));
@@ -179,6 +179,7 @@ function render(games) {
         ratingDiv.appendChild(dislikeCount);
         card.appendChild(ratingDiv);
 
+        // Card bottom (title + description)
         const bottom = document.createElement('div');
         bottom.className = 'card-bottom';
 
@@ -206,7 +207,7 @@ function render(games) {
 
     listEl.appendChild(frag);
 }
-
+    
     searchInput.addEventListener('input', () => {
         const query = searchInput.value.trim().toLowerCase();
         const filtered = query ? allGames.filter(g => g.lowerName.includes(query) || (g.description && g.description.toLowerCase().includes(query))) : allGames;
@@ -296,4 +297,5 @@ themeOptions.forEach(option => {
         updateButtonText(newTheme); 
     }); 
 });         
+
 
