@@ -86,34 +86,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
         document.body.appendChild(favoritesBtn);
 
-// === THEME DROPDOWN ===
-const themeDropdown = document.getElementById('theme-dropdown');
-const themeToggleBtn = document.getElementById('theme-toggle-btn');
-const themeOptions = document.querySelectorAll('.theme-option');
-
-const savedTheme = localStorage.getItem('theme') || 'dark';
-document.body.className = `theme-${savedTheme}`;
-updateButtonText(savedTheme);
-
-function updateButtonText(theme) {
-    switch (theme) {
-        case 'dark': themeToggleBtn.innerHTML = '🌙 Dark'; break;
-        case 'light': themeToggleBtn.innerHTML = '☀️ Light'; break;
-        case 'neon': themeToggleBtn.innerHTML = '⚡ Neon'; break;
-        case 'ocean': themeToggleBtn.innerHTML = '🌊 Ocean'; break;
-        case 'galaxy': themeToggleBtn.innerHTML = '🌌 Galaxy'; break;
-        case 'gooner': themeToggleBtn.innerHTML = '⚽ Gooner'; break;
-    }
-}
-
-themeOptions.forEach(option => {
-    option.addEventListener('click', () => {
-        const newTheme = option.dataset.theme;
-        document.body.className = `theme-${newTheme}`;
-        localStorage.setItem('theme', newTheme);
-        updateButtonText(newTheme);
-    });
-});        
     } catch (error) {
         listEl.innerHTML = '<p class="loading">Error loading games — try refresh later.</p>';
     }
@@ -217,7 +189,8 @@ if (ejectBtn) {
         window.location.href = 'about:blank';
     });
 }
-// === TAB CLOAK DROPDOWN ===
+
+// === CLOAK TAB DROPDOWN ===
 const cloakDropdown = document.getElementById('cloak-dropdown');
 
 if (cloakDropdown) {
@@ -234,7 +207,7 @@ if (cloakDropdown) {
             link.href = favicon;
             document.head.appendChild(link);
 
-            alert(`Tab cloaked as ${title}! 👀`);
+            alert(`Tab cloaked as ${title}!`);
         });
     });
 }
@@ -247,48 +220,33 @@ if (requestBtn) {
         window.open(requestUrl, '_blank');
     });
 }
+// === THEME DROPDOWN === 
+const themeDropdown = document.getElementById('theme-dropdown'); 
+const themeToggleBtn = document.getElementById('theme-toggle-btn'); 
+const themeOptions = document.querySelectorAll('.theme-option'); 
 
-// === SETTINGS MODAL ===
-const settingsBtn = document.getElementById('settings-btn');
-const settingsModal = document.getElementById('settings-modal');
-const closeSettings = document.getElementById('close-settings');
-const themeToggleModal = document.getElementById('theme-toggle-in-modal');
+  
+const savedTheme = localStorage.getItem('theme') || 'dark'; 
+document.body.className = `theme-${savedTheme}`; 
+updateButtonText(savedTheme); 
 
-if (settingsBtn && settingsModal) {
-    settingsBtn.addEventListener('click', () => settingsModal.classList.add('show'));
+function updateButtonText(theme) { 
+    switch (theme) { 
+        case 'dark': themeToggleBtn.innerHTML = '🌙 Dark'; break; 
+        case 'light': themeToggleBtn.innerHTML = '☀️ Light'; break; 
+        case 'neon': themeToggleBtn.innerHTML = '⚡ Neon'; break; 
+        case 'ocean': themeToggleBtn.innerHTML = '🌊 Ocean'; break; 
+        case 'galaxy': themeToggleBtn.innerHTML = '🌌 Galaxy'; break; 
+        case 'gooner': themeToggleBtn.innerHTML = '⚽ Gooner'; break; 
+    } 
+} 
+  
 
-    closeSettings.addEventListener('click', () => settingsModal.classList.remove('show'));
-
-    settingsModal.addEventListener('click', (e) => {
-        if (e.target === settingsModal) settingsModal.classList.remove('show');
-    });
-
-    // Theme toggle in settings
-    themeToggleModal.addEventListener('click', () => {
-        document.body.classList.toggle('light-mode');
-        if (document.body.classList.contains('light-mode')) {
-            themeToggleModal.textContent = '☀️ Light Mode';
-            localStorage.setItem('theme', 'light');
-        } else {
-            themeToggleModal.textContent = '🌙 Dark Mode';
-            localStorage.setItem('theme', 'dark');
-        }
-    });
-
-    // Tab cloaking in settings
-    document.querySelectorAll('.cloak-option').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const title = btn.dataset.title;
-            const favicon = btn.dataset.favicon;
-            document.title = title;
-            let link = document.querySelector("link[rel*='icon']") || document.createElement('link');
-            link.type = 'image/x-icon';
-            link.rel = 'shortcut icon';
-            link.href = favicon;
-            document.head.appendChild(link);
-        });
-    });
-}
-
-
-
+themeOptions.forEach(option => { 
+    option.addEventListener('click', () => { 
+        const newTheme = option.dataset.theme; 
+        document.body.className = `theme-${newTheme}`; 
+        localStorage.setItem('theme', newTheme); 
+        updateButtonText(newTheme); 
+    }); 
+});         
