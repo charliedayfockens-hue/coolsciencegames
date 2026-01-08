@@ -598,3 +598,56 @@ body.theme-ocean .game-card {
 body.theme-ocean .card-bottom {
     background: linear-gradient(135deg, #0077be, #001f3f);
 }
+/* Galaxy Theme - Deep space */
+body.theme-galaxy {
+    background: linear-gradient(to bottom, #0f0c29, #302b63, #24243e);
+    color: #e0e0ff;
+}
+
+body.theme-galaxy header {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+}
+
+body.theme-galaxy .game-card {
+    background: #1a1833;
+    box-shadow: 0 0 25px rgba(102, 126, 234, 0.6);
+    border: 1px solid #764ba2;
+}
+
+body.theme-galaxy .card-bottom {
+    background: linear-gradient(135deg, #764ba2, #24243e);
+}
+
+body.theme-galaxy .game-title {
+    color: #ffffff;
+    text-shadow: 0 0 10px #764ba2;
+}
+
+/* Gooner Theme - Arsenal FC red/white/gold */
+body.theme-gooner {
+    background: #000000;
+    color: #ffffff;
+}
+
+body.theme-gooner header {
+    background: linear-gradient(135deg, #db0007, #ef0107); /* Arsenal red */
+}
+
+body.theme-gooner .game-card {
+    background: #db0007;
+    box-shadow: 0 8px 25px rgba(219, 0, 7, 0.6);
+    border: 2px solid #ffffff;
+}
+
+body.theme-gooner .card-bottom {
+    background: linear-gradient(135deg, #023474, #ffffff); /* navy to white */
+}
+
+body.theme-gooner .game-title {
+    color: #ffffff;
+    text-shadow: 0 0 10px #ffd700; /* gold glow */
+}
+
+body.theme-gooner .favorite-btn {
+    color: #ffd700; /* gold hearts */
+}
