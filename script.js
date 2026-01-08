@@ -65,10 +65,10 @@ const trendingContainer = document.getElementById('trending-games');
 if (trendingContainer && allGames.length > 0) {
     // Pick 6 trending games (you can change these to your favorites)
     const trendingGames = allGames.filter(g => 
-        ['1v1.LoL', 'Tunnel Rush', 'Retro Bowl', 'Smash Karts', 'Basket Bros', 'Subway Surfers'].some(name => 
+        ['Super Smash Flash' 'Grand Theft Auto Vice City' 'BLOODMONEY!' 'CG FC 25' 'Final Fantasy 7 (Disk 1)'].some(name => 
             g.name.toLowerCase().includes(name.toLowerCase())
         )
-    ).slice(0, 6);
+    ).slice(0, 5);
 
     trendingGames.forEach((g, index) => {
         const card = document.createElement('div');
@@ -336,4 +336,5 @@ if (settingsBtn && settingsModal) {
         });
     });
 }
+
 
