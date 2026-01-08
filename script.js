@@ -85,6 +85,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             render(showingFavorites ? allGames.filter(g => favorites.includes(g.url)) : allGames);
         });
         document.body.appendChild(favoritesBtn);
+
 // === THEME DROPDOWN ===
 const themeDropdown = document.getElementById('theme-dropdown');
 const themeToggleBtn = document.getElementById('theme-toggle-btn');
@@ -100,6 +101,8 @@ function updateButtonText(theme) {
         case 'light': themeToggleBtn.innerHTML = '☀️ Light'; break;
         case 'neon': themeToggleBtn.innerHTML = '⚡ Neon'; break;
         case 'ocean': themeToggleBtn.innerHTML = '🌊 Ocean'; break;
+        case 'galaxy': themeToggleBtn.innerHTML = '🌌 Galaxy'; break;
+        case 'gooner': themeToggleBtn.innerHTML = '⚽ Gooner'; break;
     }
 }
 
@@ -110,7 +113,7 @@ themeOptions.forEach(option => {
         localStorage.setItem('theme', newTheme);
         updateButtonText(newTheme);
     });
-});
+});        
     } catch (error) {
         listEl.innerHTML = '<p class="loading">Error loading games — try refresh later.</p>';
     }
@@ -285,5 +288,6 @@ if (settingsBtn && settingsModal) {
         });
     });
 }
+
 
 
