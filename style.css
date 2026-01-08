@@ -420,82 +420,6 @@ body.light-mode .game-title {
     content: "⚙️";
     font-size: 1.4rem;
 }
-/* Settings Modal (same style as credits) */
-#settings-modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.7);
-    z-index: 2000;
-    align-items: center;
-    justify-content: center;
-}
-
-#settings-modal.show {
-    display: flex;
-}
-
-#settings-content {
-    background: #16213e;
-    padding: 30px;
-    border-radius: 20px;
-    max-width: 500px;
-    text-align: center;
-    color: #eee;
-    box-shadow: 0 20px 50px rgba(79,195,247,0.5);
-    border: 2px solid #4fc3f7;
-}
-
-.setting-item {
-    margin: 20px 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 20px;
-}
-
-#theme-toggle-in-modal {
-    padding: 10px 20px;
-    border-radius: 30px;
-    background: #4fc3f7;
-    color: white;
-    border: none;
-    cursor: pointer;
-}
-
-.cloaking-options {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin: 20px 0;
-}
-
-.cloak-option {
-    padding: 12px;
-    background: #2c3e50;
-    border: none;
-    color: white;
-    border-radius: 10px;
-    cursor: pointer;
-}
-
-.cloak-option:hover {
-    background: #4fc3f7;
-}
-
-body.light-mode #settings-content {
-    background: #ffffff;
-    color: #333;
-    border: 2px solid #333;
-}
-
-body.light-mode #search-hint {
-    color: #666;
-}
-
 /* Eject Button - Below Credits */
 #eject-btn {
     position: fixed;
@@ -555,3 +479,4 @@ body.light-mode #search-hint {
     content: "🧙‍♂️";
     font-size: 1.4rem;
 }
+
