@@ -85,29 +85,32 @@ document.addEventListener('DOMContentLoaded', async () => {
             render(showingFavorites ? allGames.filter(g => favorites.includes(g.url)) : allGames);
         });
         document.body.appendChild(favoritesBtn);
+// === THEME DROPDOWN ===
+const themeDropdown = document.getElementById('theme-dropdown');
+const themeToggleBtn = document.getElementById('theme-toggle-btn');
+const themeOptions = document.querySelectorAll('.theme-option');
 
-        // === DARK/LIGHT MODE TOGGLE ===
-        const themeToggleBtn = document.createElement('button');
-        themeToggleBtn.id = 'theme-toggle-btn';
-        const savedTheme = localStorage.getItem('theme');
-        if (savedTheme === 'light') {
-            document.body.classList.add('light-mode');
-            themeToggleBtn.textContent = '☀️';
-        } else {
-            themeToggleBtn.textContent = '🌙';
-        }
-        themeToggleBtn.addEventListener('click', () => {
-            document.body.classList.toggle('light-mode');
-            if (document.body.classList.contains('light-mode')) {
-                themeToggleBtn.textContent = '☀️';
-                localStorage.setItem('theme', 'light');
-            } else {
-                themeToggleBtn.textContent = '🌙';
-                localStorage.setItem('theme', 'dark');
-            }
-        });
-        document.body.appendChild(themeToggleBtn);
+const savedTheme = localStorage.getItem('theme') || 'dark';
+document.body.className = `theme-${savedTheme}`;
+updateButtonText(savedTheme);
 
+function updateButtonText(theme) {
+    switch (theme) {
+        case 'dark': themeToggleBtn.innerHTML = '🌙 Dark'; break;
+        case 'light': themeToggleBtn.innerHTML = '☀️ Light'; break;
+        case 'neon': themeToggleBtn.innerHTML = '⚡ Neon'; break;
+        case 'ocean': themeToggleBtn.innerHTML = '🌊 Ocean'; break;
+    }
+}
+
+themeOptions.forEach(option => {
+    option.addEventListener('click', () => {
+        const newTheme = option.dataset.theme;
+        document.body.className = `theme-${newTheme}`;
+        localStorage.setItem('theme', newTheme);
+        updateButtonText(newTheme);
+    });
+});
     } catch (error) {
         listEl.innerHTML = '<p class="loading">Error loading games — try refresh later.</p>';
     }
@@ -282,4 +285,5 @@ if (settingsBtn && settingsModal) {
         });
     });
 }
+
 
