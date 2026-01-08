@@ -89,77 +89,123 @@ document.addEventListener('DOMContentLoaded', async () => {
     } catch (error) {
         listEl.innerHTML = '<p class="loading">Error loading games — try refresh later.</p>';
     }
+function render(games) {
+    listEl.innerHTML = '';
+    counterEl.textContent = `${games.length} Game${games.length === 1 ? '' : 's'} Available`;
 
-    function render(games) {
-        listEl.innerHTML = '';
-        counterEl.textContent = `${games.length} Game${games.length === 1 ? '' : 's'} Available`;
+    if (games.length === 0) {
+        listEl.innerHTML = '<p class="loading">No games found.</p>';
+        return;
+    }
 
-        if (games.length === 0) {
-            listEl.innerHTML = '<p class="loading">No games found.</p>';
-            return;
+    const frag = document.createDocumentFragment();
+    const favorites = JSON.parse(localStorage.getItem('gameFavorites') || '[]');
+    const ratingsKey = 'gameRatings';
+    let ratings = JSON.parse(localStorage.getItem(ratingsKey) || '{}');
+
+    games.forEach(g => {
+        const card = document.createElement('div');
+        card.className = 'game-card';
+        card.style.position = 'relative';
+
+        if (g.image) {
+            const img = document.createElement('img');
+            img.src = g.image;
+            img.alt = g.name;
+            img.loading = 'lazy';
+            card.appendChild(img);
         }
 
-        const frag = document.createDocumentFragment();
-        const favorites = JSON.parse(localStorage.getItem('gameFavorites') || '[]');
-
-        games.forEach(g => {
-            const card = document.createElement('div');
-            card.className = 'game-card';
-            card.style.position = 'relative';
-
-            if (g.image) {
-                const img = document.createElement('img');
-                img.src = g.image;
-                img.alt = g.name;
-                img.loading = 'lazy';
-                card.appendChild(img);
+        // Favorite heart
+        const heart = document.createElement('button');
+        heart.className = 'favorite-btn';
+        heart.innerHTML = favorites.includes(g.url) ? '❤️' : '♡';
+        heart.addEventListener('click', (e) => {
+            e.stopPropagation();
+            let favs = JSON.parse(localStorage.getItem('gameFavorites') || '[]');
+            if (favs.includes(g.url)) {
+                favs = favs.filter(u => u !== g.url);
+                heart.innerHTML = '♡';
+            } else {
+                favs.push(g.url);
+                heart.innerHTML = '❤️';
             }
+            localStorage.setItem('gameFavorites', JSON.stringify(favs));
+        });
+        card.appendChild(heart);
 
-            // Favorite heart
-            const heart = document.createElement('button');
-            heart.className = 'favorite-btn';
-            heart.innerHTML = favorites.includes(g.url) ? '❤️' : '♡';
-            heart.addEventListener('click', (e) => {
-                e.stopPropagation();
-                let favs = JSON.parse(localStorage.getItem('gameFavorites') || '[]');
-                if (favs.includes(g.url)) {
-                    favs = favs.filter(u => u !== g.url);
-                    heart.innerHTML = '♡';
-                } else {
-                    favs.push(g.url);
-                    heart.innerHTML = '❤️';
-                }
-                localStorage.setItem('gameFavorites', JSON.stringify(favs));
-            });
-            card.appendChild(heart);
+        // Like/Dislike container
+        const ratingDiv = document.createElement('div');
+        ratingDiv.className = 'rating-container';
 
-            const bottom = document.createElement('div');
-            bottom.className = 'card-bottom';
+        const gameId = g.url;
+        if (!ratings[gameId]) ratings[gameId] = { likes: 0, dislikes: 0 };
 
-            const title = document.createElement('div');
-            title.className = 'game-title';
-            title.textContent = g.name;
-            bottom.appendChild(title);
+        // Like button
+        const likeBtn = document.createElement('button');
+        likeBtn.className = 'like-btn';
+        likeBtn.innerHTML = '👍';
+        const likeCount = document.createElement('span');
+        likeCount.className = 'rating-count';
+        likeCount.textContent = ratings[gameId].likes;
 
-            if (g.description) {
-                const desc = document.createElement('p');
-                desc.className = 'game-desc';
-                desc.textContent = g.description;
-                bottom.appendChild(desc);
-            }
-
-            const a = document.createElement('a');
-            a.href = g.url;
-            a.target = '_blank';
-            a.rel = 'noopener noreferrer';
-            a.appendChild(bottom);
-            card.appendChild(a);
-
-            frag.appendChild(card);
+        likeBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (!ratings[gameId]) ratings[gameId] = { likes: 0, dislikes: 0 };
+            ratings[gameId].likes++;
+            likeCount.textContent = ratings[gameId].likes;
+            localStorage.setItem(ratingsKey, JSON.stringify(ratings));
         });
 
-        listEl.appendChild(frag);
-    }
+        // Dislike button
+        const dislikeBtn = document.createElement('button');
+        dislikeBtn.className = 'dislike-btn';
+        dislikeBtn.innerHTML = '👎';
+        const dislikeCount = document.createElement('span');
+        dislikeCount.className = 'rating-count';
+        dislikeCount.textContent = ratings[gameId].dislikes;
+
+        dislikeBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (!ratings[gameId]) ratings[gameId] = { likes: 0, dislikes: 0 };
+            ratings[gameId].dislikes++;
+            dislikeCount.textContent = ratings[gameId].dislikes;
+            localStorage.setItem(ratingsKey, JSON.stringify(ratings));
+        });
+
+        ratingDiv.appendChild(likeBtn);
+        ratingDiv.appendChild(likeCount);
+        ratingDiv.appendChild(dislikeBtn);
+        ratingDiv.appendChild(dislikeCount);
+        card.appendChild(ratingDiv);
+
+        const bottom = document.createElement('div');
+        bottom.className = 'card-bottom';
+
+        const title = document.createElement('div');
+        title.className = 'game-title';
+        title.textContent = g.name;
+        bottom.appendChild(title);
+
+        if (g.description) {
+            const desc = document.createElement('p');
+            desc.className = 'game-desc';
+            desc.textContent = g.description;
+            bottom.appendChild(desc);
+        }
+
+        const a = document.createElement('a');
+        a.href = g.url;
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        a.appendChild(bottom);
+        card.appendChild(a);
+
+        frag.appendChild(card);
+    });
+
+    listEl.appendChild(frag);
+}
 
     searchInput.addEventListener('input', () => {
         const query = searchInput.value.trim().toLowerCase();
@@ -250,3 +296,4 @@ themeOptions.forEach(option => {
         updateButtonText(newTheme); 
     }); 
 });         
+
