@@ -50,7 +50,16 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         allGames.sort((a, b) => a.name.localeCompare(b.name));
 
-        // === TRENDING / MOST PLAYED SECTION ===
+        // Load descriptions
+        for (const game of allGames) {
+            if (game.descriptionUrl) {
+                try {
+                    const dResp = await fetch(game.descriptionUrl);
+                    if (dResp.ok) game.description = (await dResp.text()).trim().replace(/\n/g, ' ');
+                } catch {}
+            }
+        }
+// === TRENDING / MOST PLAYED SECTION ===
 const trendingContainer = document.getElementById('trending-games');
 
 if (trendingContainer && allGames.length > 0) {
@@ -98,17 +107,6 @@ if (trendingContainer && allGames.length > 0) {
         trendingContainer.appendChild(card);
     });
 }
-
-        // Load descriptions
-        for (const game of allGames) {
-            if (game.descriptionUrl) {
-                try {
-                    const dResp = await fetch(game.descriptionUrl);
-                    if (dResp.ok) game.description = (await dResp.text()).trim().replace(/\n/g, ' ');
-                } catch {}
-            }
-        }
-
         render(allGames);
 
         // === RANDOM GAME BUTTON ===
@@ -338,3 +336,4 @@ if (settingsBtn && settingsModal) {
         });
     });
 }
+
