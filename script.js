@@ -289,7 +289,51 @@ if (settingsBtn && settingsModal) {
         });
     });
 }
+// === TRENDING / MOST PLAYED SECTION ===
+const trendingContainer = document.getElementById('trending-games');
 
+if (trendingContainer && allGames.length > 0) {
+    // Pick 6 trending games (you can change these to your favorites)
+    const trendingGames = allGames.filter(g => 
+        ['1v1.LoL', 'Tunnel Rush', 'Retro Bowl', 'Smash Karts', 'Basket Bros', 'Subway Surfers'].some(name => 
+            g.name.toLowerCase().includes(name.toLowerCase())
+        )
+    ).slice(0, 6);
 
+    trendingGames.forEach((g, index) => {
+        const card = document.createElement('div');
+        card.className = 'trending-card';
 
+        if (g.image) {
+            const img = document.createElement('img');
+            img.src = g.image;
+            img.alt = g.name;
+            img.loading = 'lazy';
+            img.onerror = () => img.remove();
+            card.appendChild(img);
+        }
 
+        // Trending badge (e.g., #1, #2...)
+        const badge = document.createElement('div');
+        badge.className = 'trending-badge';
+        badge.textContent = `#${index + 1}`;
+        card.appendChild(badge);
+
+        const bottom = document.createElement('div');
+        bottom.className = 'card-bottom';
+
+        const title = document.createElement('div');
+        title.className = 'game-title';
+        title.textContent = g.name;
+        bottom.appendChild(title);
+
+        const a = document.createElement('a');
+        a.href = g.url;
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        a.appendChild(bottom);
+        card.appendChild(a);
+
+        trendingContainer.appendChild(card);
+    });
+}
