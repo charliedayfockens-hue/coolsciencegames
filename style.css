@@ -803,3 +803,51 @@ body.theme-vaporwave .game-title {
     color: #00ffff;
     text-shadow: 0 0 15px #ff69b4;
 }
+/* Recently Played Section */
+#recently-played {
+    margin: 30px auto;
+    max-width: 1200px;
+    padding: 0 20px;
+}
+
+#recently-played h3 {
+    text-align: center;
+    font-size: 1.8rem;
+    margin-bottom: 20px;
+    color: #4fc3f7;
+}
+
+#recent-games-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+}
+
+.recent-card {
+    width: 220px;
+    background: #1e1e2e;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 8px 20px rgba(79,195,247,0.2);
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.recent-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 30px rgba(79,195,247,0.5);
+}
+
+.recent-card img {
+    width: 100%;
+    height: 140px;
+    object-fit: cover;
+}
+
+.recent-card .title {
+    padding: 12px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: white;
+}
