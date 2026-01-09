@@ -91,6 +91,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
      function render(games) {
+         showRecentlyPlayed();
     listEl.innerHTML = '';
     counterEl.textContent = `${games.length} Game${games.length === 1 ? '' : 's'} Available`;
 
@@ -334,5 +335,6 @@ if (secretReset) {
         }
     });
 }
+
 
 
