@@ -752,3 +752,54 @@ body.theme-gooner .favorite-btn {
     font-weight: bold;
     min-width: 20px;
 }
+/* Candy Theme - Bright & sweet */
+body.theme-candy {
+    background: linear-gradient(to bottom, #ff9a9e, #fad0c4, #fad0c4);
+    color: #333;
+}
+
+body.theme-candy header {
+    background: linear-gradient(135deg, #a18cd1, #fbc2eb);
+}
+
+body.theme-candy .game-card {
+    background: rgba(255,255,255,0.7);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 8px 25px rgba(255,105,180,0.4);
+    border: 2px solid #ff69b4;
+}
+
+body.theme-candy .card-bottom {
+    background: linear-gradient(135deg, #ff9a9e, #fad0c4);
+}
+
+body.theme-candy .game-title {
+    color: #ff1493;
+    text-shadow: 0 0 10px #ff69b4;
+}
+
+/* Vaporwave Theme - Retro 80s/90s aesthetic */
+body.theme-vaporwave {
+    background: #191970;
+    color: #ff69b4;
+}
+
+body.theme-vaporwave header {
+    background: linear-gradient(135deg, #ff1493, #00ffff);
+}
+
+body.theme-vaporwave .game-card {
+    background: rgba(25,25,112,0.7);
+    backdrop-filter: blur(8px);
+    box-shadow: 0 0 25px #ff69b4;
+    border: 1px solid #00ffff;
+}
+
+body.theme-vaporwave .card-bottom {
+    background: linear-gradient(135deg, #ff1493, #191970);
+}
+
+body.theme-vaporwave .game-title {
+    color: #00ffff;
+    text-shadow: 0 0 15px #ff69b4;
+}
