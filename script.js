@@ -89,7 +89,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     } catch (error) {
         listEl.innerHTML = '<p class="loading">Error loading games — try refresh later.</p>';
     }
-function render(games) {
+
+     function render(games) {
     listEl.innerHTML = '';
     counterEl.textContent = `${games.length} Game${games.length === 1 ? '' : 's'} Available`;
 
@@ -116,7 +117,7 @@ function render(games) {
             card.appendChild(img);
         }
 
-        // Favorite heart
+        // Favorite heart (keep as is)
         const heart = document.createElement('button');
         heart.className = 'favorite-btn';
         heart.innerHTML = favorites.includes(g.url) ? '❤️' : '♡';
@@ -144,9 +145,7 @@ function render(games) {
         // Like button
         const likeBtn = document.createElement('button');
         likeBtn.className = 'like-btn';
-        if (ratings[gameId].userVote === 'like') likeBtn.classList.add('liked');
         likeBtn.innerHTML = '👍';
-
         const likeCount = document.createElement('span');
         likeCount.className = 'rating-count';
         likeCount.textContent = ratings[gameId].likes;
@@ -159,14 +158,11 @@ function render(games) {
                 // Undo like
                 ratings[gameId].likes--;
                 ratings[gameId].userVote = null;
-                likeBtn.classList.remove('liked');
             } else {
-                // Add like (remove dislike if exists)
+                // Add like / switch from dislike
                 if (currentVote === 'dislike') ratings[gameId].dislikes--;
                 ratings[gameId].likes++;
                 ratings[gameId].userVote = 'like';
-                likeBtn.classList.add('liked');
-                dislikeBtn.classList.remove('disliked');
             }
 
             likeCount.textContent = ratings[gameId].likes;
@@ -177,9 +173,7 @@ function render(games) {
         // Dislike button
         const dislikeBtn = document.createElement('button');
         dislikeBtn.className = 'dislike-btn';
-        if (ratings[gameId].userVote === 'dislike') dislikeBtn.classList.add('disliked');
         dislikeBtn.innerHTML = '👎';
-
         const dislikeCount = document.createElement('span');
         dislikeCount.className = 'rating-count';
         dislikeCount.textContent = ratings[gameId].dislikes;
@@ -192,14 +186,11 @@ function render(games) {
                 // Undo dislike
                 ratings[gameId].dislikes--;
                 ratings[gameId].userVote = null;
-                dislikeBtn.classList.remove('disliked');
             } else {
-                // Add dislike (remove like if exists)
+                // Add dislike / switch from like
                 if (currentVote === 'like') ratings[gameId].likes--;
                 ratings[gameId].dislikes++;
                 ratings[gameId].userVote = 'dislike';
-                dislikeBtn.classList.add('disliked');
-                likeBtn.classList.remove('liked');
             }
 
             likeCount.textContent = ratings[gameId].likes;
@@ -213,7 +204,7 @@ function render(games) {
         ratingDiv.appendChild(dislikeCount);
         card.appendChild(ratingDiv);
 
-        // Card bottom
+        // Bottom part (title + description)
         const bottom = document.createElement('div');
         bottom.className = 'card-bottom';
 
@@ -343,4 +334,5 @@ if (secretReset) {
         }
     });
 }
+
 
