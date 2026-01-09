@@ -61,28 +61,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         render(allGames);
-        // Track when a game is played
-document.addEventListener('click', (e) => {
-    const link = e.target.closest('a[href*="assets/"]');
-    if (link) {
-        const gameUrl = link.href;
-        let recent = JSON.parse(localStorage.getItem('recentlyPlayed') || '[]');
-        
-        // Remove if already exists (move to top)
-        recent = recent.filter(url => url !== gameUrl);
-        
-        // Add to front
-        recent.unshift(gameUrl);
-        
-        // Keep only last 5
-        recent = recent.slice(0, 5);
-        
-        localStorage.setItem('recentlyPlayed', JSON.stringify(recent));
-        
-        // Refresh the recent section immediately
-        showRecentlyPlayed();
-    }
-});
 
         // === RANDOM GAME BUTTON ===
         const randomBtn = document.createElement('button');
@@ -111,9 +89,9 @@ document.addEventListener('click', (e) => {
     } catch (error) {
         listEl.innerHTML = '<p class="loading">Error loading games — try refresh later.</p>';
     }
+function render(games) {
 
      function render(games) {
-         showRecentlyPlayed();
     listEl.innerHTML = '';
     counterEl.textContent = `${games.length} Game${games.length === 1 ? '' : 's'} Available`;
 
@@ -140,6 +118,7 @@ document.addEventListener('click', (e) => {
             card.appendChild(img);
         }
 
+        // Favorite heart
         // Favorite heart (keep as is)
         const heart = document.createElement('button');
         heart.className = 'favorite-btn';
@@ -168,7 +147,9 @@ document.addEventListener('click', (e) => {
         // Like button
         const likeBtn = document.createElement('button');
         likeBtn.className = 'like-btn';
+        if (ratings[gameId].userVote === 'like') likeBtn.classList.add('liked');
         likeBtn.innerHTML = '👍';
+
         const likeCount = document.createElement('span');
         likeCount.className = 'rating-count';
         likeCount.textContent = ratings[gameId].likes;
@@ -181,11 +162,15 @@ document.addEventListener('click', (e) => {
                 // Undo like
                 ratings[gameId].likes--;
                 ratings[gameId].userVote = null;
+                likeBtn.classList.remove('liked');
             } else {
+                // Add like (remove dislike if exists)
                 // Add like / switch from dislike
                 if (currentVote === 'dislike') ratings[gameId].dislikes--;
                 ratings[gameId].likes++;
                 ratings[gameId].userVote = 'like';
+                likeBtn.classList.add('liked');
+                dislikeBtn.classList.remove('disliked');
             }
 
             likeCount.textContent = ratings[gameId].likes;
@@ -196,7 +181,9 @@ document.addEventListener('click', (e) => {
         // Dislike button
         const dislikeBtn = document.createElement('button');
         dislikeBtn.className = 'dislike-btn';
+        if (ratings[gameId].userVote === 'dislike') dislikeBtn.classList.add('disliked');
         dislikeBtn.innerHTML = '👎';
+
         const dislikeCount = document.createElement('span');
         dislikeCount.className = 'rating-count';
         dislikeCount.textContent = ratings[gameId].dislikes;
@@ -209,11 +196,15 @@ document.addEventListener('click', (e) => {
                 // Undo dislike
                 ratings[gameId].dislikes--;
                 ratings[gameId].userVote = null;
+                dislikeBtn.classList.remove('disliked');
             } else {
+                // Add dislike (remove like if exists)
                 // Add dislike / switch from like
                 if (currentVote === 'like') ratings[gameId].likes--;
                 ratings[gameId].dislikes++;
                 ratings[gameId].userVote = 'dislike';
+                dislikeBtn.classList.add('disliked');
+                likeBtn.classList.remove('liked');
             }
 
             likeCount.textContent = ratings[gameId].likes;
@@ -227,6 +218,7 @@ document.addEventListener('click', (e) => {
         ratingDiv.appendChild(dislikeCount);
         card.appendChild(ratingDiv);
 
+        // Card bottom
         // Bottom part (title + description)
         const bottom = document.createElement('div');
         bottom.className = 'card-bottom';
@@ -255,7 +247,7 @@ document.addEventListener('click', (e) => {
 
     listEl.appendChild(frag);
 }
-    
+
     searchInput.addEventListener('input', () => {
         const query = searchInput.value.trim().toLowerCase();
         const filtered = query ? allGames.filter(g => g.lowerName.includes(query) || (g.description && g.description.toLowerCase().includes(query))) : allGames;
@@ -320,7 +312,7 @@ const themeDropdown = document.getElementById('theme-dropdown');
 const themeToggleBtn = document.getElementById('theme-toggle-btn'); 
 const themeOptions = document.querySelectorAll('.theme-option'); 
 
-  
+
 const savedTheme = localStorage.getItem('theme') || 'dark'; 
 document.body.className = `theme-${savedTheme}`; 
 updateButtonText(savedTheme); 
@@ -356,4 +348,3 @@ if (secretReset) {
             location.reload(); // refresh page to show zero counts immediately
         }
     });
-}
