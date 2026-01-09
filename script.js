@@ -331,6 +331,18 @@ themeOptions.forEach(option => {
         updateButtonText(newTheme); 
     }); 
 });         
+// === SECRET RESET BUTTON (only you know about it) ===
+const secretReset = document.getElementById('secret-reset');
 
-
-
+if (secretReset) {
+    secretReset.addEventListener('click', () => {
+        // Ask for confirmation so you don't accidentally reset
+        if (confirm("Reset ALL like and dislike counters? This cannot be undone!")) {
+            localStorage.removeItem('gameRatings');
+            alert("All like/dislike counters have been reset!");
+            
+            // Optional: refresh the page to show zero counts immediately
+            location.reload();
+        }
+    });
+}
