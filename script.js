@@ -330,18 +330,16 @@ themeOptions.forEach(option => {
         updateButtonText(newTheme); 
     }); 
 });         
-// === SECRET RESET BUTTON (only you know about it) ===
+// === SECRET RESET BUTTON FOR LIKES/DISLIKES (only you know about it) ===
 const secretReset = document.getElementById('secret-reset');
 
 if (secretReset) {
     secretReset.addEventListener('click', () => {
-        // Ask for confirmation so you don't accidentally reset
-        if (confirm("Reset ALL like and dislike counters? This cannot be undone!")) {
+        // Double confirmation so you don't accidentally reset
+        if (confirm("Reset ALL likes and dislikes for every game?") && confirm("Are you REALLY sure? This deletes everything forever!")) {
             localStorage.removeItem('gameRatings');
-            alert("All like/dislike counters have been reset!");
-            
-            // Optional: refresh the page to show zero counts immediately
-            location.reload();
+            alert("All like/dislike counters have been RESET to 0!");
+            location.reload(); // refresh page to show zero counts immediately
         }
     });
 }
