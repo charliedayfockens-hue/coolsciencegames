@@ -429,4 +429,42 @@ searchInput.addEventListener('input', () => {
     // ... your existing search code ...
     showRecentlyPlayed();
 });
+function showRecentlyPlayed() {
+    const container = document.getElementById('recent-games-list');
+    if (!container) return;
 
+    const recentUrls = JSON.parse(localStorage.getItem('recentlyPlayed') || '[]');
+    const recentGames = allGames.filter(g => recentUrls.includes(g.url));
+
+    container.innerHTML = '';
+
+    if (recentGames.length === 0) {
+        container.innerHTML = '<p style="text-align:center;color:#888;">No recent games yet. Play some!</p>';
+        return;
+    }
+
+    recentGames.forEach(g => {
+        const card = document.createElement('div');
+        card.className = 'recent-card';
+
+        if (g.image) {
+            const img = document.createElement('img');
+            img.src = g.image;
+            img.alt = g.name;
+            img.loading = 'lazy';
+            card.appendChild(img);
+        }
+
+        const title = document.createElement('div');
+        title.className = 'title';
+        title.textContent = g.name;
+        card.appendChild(title);
+
+        const a = document.createElement('a');
+        a.href = g.url;
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        a.appendChild(card);
+        container.appendChild(a);
+    });
+}
