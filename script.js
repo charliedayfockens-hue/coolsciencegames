@@ -310,19 +310,18 @@ const themeOptions = document.querySelectorAll('.theme-option');
 const savedTheme = localStorage.getItem('theme') || 'dark'; 
 document.body.className = `theme-${savedTheme}`; 
 updateButtonText(savedTheme); 
-
-function updateButtonText(theme) { 
-    switch (theme) { 
-        case 'dark': themeToggleBtn.innerHTML = '🌙 Dark'; break; 
-        case 'light': themeToggleBtn.innerHTML = '☀️ Light'; break; 
-        case 'neon': themeToggleBtn.innerHTML = '⚡ Neon'; break; 
-        case 'ocean': themeToggleBtn.innerHTML = '🌊 Ocean'; break; 
-        case 'galaxy': themeToggleBtn.innerHTML = '🌌 Galaxy'; break; 
-        case 'gooner': themeToggleBtn.innerHTML = '⚽ Gooner'; break; 
-    } 
-} 
-  
-
+function updateButtonText(theme) {
+    switch (theme) {
+        case 'dark': themeToggleBtn.innerHTML = '🌙 Dark'; break;
+        case 'light': themeToggleBtn.innerHTML = '☀️ Light'; break;
+        case 'neon': themeToggleBtn.innerHTML = '⚡ Neon'; break;
+        case 'ocean': themeToggleBtn.innerHTML = '🌊 Ocean'; break;
+        case 'galaxy': themeToggleBtn.innerHTML = '🌌 Galaxy'; break;
+        case 'gooner': themeToggleBtn.innerHTML = '⚽ Gooner'; break;
+        case 'candy': themeToggleBtn.innerHTML = '🍬 Candy'; break;
+        case 'vaporwave': themeToggleBtn.innerHTML = '🌸 Vaporwave'; break;
+    }
+}
 themeOptions.forEach(option => { 
     option.addEventListener('click', () => { 
         const newTheme = option.dataset.theme; 
@@ -346,3 +345,4 @@ if (secretReset) {
         }
     });
 }
+
