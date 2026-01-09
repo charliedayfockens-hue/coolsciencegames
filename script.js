@@ -61,6 +61,28 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         render(allGames);
+        // Track when a game is played
+document.addEventListener('click', (e) => {
+    const link = e.target.closest('a[href*="assets/"]');
+    if (link) {
+        const gameUrl = link.href;
+        let recent = JSON.parse(localStorage.getItem('recentlyPlayed') || '[]');
+        
+        // Remove if already exists (move to top)
+        recent = recent.filter(url => url !== gameUrl);
+        
+        // Add to front
+        recent.unshift(gameUrl);
+        
+        // Keep only last 5
+        recent = recent.slice(0, 5);
+        
+        localStorage.setItem('recentlyPlayed', JSON.stringify(recent));
+        
+        // Refresh the recent section immediately
+        showRecentlyPlayed();
+    }
+});
 
         // === RANDOM GAME BUTTON ===
         const randomBtn = document.createElement('button');
@@ -407,3 +429,4 @@ searchInput.addEventListener('input', () => {
     // ... your existing search code ...
     showRecentlyPlayed();
 });
+
