@@ -86,167 +86,171 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
         document.body.appendChild(favoritesBtn);
 
+        // === DARK/LIGHT MODE TOGGLE ===
+        const themeToggleBtn = document.createElement('button');
+        themeToggleBtn.id = 'theme-toggle-btn';
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'light') {
+            document.body.classList.add('light-mode');
+            themeToggleBtn.textContent = '☀️';
+        } else {
+            themeToggleBtn.textContent = '🌙';
+        }
+        themeToggleBtn.addEventListener('click', () => {
+            document.body.classList.toggle('light-mode');
+            if (document.body.classList.contains('light-mode')) {
+                themeToggleBtn.textContent = '☀️';
+                localStorage.setItem('theme', 'light');
+            } else {
+                themeToggleBtn.textContent = '🌙';
+                localStorage.setItem('theme', 'dark');
+            }
+        });
+        document.body.appendChild(themeToggleBtn);
+
     } catch (error) {
+        console.error('Loading failed:', error);
         listEl.innerHTML = '<p class="loading">Error loading games — try refresh later.</p>';
     }
-function render(games) {
 
-     function render(games) {
-    listEl.innerHTML = '';
-    counterEl.textContent = `${games.length} Game${games.length === 1 ? '' : 's'} Available`;
+    function render(games) {
+        listEl.innerHTML = '';
+        counterEl.textContent = `${games.length} Game${games.length === 1 ? '' : 's'} Available`;
 
-    if (games.length === 0) {
-        listEl.innerHTML = '<p class="loading">No games found.</p>';
-        return;
+        if (games.length === 0) {
+            listEl.innerHTML = '<p class="loading">No games found.</p>';
+            return;
+        }
+
+        const frag = document.createDocumentFragment();
+        const favorites = JSON.parse(localStorage.getItem('gameFavorites') || '[]');
+        const ratingsKey = 'gameRatings';
+        let ratings = JSON.parse(localStorage.getItem(ratingsKey) || '{}');
+
+        games.forEach(g => {
+            const card = document.createElement('div');
+            card.className = 'game-card';
+            card.style.position = 'relative';
+
+            if (g.image) {
+                const img = document.createElement('img');
+                img.src = g.image;
+                img.alt = g.name;
+                img.loading = 'lazy';
+                card.appendChild(img);
+            }
+
+            // Favorite heart
+            const heart = document.createElement('button');
+            heart.className = 'favorite-btn';
+            heart.innerHTML = favorites.includes(g.url) ? '❤️' : '♡';
+            heart.addEventListener('click', (e) => {
+                e.stopPropagation();
+                let favs = JSON.parse(localStorage.getItem('gameFavorites') || '[]');
+                if (favs.includes(g.url)) {
+                    favs = favs.filter(u => u !== g.url);
+                    heart.innerHTML = '♡';
+                } else {
+                    favs.push(g.url);
+                    heart.innerHTML = '❤️';
+                }
+                localStorage.setItem('gameFavorites', JSON.stringify(favs));
+            });
+            card.appendChild(heart);
+
+            // Like/Dislike container
+            const ratingDiv = document.createElement('div');
+            ratingDiv.className = 'rating-container';
+
+            const gameId = g.url;
+            if (!ratings[gameId]) ratings[gameId] = { likes: 0, dislikes: 0, userVote: null };
+
+            // Like button
+            const likeBtn = document.createElement('button');
+            likeBtn.className = 'like-btn';
+            likeBtn.innerHTML = '👍';
+            const likeCount = document.createElement('span');
+            likeCount.className = 'rating-count';
+            likeCount.textContent = ratings[gameId].likes;
+
+            likeBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const currentVote = ratings[gameId].userVote;
+
+                if (currentVote === 'like') {
+                    ratings[gameId].likes--;
+                    ratings[gameId].userVote = null;
+                } else {
+                    if (currentVote === 'dislike') ratings[gameId].dislikes--;
+                    ratings[gameId].likes++;
+                    ratings[gameId].userVote = 'like';
+                }
+
+                likeCount.textContent = ratings[gameId].likes;
+                dislikeCount.textContent = ratings[gameId].dislikes;
+                localStorage.setItem(ratingsKey, JSON.stringify(ratings));
+            });
+
+            // Dislike button
+            const dislikeBtn = document.createElement('button');
+            dislikeBtn.className = 'dislike-btn';
+            dislikeBtn.innerHTML = '👎';
+            const dislikeCount = document.createElement('span');
+            dislikeCount.className = 'rating-count';
+            dislikeCount.textContent = ratings[gameId].dislikes;
+
+            dislikeBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const currentVote = ratings[gameId].userVote;
+
+                if (currentVote === 'dislike') {
+                    ratings[gameId].dislikes--;
+                    ratings[gameId].userVote = null;
+                } else {
+                    if (currentVote === 'like') ratings[gameId].likes--;
+                    ratings[gameId].dislikes++;
+                    ratings[gameId].userVote = 'dislike';
+                }
+
+                likeCount.textContent = ratings[gameId].likes;
+                dislikeCount.textContent = ratings[gameId].dislikes;
+                localStorage.setItem(ratingsKey, JSON.stringify(ratings));
+            });
+
+            ratingDiv.appendChild(likeBtn);
+            ratingDiv.appendChild(likeCount);
+            ratingDiv.appendChild(dislikeBtn);
+            ratingDiv.appendChild(dislikeCount);
+            card.appendChild(ratingDiv);
+
+            // Card bottom
+            const bottom = document.createElement('div');
+            bottom.className = 'card-bottom';
+
+            const title = document.createElement('div');
+            title.className = 'game-title';
+            title.textContent = g.name;
+            bottom.appendChild(title);
+
+            if (g.description) {
+                const desc = document.createElement('p');
+                desc.className = 'game-desc';
+                desc.textContent = g.description;
+                bottom.appendChild(desc);
+            }
+
+            const a = document.createElement('a');
+            a.href = g.url;
+            a.target = '_blank';
+            a.rel = 'noopener noreferrer';
+            a.appendChild(bottom);
+            card.appendChild(a);
+
+            frag.appendChild(card);
+        });
+
+        listEl.appendChild(frag);
     }
-
-    const frag = document.createDocumentFragment();
-    const favorites = JSON.parse(localStorage.getItem('gameFavorites') || '[]');
-    const ratingsKey = 'gameRatings';
-    let ratings = JSON.parse(localStorage.getItem(ratingsKey) || '{}');
-
-    games.forEach(g => {
-        const card = document.createElement('div');
-        card.className = 'game-card';
-        card.style.position = 'relative';
-
-        if (g.image) {
-            const img = document.createElement('img');
-            img.src = g.image;
-            img.alt = g.name;
-            img.loading = 'lazy';
-            card.appendChild(img);
-        }
-
-        // Favorite heart
-        // Favorite heart (keep as is)
-        const heart = document.createElement('button');
-        heart.className = 'favorite-btn';
-        heart.innerHTML = favorites.includes(g.url) ? '❤️' : '♡';
-        heart.addEventListener('click', (e) => {
-            e.stopPropagation();
-            let favs = JSON.parse(localStorage.getItem('gameFavorites') || '[]');
-            if (favs.includes(g.url)) {
-                favs = favs.filter(u => u !== g.url);
-                heart.innerHTML = '♡';
-            } else {
-                favs.push(g.url);
-                heart.innerHTML = '❤️';
-            }
-            localStorage.setItem('gameFavorites', JSON.stringify(favs));
-        });
-        card.appendChild(heart);
-
-        // Like/Dislike container
-        const ratingDiv = document.createElement('div');
-        ratingDiv.className = 'rating-container';
-
-        const gameId = g.url;
-        if (!ratings[gameId]) ratings[gameId] = { likes: 0, dislikes: 0, userVote: null };
-
-        // Like button
-        const likeBtn = document.createElement('button');
-        likeBtn.className = 'like-btn';
-        if (ratings[gameId].userVote === 'like') likeBtn.classList.add('liked');
-        likeBtn.innerHTML = '👍';
-
-        const likeCount = document.createElement('span');
-        likeCount.className = 'rating-count';
-        likeCount.textContent = ratings[gameId].likes;
-
-        likeBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const currentVote = ratings[gameId].userVote;
-
-            if (currentVote === 'like') {
-                // Undo like
-                ratings[gameId].likes--;
-                ratings[gameId].userVote = null;
-                likeBtn.classList.remove('liked');
-            } else {
-                // Add like (remove dislike if exists)
-                // Add like / switch from dislike
-                if (currentVote === 'dislike') ratings[gameId].dislikes--;
-                ratings[gameId].likes++;
-                ratings[gameId].userVote = 'like';
-                likeBtn.classList.add('liked');
-                dislikeBtn.classList.remove('disliked');
-            }
-
-            likeCount.textContent = ratings[gameId].likes;
-            dislikeCount.textContent = ratings[gameId].dislikes;
-            localStorage.setItem(ratingsKey, JSON.stringify(ratings));
-        });
-
-        // Dislike button
-        const dislikeBtn = document.createElement('button');
-        dislikeBtn.className = 'dislike-btn';
-        if (ratings[gameId].userVote === 'dislike') dislikeBtn.classList.add('disliked');
-        dislikeBtn.innerHTML = '👎';
-
-        const dislikeCount = document.createElement('span');
-        dislikeCount.className = 'rating-count';
-        dislikeCount.textContent = ratings[gameId].dislikes;
-
-        dislikeBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const currentVote = ratings[gameId].userVote;
-
-            if (currentVote === 'dislike') {
-                // Undo dislike
-                ratings[gameId].dislikes--;
-                ratings[gameId].userVote = null;
-                dislikeBtn.classList.remove('disliked');
-            } else {
-                // Add dislike (remove like if exists)
-                // Add dislike / switch from like
-                if (currentVote === 'like') ratings[gameId].likes--;
-                ratings[gameId].dislikes++;
-                ratings[gameId].userVote = 'dislike';
-                dislikeBtn.classList.add('disliked');
-                likeBtn.classList.remove('liked');
-            }
-
-            likeCount.textContent = ratings[gameId].likes;
-            dislikeCount.textContent = ratings[gameId].dislikes;
-            localStorage.setItem(ratingsKey, JSON.stringify(ratings));
-        });
-
-        ratingDiv.appendChild(likeBtn);
-        ratingDiv.appendChild(likeCount);
-        ratingDiv.appendChild(dislikeBtn);
-        ratingDiv.appendChild(dislikeCount);
-        card.appendChild(ratingDiv);
-
-        // Card bottom
-        // Bottom part (title + description)
-        const bottom = document.createElement('div');
-        bottom.className = 'card-bottom';
-
-        const title = document.createElement('div');
-        title.className = 'game-title';
-        title.textContent = g.name;
-        bottom.appendChild(title);
-
-        if (g.description) {
-            const desc = document.createElement('p');
-            desc.className = 'game-desc';
-            desc.textContent = g.description;
-            bottom.appendChild(desc);
-        }
-
-        const a = document.createElement('a');
-        a.href = g.url;
-        a.target = '_blank';
-        a.rel = 'noopener noreferrer';
-        a.appendChild(bottom);
-        card.appendChild(a);
-
-        frag.appendChild(card);
-    });
-
-    listEl.appendChild(frag);
-}
 
     searchInput.addEventListener('input', () => {
         const query = searchInput.value.trim().toLowerCase();
@@ -277,25 +281,16 @@ if (ejectBtn) {
     });
 }
 
-// === CLOAK TAB DROPDOWN ===
-const cloakDropdown = document.getElementById('cloak-dropdown');
-
-if (cloakDropdown) {
-    document.querySelectorAll('.cloak-option').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const title = btn.dataset.title;
-            const favicon = btn.dataset.favicon;
-
-            document.title = title;
-
-            let link = document.querySelector("link[rel*='icon']") || document.createElement('link');
-            link.type = 'image/x-icon';
-            link.rel = 'shortcut icon';
-            link.href = favicon;
-            document.head.appendChild(link);
-
-            alert(`Tab cloaked as ${title}!`);
-        });
+// === CLOAK TAB BUTTON ===
+const cloakBtn = document.getElementById('cloak-btn');
+if (cloakBtn) {
+    cloakBtn.addEventListener('click', () => {
+        document.title = "Schoology";
+        let link = document.querySelector("link[rel*='icon']") || document.createElement('link');
+        link.type = 'image/x-icon';
+        link.rel = 'shortcut icon';
+        link.href = 'https://asset-cdn.schoology.com/sites/all/themes/schoology_theme/favicon.ico';
+        document.head.appendChild(link);
     });
 }
 
@@ -307,44 +302,3 @@ if (requestBtn) {
         window.open(requestUrl, '_blank');
     });
 }
-// === THEME DROPDOWN === 
-const themeDropdown = document.getElementById('theme-dropdown'); 
-const themeToggleBtn = document.getElementById('theme-toggle-btn'); 
-const themeOptions = document.querySelectorAll('.theme-option'); 
-
-
-const savedTheme = localStorage.getItem('theme') || 'dark'; 
-document.body.className = `theme-${savedTheme}`; 
-updateButtonText(savedTheme); 
-function updateButtonText(theme) {
-    switch (theme) {
-        case 'dark': themeToggleBtn.innerHTML = '🌙 Dark'; break;
-        case 'light': themeToggleBtn.innerHTML = '☀️ Light'; break;
-        case 'neon': themeToggleBtn.innerHTML = '⚡ Neon'; break;
-        case 'ocean': themeToggleBtn.innerHTML = '🌊 Ocean'; break;
-        case 'galaxy': themeToggleBtn.innerHTML = '🌌 Galaxy'; break;
-        case 'gooner': themeToggleBtn.innerHTML = '⚽ Gooner'; break;
-        case 'candy': themeToggleBtn.innerHTML = '🍬 Candy'; break;
-        case 'vaporwave': themeToggleBtn.innerHTML = '🌸 Vaporwave'; break;
-    }
-}
-themeOptions.forEach(option => { 
-    option.addEventListener('click', () => { 
-        const newTheme = option.dataset.theme; 
-        document.body.className = `theme-${newTheme}`; 
-        localStorage.setItem('theme', newTheme); 
-        updateButtonText(newTheme); 
-    }); 
-});         
-// === SECRET RESET BUTTON FOR LIKES/DISLIKES (only you know about it) ===
-const secretReset = document.getElementById('secret-reset');
-
-if (secretReset) {
-    secretReset.addEventListener('click', () => {
-        // Double confirmation so you don't accidentally reset
-        if (confirm("Reset ALL likes and dislikes for every game?") && confirm("Are you REALLY sure? This deletes everything forever!")) {
-            localStorage.removeItem('gameRatings');
-            alert("All like/dislike counters have been RESET to 0!");
-            location.reload(); // refresh page to show zero counts immediately
-        }
-    });
