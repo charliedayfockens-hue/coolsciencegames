@@ -15,7 +15,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         const resp = await fetch('https://api.github.com/repos/charliedayfockens-hue/coolsciencegames/git/trees/main?recursive=1', {
             headers: { 'User-Agent': 'CoolScienceGames-Site' }
         });
-        if (!resp.ok) throw new Error('API error');
+
+        if (!resp.ok) {
+            throw new Error(`GitHub API error: ${resp.status}`);
+        }
 
         const data = await resp.json();
 
@@ -30,35 +33,26 @@ document.addEventListener('DOMContentLoaded', async () => {
             const fileName = fullPath.split('/').pop();
             const baseName = fileName.replace(/\.html?$/i, '');
 
-            const cleanName = baseName.replace(/[-_]/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+            const cleanName = baseName
+                .replace(/[-_]/g, ' ')
+                .replace(/\b\w/g, c => c.toUpperCase());
 
-            const possibleImages = [`assets/Images/${baseName}.jpg`, `assets/Images/${baseName}.png`];
+            const possibleImages = [
+                `assets/Images/${baseName}.jpg`,
+                `assets/Images/${baseName}.png`,
+                `assets/Images/${baseName}.jpeg`
+            ];
             const imagePath = possibleImages.find(img => data.tree.some(t => t.path === img));
-
-            const descPath = `assets/Descriptions/${baseName}.txt`;
-            const descUrl = data.tree.some(t => t.path === descPath) ? `${baseUrl}${descPath}` : null;
 
             return {
                 name: cleanName,
                 url: `${baseUrl}${fullPath}`,
                 lowerName: cleanName.toLowerCase(),
-                image: imagePath ? `${baseUrl}${imagePath}` : null,
-                descriptionUrl: descUrl,
-                description: ''
+                image: imagePath ? `${baseUrl}${imagePath}` : null
             };
         });
 
         allGames.sort((a, b) => a.name.localeCompare(b.name));
-
-        // Load descriptions
-        for (const game of allGames) {
-            if (game.descriptionUrl) {
-                try {
-                    const dResp = await fetch(game.descriptionUrl);
-                    if (dResp.ok) game.description = (await dResp.text()).trim().replace(/\n/g, ' ');
-                } catch {}
-            }
-        }
 
         render(allGames);
 
@@ -124,8 +118,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const frag = document.createDocumentFragment();
         const favorites = JSON.parse(localStorage.getItem('gameFavorites') || '[]');
-        const ratingsKey = 'gameRatings';
-        let ratings = JSON.parse(localStorage.getItem(ratingsKey) || '{}');
 
         games.forEach(g => {
             const card = document.createElement('div');
@@ -137,6 +129,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 img.src = g.image;
                 img.alt = g.name;
                 img.loading = 'lazy';
+                img.onerror = () => img.remove();
                 card.appendChild(img);
             }
 
@@ -158,72 +151,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
             card.appendChild(heart);
 
-            // Like/Dislike container
-            const ratingDiv = document.createElement('div');
-            ratingDiv.className = 'rating-container';
-
-            const gameId = g.url;
-            if (!ratings[gameId]) ratings[gameId] = { likes: 0, dislikes: 0, userVote: null };
-
-            // Like button
-            const likeBtn = document.createElement('button');
-            likeBtn.className = 'like-btn';
-            likeBtn.innerHTML = '👍';
-            const likeCount = document.createElement('span');
-            likeCount.className = 'rating-count';
-            likeCount.textContent = ratings[gameId].likes;
-
-            likeBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const currentVote = ratings[gameId].userVote;
-
-                if (currentVote === 'like') {
-                    ratings[gameId].likes--;
-                    ratings[gameId].userVote = null;
-                } else {
-                    if (currentVote === 'dislike') ratings[gameId].dislikes--;
-                    ratings[gameId].likes++;
-                    ratings[gameId].userVote = 'like';
-                }
-
-                likeCount.textContent = ratings[gameId].likes;
-                dislikeCount.textContent = ratings[gameId].dislikes;
-                localStorage.setItem(ratingsKey, JSON.stringify(ratings));
-            });
-
-            // Dislike button
-            const dislikeBtn = document.createElement('button');
-            dislikeBtn.className = 'dislike-btn';
-            dislikeBtn.innerHTML = '👎';
-            const dislikeCount = document.createElement('span');
-            dislikeCount.className = 'rating-count';
-            dislikeCount.textContent = ratings[gameId].dislikes;
-
-            dislikeBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const currentVote = ratings[gameId].userVote;
-
-                if (currentVote === 'dislike') {
-                    ratings[gameId].dislikes--;
-                    ratings[gameId].userVote = null;
-                } else {
-                    if (currentVote === 'like') ratings[gameId].likes--;
-                    ratings[gameId].dislikes++;
-                    ratings[gameId].userVote = 'dislike';
-                }
-
-                likeCount.textContent = ratings[gameId].likes;
-                dislikeCount.textContent = ratings[gameId].dislikes;
-                localStorage.setItem(ratingsKey, JSON.stringify(ratings));
-            });
-
-            ratingDiv.appendChild(likeBtn);
-            ratingDiv.appendChild(likeCount);
-            ratingDiv.appendChild(dislikeBtn);
-            ratingDiv.appendChild(dislikeCount);
-            card.appendChild(ratingDiv);
-
-            // Card bottom
             const bottom = document.createElement('div');
             bottom.className = 'card-bottom';
 
@@ -231,13 +158,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             title.className = 'game-title';
             title.textContent = g.name;
             bottom.appendChild(title);
-
-            if (g.description) {
-                const desc = document.createElement('p');
-                desc.className = 'game-desc';
-                desc.textContent = g.description;
-                bottom.appendChild(desc);
-            }
 
             const a = document.createElement('a');
             a.href = g.url;
@@ -252,53 +172,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         listEl.appendChild(frag);
     }
 
-    searchInput.addEventListener('input', () => {
-        const query = searchInput.value.trim().toLowerCase();
-        const filtered = query ? allGames.filter(g => g.lowerName.includes(query) || (g.description && g.description.toLowerCase().includes(query))) : allGames;
-        render(filtered);
-    });
+    if (searchInput) {
+        searchInput.addEventListener('input', () => {
+            const query = searchInput.value.trim().toLowerCase();
+            const filtered = query ? allGames.filter(g => g.lowerName.includes(query)) : allGames;
+            render(filtered);
+        });
+    }
 });
-
-// === CREDITS MODAL ===
-const creditsBtn = document.getElementById('credits-btn');
-const creditsModal = document.getElementById('credits-modal');
-const closeCredits = document.getElementById('close-credits');
-
-if (creditsBtn && creditsModal && closeCredits) {
-    creditsBtn.addEventListener('click', () => creditsModal.classList.add('show'));
-    closeCredits.addEventListener('click', () => creditsModal.classList.remove('show'));
-    creditsModal.addEventListener('click', (e) => {
-        if (e.target === creditsModal) creditsModal.classList.remove('show');
-    });
-}
-
-// === EJECT BUTTON ===
-const ejectBtn = document.getElementById('eject-btn');
-if (ejectBtn) {
-    ejectBtn.addEventListener('click', () => {
-        window.close();
-        window.location.href = 'about:blank';
-    });
-}
-
-// === CLOAK TAB BUTTON ===
-const cloakBtn = document.getElementById('cloak-btn');
-if (cloakBtn) {
-    cloakBtn.addEventListener('click', () => {
-        document.title = "Schoology";
-        let link = document.querySelector("link[rel*='icon']") || document.createElement('link');
-        link.type = 'image/x-icon';
-        link.rel = 'shortcut icon';
-        link.href = 'https://asset-cdn.schoology.com/sites/all/themes/schoology_theme/favicon.ico';
-        document.head.appendChild(link);
-    });
-}
-
-// === REQUEST A GAME BUTTON ===
-const requestBtn = document.getElementById('request-btn');
-if (requestBtn) {
-    requestBtn.addEventListener('click', () => {
-        const requestUrl = 'https://docs.google.com/forms/d/e/YOUR_FORM_ID/viewform'; // CHANGE TO YOUR LINK
-        window.open(requestUrl, '_blank');
-    });
-}
