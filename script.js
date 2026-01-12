@@ -13,125 +13,79 @@ document.addEventListener('DOMContentLoaded', function() {
 // Automatically load games from assets folder
 async function loadGamesAutomatically() {
     const gamesGrid = document.getElementById('gamesGrid');
-    gamesGrid.innerHTML = '<div class="loading">Scanning for games...</div>';
+    gamesGrid.innerHTML = '<div class="loading">Looking for games in assets folder...</div>';
     
+    // Method 1: Try GitHub API first (most reliable for GitHub Pages)
     try {
-        // Method 1: Try to fetch the assets directory listing
-        const response = await fetch('assets/');
-        const text = await response.text();
+        // Get the repo path from the URL
+        const path = window.location.pathname;
+        const pathParts = path.split('/').filter(p => p);
         
-        // Parse HTML to find .html files
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(text, 'text/html');
-        const links = doc.querySelectorAll('a');
-        
-        const gameFiles = [];
-        links.forEach(link => {
-            const href = link.getAttribute('href');
-            // Only include .html files, exclude index.html if present
-            if (href && href.endsWith('.html') && href !== 'index.html') {
-                gameFiles.push(href.split('/').pop()); // Get just the filename
-            }
-        });
-        
-        if (gameFiles.length > 0) {
-            allGames = gameFiles.map(filename => ({
-                filename: filename,
-                displayName: formatGameName(filename)
-            }));
-            displayGames(allGames);
-        } else {
-            throw new Error('No games found via directory listing');
-        }
-    } catch (error) {
-        console.log('Direct folder scanning not available, using GitHub API method...');
-        
-        // Method 2: Try GitHub API (works for GitHub Pages)
-        try {
-            // Extract repo info from URL
-            const pathParts = window.location.pathname.split('/').filter(p => p);
-            const username = pathParts[0] || 'your-username';
-            const repo = pathParts[1] || 'your-repo';
+        // Check if we're on GitHub Pages
+        if (pathParts.length >= 2 && window.location.hostname.includes('github.io')) {
+            const username = pathParts[0];
+            const repo = pathParts[1];
             
             const apiUrl = `https://api.github.com/repos/${username}/${repo}/contents/assets`;
             const response = await fetch(apiUrl);
-            const files = await response.json();
             
-            if (Array.isArray(files)) {
+            if (response.ok) {
+                const files = await response.json();
                 const gameFiles = files
-                    .filter(file => file.name.endsWith('.html') && file.name !== 'index.html')
+                    .filter(file => file.type === 'file' && file.name.endsWith('.html'))
                     .map(file => file.name);
                 
+                if (gameFiles.length > 0) {
+                    allGames = gameFiles.map(filename => ({
+                        filename: filename,
+                        displayName: formatGameName(filename)
+                    }));
+                    displayGames(allGames);
+                    return;
+                }
+            }
+        }
+    } catch (error) {
+        console.log('GitHub API method failed:', error);
+    }
+    
+    // Method 2: Try direct folder listing
+    try {
+        const response = await fetch('assets/');
+        if (response.ok) {
+            const text = await response.text();
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(text, 'text/html');
+            const links = doc.querySelectorAll('a');
+            
+            const gameFiles = [];
+            links.forEach(link => {
+                const href = link.getAttribute('href');
+                if (href && href.endsWith('.html')) {
+                    // Get just the filename without path
+                    const filename = href.split('/').pop();
+                    if (filename !== 'index.html') {
+                        gameFiles.push(filename);
+                    }
+                }
+            });
+            
+            if (gameFiles.length > 0) {
                 allGames = gameFiles.map(filename => ({
                     filename: filename,
                     displayName: formatGameName(filename)
                 }));
-                
                 displayGames(allGames);
-            } else {
-                throw new Error('GitHub API returned unexpected format');
+                return;
             }
-        } catch (apiError) {
-            console.log('GitHub API method failed, trying brute force detection...');
-            
-            // Method 3: Brute force - try common filenames
-            await detectGamesBruteForce();
         }
-    }
-}
-
-// Brute force detection - tries to HEAD request common game filenames
-async function detectGamesBruteForce() {
-    const gamesGrid = document.getElementById('gamesGrid');
-    gamesGrid.innerHTML = '<div class="loading">Searching for games...</div>';
-    
-    // Generate possible game filenames to check
-    const possibleNames = [];
-    
-    // Try numbered games
-    for (let i = 1; i <= 50; i++) {
-        possibleNames.push(`game${i}.html`);
-        possibleNames.push(`game-${i}.html`);
-        possibleNames.push(`game_${i}.html`);
+    } catch (error) {
+        console.log('Direct folder listing failed:', error);
     }
     
-    // Try common game name patterns
-    const commonPrefixes = ['math', 'science', 'physics', 'chemistry', 'biology', 'space', 
-                           'puzzle', 'quiz', 'challenge', 'simulator', 'lab', 'adventure',
-                           'racing', 'shooter', 'platformer', 'arcade', 'casual'];
-    
-    commonPrefixes.forEach(prefix => {
-        possibleNames.push(`${prefix}.html`);
-        possibleNames.push(`${prefix}-game.html`);
-        possibleNames.push(`${prefix}_game.html`);
-        for (let i = 1; i <= 10; i++) {
-            possibleNames.push(`${prefix}${i}.html`);
-            possibleNames.push(`${prefix}-${i}.html`);
-            possibleNames.push(`${prefix}_${i}.html`);
-        }
-    });
-    
-    // Add the example games
-    possibleNames.push('Physics_Simulator.html');
-    possibleNames.push('Math_Challenge.html');
-    
-    const foundGames = [];
-    const checkBatch = 10; // Check 10 files at a time
-    
-    for (let i = 0; i < possibleNames.length; i += checkBatch) {
-        const batch = possibleNames.slice(i, i + checkBatch);
-        const checks = batch.map(name => checkGameExists(name));
-        const results = await Promise.all(checks);
-        
-        results.forEach((exists, idx) => {
-            if (exists) {
-                foundGames.push(batch[idx]);
-            }
-        });
-        
-        // Update progress
-        gamesGrid.innerHTML = `<div class="loading">Found ${foundGames.length} games... (${Math.min(i + checkBatch, possibleNames.length)}/${possibleNames.length} checked)</div>`;
-    }
+    // Method 3: Quick smart check - only check a few common patterns
+    gamesGrid.innerHTML = '<div class="loading">Searching for games... this will take a moment...</div>';
+    const foundGames = await quickGameSearch();
     
     if (foundGames.length > 0) {
         allGames = foundGames.map(filename => ({
@@ -142,14 +96,59 @@ async function detectGamesBruteForce() {
     } else {
         gamesGrid.innerHTML = `
             <div class="loading" style="text-align: center;">
-                <p style="font-size: 1.4rem; margin-bottom: 15px;">No games found! 😢</p>
-                <p style="font-size: 1rem; opacity: 0.9;">Add .html game files to the 'assets' folder in your repository.</p>
-                <p style="font-size: 0.9rem; margin-top: 10px; opacity: 0.8;">
-                    The website will automatically detect them once you add them!
-                </p>
+                <p style="font-size: 1.4rem; margin-bottom: 15px;">😢 No games found in assets folder!</p>
+                <p style="font-size: 1rem; opacity: 0.9; margin-bottom: 10px;">Make sure:</p>
+                <p style="font-size: 0.9rem; opacity: 0.8;">1. Files are in the 'assets' folder</p>
+                <p style="font-size: 0.9rem; opacity: 0.8;">2. Files end with .html</p>
+                <p style="font-size: 0.9rem; opacity: 0.8;">3. You've pushed to GitHub</p>
+                <p style="font-size: 0.8rem; margin-top: 15px; opacity: 0.7;">Current path: ${window.location.href}</p>
             </div>
         `;
     }
+}
+
+// Quick search for common game patterns
+async function quickGameSearch() {
+    const possibleNames = [];
+    
+    // Check numbered games (1-20 only)
+    for (let i = 1; i <= 20; i++) {
+        possibleNames.push(`game${i}.html`);
+        possibleNames.push(`game-${i}.html`);
+        possibleNames.push(`game_${i}.html`);
+    }
+    
+    // Check common single word names
+    const commonWords = ['math', 'science', 'physics', 'chemistry', 'biology', 
+                        'space', 'puzzle', 'quiz', 'test', 'adventure', 'racing',
+                        'shooter', 'platformer', 'arcade', 'snake', 'pong', 'tetris'];
+    
+    commonWords.forEach(word => {
+        possibleNames.push(`${word}.html`);
+        possibleNames.push(`${word}-game.html`);
+        possibleNames.push(`${word}_game.html`);
+    });
+    
+    // Add the example games
+    possibleNames.push('Physics_Simulator.html');
+    possibleNames.push('Math_Challenge.html');
+    possibleNames.push('index.html');
+    
+    const foundGames = [];
+    
+    // Check in batches of 5 to be faster
+    for (let i = 0; i < possibleNames.length; i += 5) {
+        const batch = possibleNames.slice(i, i + 5);
+        const results = await Promise.all(batch.map(name => checkGameExists(name)));
+        
+        results.forEach((exists, idx) => {
+            if (exists && batch[idx] !== 'index.html') {
+                foundGames.push(batch[idx]);
+            }
+        });
+    }
+    
+    return foundGames;
 }
 
 // Check if a game file exists
