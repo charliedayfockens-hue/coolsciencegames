@@ -90,6 +90,268 @@ body.theme-custom .game-button {
     color: var(--custom-text-color);
 }
 
+/* Neon Cyberpunk Theme */
+body.theme-neon-cyberpunk {
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a0a2e 50%, #16213e 100%);
+    position: relative;
+}
+
+body.theme-neon-cyberpunk::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: 
+        repeating-linear-gradient(0deg, rgba(255, 0, 255, 0.1) 0px, transparent 2px, transparent 4px),
+        repeating-linear-gradient(90deg, rgba(0, 255, 255, 0.1) 0px, transparent 2px, transparent 4px);
+    pointer-events: none;
+    animation: neonFlicker 2s infinite;
+}
+
+@keyframes neonFlicker {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.8; }
+}
+
+body.theme-neon-cyberpunk .game-button {
+    background: rgba(0, 0, 0, 0.7);
+    border: 2px solid #00ffff;
+    color: #00ffff;
+    text-shadow: 0 0 10px #00ffff;
+}
+
+/* Dark Mode Theme */
+body.theme-dark-mode {
+    background: #000000;
+}
+
+body.theme-dark-mode .game-button {
+    background: rgba(50, 50, 50, 0.9);
+    color: #e0e0e0;
+}
+
+body.theme-dark-mode .title,
+body.theme-dark-mode .subtitle {
+    color: #ffffff;
+}
+
+/* Retro Arcade Theme */
+body.theme-retro-arcade {
+    background: 
+        linear-gradient(45deg, #ff0080 25%, transparent 25%),
+        linear-gradient(-45deg, #ff0080 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #00ffff 75%),
+        linear-gradient(-45deg, transparent 75%, #00ffff 75%),
+        #1a1a2e;
+    background-size: 20px 20px;
+    background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+}
+
+body.theme-retro-arcade .game-button {
+    background: rgba(255, 215, 0, 0.9);
+    color: #000;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 0.7rem;
+}
+
+/* Forest Fantasy Theme */
+body.theme-forest-fantasy {
+    background: linear-gradient(135deg, #1e4620 0%, #2d5016 50%, #1a3d1a 100%);
+}
+
+body.theme-forest-fantasy .game-button {
+    background: rgba(76, 175, 80, 0.3);
+    color: #b2ff59;
+    border: 2px solid #4caf50;
+}
+
+/* Fire & Lava Theme */
+body.theme-fire-lava {
+    background: linear-gradient(135deg, #ff0000 0%, #ff4500 25%, #ff6347 50%, #ff7f00 75%, #ff0000 100%);
+    background-size: 400% 400%;
+    animation: fireFlow 5s ease infinite;
+}
+
+@keyframes fireFlow {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+body.theme-fire-lava .game-button {
+    background: rgba(139, 0, 0, 0.7);
+    color: #ffa500;
+    border: 2px solid #ff4500;
+}
+
+/* Ice Kingdom Theme */
+body.theme-ice-kingdom {
+    background: linear-gradient(135deg, #00bfff 0%, #1e90ff 50%, #87ceeb 100%);
+}
+
+body.theme-ice-kingdom .game-button {
+    background: rgba(176, 224, 230, 0.5);
+    color: #00008b;
+    border: 2px solid #4682b4;
+}
+
+/* Ocean Depths Theme */
+body.theme-ocean-depths {
+    background: linear-gradient(135deg, #001f3f 0%, #003d5c 50%, #005a7a 100%);
+}
+
+body.theme-ocean-depths .game-button {
+    background: rgba(0, 128, 128, 0.4);
+    color: #00ffff;
+    border: 2px solid #20b2aa;
+}
+
+/* Desert Storm Theme */
+body.theme-desert-storm {
+    background: linear-gradient(135deg, #daa520 0%, #d2691e 50%, #cd853f 100%);
+}
+
+body.theme-desert-storm .game-button {
+    background: rgba(210, 180, 140, 0.7);
+    color: #8b4513;
+}
+
+/* Glitch Mode Theme */
+body.theme-glitch-mode {
+    background: #000;
+    animation: glitchBg 0.3s infinite;
+}
+
+@keyframes glitchBg {
+    0% { background: #000; }
+    33% { background: #0a0a0a; }
+    66% { background: #050505; }
+    100% { background: #000; }
+}
+
+body.theme-glitch-mode .game-button {
+    background: rgba(255, 255, 255, 0.1);
+    color: #00ff00;
+    animation: glitchText 0.5s infinite;
+}
+
+@keyframes glitchText {
+    0% { transform: translate(0); }
+    20% { transform: translate(-2px, 2px); }
+    40% { transform: translate(2px, -2px); }
+    60% { transform: translate(-2px, -2px); }
+    80% { transform: translate(2px, 2px); }
+    100% { transform: translate(0); }
+}
+
+/* Synthwave Sunset Theme */
+body.theme-synthwave {
+    background: linear-gradient(180deg, #ff00ff 0%, #ff1493 25%, #ff69b4 50%, #4b0082 75%, #000080 100%);
+}
+
+body.theme-synthwave .game-button {
+    background: rgba(255, 20, 147, 0.3);
+    color: #00ffff;
+    border: 2px solid #ff1493;
+}
+
+/* Blood Moon Horror Theme */
+body.theme-blood-moon {
+    background: linear-gradient(135deg, #1a0000 0%, #330000 50%, #4d0000 100%);
+}
+
+body.theme-blood-moon .game-button {
+    background: rgba(139, 0, 0, 0.5);
+    color: #ff0000;
+    font-family: 'Creepster', cursive;
+}
+
+/* Minimal White Theme */
+body.theme-minimal-white {
+    background: #ffffff;
+}
+
+body.theme-minimal-white .game-button {
+    background: rgba(255, 255, 255, 0.9);
+    color: #000000;
+    border: 2px solid #000000;
+}
+
+body.theme-minimal-white .title,
+body.theme-minimal-white .subtitle {
+    color: #000000;
+    text-shadow: none;
+}
+
+/* Matrix Code Theme */
+body.theme-matrix {
+    background: #000000;
+}
+
+body.theme-matrix .game-button {
+    background: rgba(0, 0, 0, 0.8);
+    color: #00ff00;
+    font-family: 'Share Tech Mono', monospace;
+    border: 1px solid #00ff00;
+}
+
+/* Galaxy Rainbow Theme */
+body.theme-galaxy-rainbow {
+    background: radial-gradient(ellipse at center, #ff0080 0%, #ff8c00 20%, #ffd700 40%, #00ff00 60%, #00bfff 80%, #8a2be2 100%);
+    background-size: 200% 200%;
+    animation: galaxyRainbow 10s ease infinite;
+}
+
+@keyframes galaxyRainbow {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+/* Steampunk Theme */
+body.theme-steampunk {
+    background: linear-gradient(135deg, #3e2723 0%, #5d4037 50%, #6d4c41 100%);
+}
+
+body.theme-steampunk .game-button {
+    background: rgba(205, 127, 50, 0.5);
+    color: #ffd700;
+    border: 2px solid #b8860b;
+}
+
+/* Cartoon Pop Theme */
+body.theme-cartoon-pop {
+    background: linear-gradient(45deg, #ff6b6b 0%, #4ecdc4 25%, #ffe66d 50%, #a8e6cf 75%, #ff6b6b 100%);
+}
+
+body.theme-cartoon-pop .game-button {
+    background: rgba(255, 255, 255, 0.9);
+    color: #ff1744;
+    font-family: 'Luckiest Guy', cursive;
+}
+
+/* Shadow Realm Theme */
+body.theme-shadow-realm {
+    background: linear-gradient(135deg, #1a0033 0%, #2d004d 50%, #4b0082 100%);
+}
+
+body.theme-shadow-realm .game-button {
+    background: rgba(138, 43, 226, 0.3);
+    color: #da70d6;
+    border: 2px solid #9370db;
+}
+
+/* Snowy Night Theme */
+body.theme-snowy-night {
+    background: linear-gradient(135deg, #1e3a5f 0%, #2c5282 50%, #3a7ca5 100%);
+}
+
+body.theme-snowy-night .game-button {
+    background: rgba(240, 248, 255, 0.3);
+    color: #f0f8ff;
+    border: 2px solid #b0e0e6;
+}
+
 /* Animated background stars */
 .stars {
     position: fixed;
@@ -386,7 +648,10 @@ header {
     padding: 20px;
     border-radius: 15px;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-    min-width: 300px;
+    min-width: 500px;
+    max-width: 90vw;
+    max-height: 80vh;
+    overflow-y: auto;
     opacity: 0;
     pointer-events: none;
     transition: all 0.3s ease;
@@ -399,20 +664,20 @@ header {
     transform: translateX(-50%) translateY(0);
 }
 
-.theme-dropdown .theme-buttons {
+.theme-buttons-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
     margin-bottom: 15px;
 }
 
 .theme-dropdown .theme-btn {
-    padding: 12px 15px;
+    padding: 10px 12px;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     border: none;
-    border-radius: 10px;
+    border-radius: 8px;
     color: white;
-    font-size: 0.95rem;
+    font-size: 0.85rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -466,6 +731,36 @@ header {
     border: none;
     border-radius: 6px;
     cursor: pointer;
+}
+
+.font-picker {
+    padding: 8px 12px;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    background: white;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.font-picker:hover {
+    border-color: #667eea;
+}
+
+.font-picker:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+@media (max-width: 768px) {
+    .theme-dropdown {
+        min-width: 90vw;
+    }
+    
+    .theme-buttons-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }
 
 

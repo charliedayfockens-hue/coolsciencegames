@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cool Science Games</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Press+Start+2P&family=Rajdhani:wght@400;600;700&family=Audiowide&family=VT323&family=Russo+One&family=Bungee&family=Exo+2:wght@400;700&family=Share+Tech+Mono&family=Pixelify+Sans:wght@400;700&family=Cinzel:wght@400;700&family=Creepster&family=Oxanium:wght@400;700&family=Silkscreen:wght@400;700&family=Teko:wght@400;700&family=Rubik:wght@400;700&family=Montserrat:wght@400;700&family=Freckle+Face&family=MedievalSharp&family=Chakra+Petch:wght@400;700&family=Anton&family=Nosifer&family=Inter:wght@400;700&family=Luckiest+Guy&family=Aldrich&family=Roboto+Mono:wght@400;700&family=Unica+One&family=Major+Mono+Display&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -16,15 +19,35 @@
                 <div class="theme-dropdown-container">
                     <button id="themeToggle" class="theme-toggle">🎨 Change Theme</button>
                     <div id="themeDropdown" class="theme-dropdown">
-                        <div class="theme-buttons">
+                        <h3 style="color: #667eea; margin-bottom: 15px; font-size: 1.2rem;">Choose Theme</h3>
+                        
+                        <div class="theme-buttons-grid">
                             <button class="theme-btn" data-theme="default">Default</button>
                             <button class="theme-btn" data-theme="rainbow">Rainbow</button>
                             <button class="theme-btn" data-theme="galaxy">Galaxy</button>
+                            <button class="theme-btn" data-theme="neon-cyberpunk">Neon Cyberpunk</button>
+                            <button class="theme-btn" data-theme="dark-mode">Dark Mode</button>
+                            <button class="theme-btn" data-theme="retro-arcade">Retro Arcade</button>
+                            <button class="theme-btn" data-theme="forest-fantasy">Forest Fantasy</button>
+                            <button class="theme-btn" data-theme="fire-lava">Fire & Lava</button>
+                            <button class="theme-btn" data-theme="ice-kingdom">Ice Kingdom</button>
+                            <button class="theme-btn" data-theme="ocean-depths">Ocean Depths</button>
+                            <button class="theme-btn" data-theme="desert-storm">Desert Storm</button>
+                            <button class="theme-btn" data-theme="glitch-mode">Glitch Mode</button>
+                            <button class="theme-btn" data-theme="synthwave">Synthwave Sunset</button>
+                            <button class="theme-btn" data-theme="blood-moon">Blood Moon</button>
+                            <button class="theme-btn" data-theme="minimal-white">Minimal White</button>
+                            <button class="theme-btn" data-theme="matrix">Matrix Code</button>
+                            <button class="theme-btn" data-theme="galaxy-rainbow">Galaxy Rainbow</button>
+                            <button class="theme-btn" data-theme="steampunk">Steampunk</button>
+                            <button class="theme-btn" data-theme="cartoon-pop">Cartoon Pop</button>
+                            <button class="theme-btn" data-theme="shadow-realm">Shadow Realm</button>
+                            <button class="theme-btn" data-theme="snowy-night">Snowy Night</button>
                             <button class="theme-btn" data-theme="custom">Custom</button>
                         </div>
                         
                         <div id="customColorPanel" class="custom-color-panel" style="display: none;">
-                            <h4>Custom Colors</h4>
+                            <h4>Custom Colors & Font</h4>
                             <div class="color-controls">
                                 <div class="color-control">
                                     <label>Background Color:</label>
@@ -37,6 +60,40 @@
                                 <div class="color-control">
                                     <label>Button Text Color:</label>
                                     <input type="color" id="textColorPicker" value="#667eea">
+                                </div>
+                                <div class="color-control">
+                                    <label>Font:</label>
+                                    <select id="fontPicker" class="font-picker">
+                                        <option value="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif">Default</option>
+                                        <option value="'Orbitron', sans-serif">Orbitron</option>
+                                        <option value="'Press Start 2P', cursive">Press Start 2P</option>
+                                        <option value="'Rajdhani', sans-serif">Rajdhani</option>
+                                        <option value="'Audiowide', cursive">Audiowide</option>
+                                        <option value="'VT323', monospace">VT323</option>
+                                        <option value="'Russo One', sans-serif">Russo One</option>
+                                        <option value="'Bungee', cursive">Bungee</option>
+                                        <option value="'Exo 2', sans-serif">Exo 2</option>
+                                        <option value="'Share Tech Mono', monospace">Share Tech Mono</option>
+                                        <option value="'Pixelify Sans', cursive">Pixelify Sans</option>
+                                        <option value="'Cinzel', serif">Cinzel</option>
+                                        <option value="'Creepster', cursive">Creepster</option>
+                                        <option value="'Oxanium', cursive">Oxanium</option>
+                                        <option value="'Silkscreen', cursive">Silkscreen</option>
+                                        <option value="'Teko', sans-serif">Teko</option>
+                                        <option value="'Rubik', sans-serif">Rubik</option>
+                                        <option value="'Montserrat', sans-serif">Montserrat</option>
+                                        <option value="'Freckle Face', cursive">Freckle Face</option>
+                                        <option value="'MedievalSharp', cursive">MedievalSharp</option>
+                                        <option value="'Chakra Petch', sans-serif">Chakra Petch</option>
+                                        <option value="'Anton', sans-serif">Anton</option>
+                                        <option value="'Nosifer', cursive">Nosifer</option>
+                                        <option value="'Inter', sans-serif">Inter</option>
+                                        <option value="'Luckiest Guy', cursive">Luckiest Guy</option>
+                                        <option value="'Aldrich', sans-serif">Aldrich</option>
+                                        <option value="'Roboto Mono', monospace">Roboto Mono</option>
+                                        <option value="'Unica One', cursive">Unica One</option>
+                                        <option value="'Major Mono Display', monospace">Major Mono Display</option>
+                                    </select>
                                 </div>
                             </div>
                         </div>

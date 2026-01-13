@@ -357,10 +357,12 @@ function setupThemeChanger() {
     const bgColorPicker = document.getElementById('bgColorPicker');
     const bgShadePicker = document.getElementById('bgShadePicker');
     const textColorPicker = document.getElementById('textColorPicker');
+    const fontPicker = document.getElementById('fontPicker');
     
     bgColorPicker.addEventListener('input', updateCustomTheme);
     bgShadePicker.addEventListener('input', updateCustomTheme);
     textColorPicker.addEventListener('input', updateCustomTheme);
+    fontPicker.addEventListener('change', updateCustomFont);
 }
 
 // Apply theme
@@ -369,7 +371,17 @@ function applyTheme(theme) {
     const body = document.body;
     
     // Remove all theme classes
-    body.classList.remove('theme-rainbow', 'theme-galaxy', 'theme-custom');
+    const themeClasses = [
+        'theme-rainbow', 'theme-galaxy', 'theme-custom',
+        'theme-neon-cyberpunk', 'theme-dark-mode', 'theme-retro-arcade',
+        'theme-forest-fantasy', 'theme-fire-lava', 'theme-ice-kingdom',
+        'theme-ocean-depths', 'theme-desert-storm', 'theme-glitch-mode',
+        'theme-synthwave', 'theme-blood-moon', 'theme-minimal-white',
+        'theme-matrix', 'theme-galaxy-rainbow', 'theme-steampunk',
+        'theme-cartoon-pop', 'theme-shadow-realm', 'theme-snowy-night'
+    ];
+    
+    themeClasses.forEach(cls => body.classList.remove(cls));
     
     // Apply new theme
     if (theme !== 'default') {
@@ -379,17 +391,20 @@ function applyTheme(theme) {
     // Save theme preference
     localStorage.setItem('selectedTheme', theme);
     
-    // If custom, apply saved colors
+    // If custom, apply saved colors and font
     if (theme === 'custom') {
         const bgColor = localStorage.getItem('customBgColor') || '#667eea';
         const bgShade = localStorage.getItem('customBgShade') || '#764ba2';
         const textColor = localStorage.getItem('customTextColor') || '#667eea';
+        const font = localStorage.getItem('customFont') || "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
         
         document.getElementById('bgColorPicker').value = bgColor;
         document.getElementById('bgShadePicker').value = bgShade;
         document.getElementById('textColorPicker').value = textColor;
+        document.getElementById('fontPicker').value = font;
         
         updateCustomTheme();
+        updateCustomFont();
     }
 }
 
@@ -407,6 +422,13 @@ function updateCustomTheme() {
     localStorage.setItem('customBgColor', bgColor);
     localStorage.setItem('customBgShade', bgShade);
     localStorage.setItem('customTextColor', textColor);
+}
+
+// Update custom font
+function updateCustomFont() {
+    const font = document.getElementById('fontPicker').value;
+    document.body.style.fontFamily = font;
+    localStorage.setItem('customFont', font);
 }
 
 // Load saved theme
