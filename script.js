@@ -13,27 +13,47 @@ document.addEventListener('DOMContentLoaded', function() {
 // Automatically load games from assets folder
 async function loadGamesAutomatically() {
     const gamesGrid = document.getElementById('gamesGrid');
-    gamesGrid.innerHTML = '<div class="loading">Looking for games in assets folder...</div>';
+    gamesGrid.innerHTML = '<div class="loading">Scanning assets folder for games...</div>';
     
-    // Method 1: Try GitHub API first (most reliable for GitHub Pages)
-    try {
-        // Get the repo path from the URL
-        const path = window.location.pathname;
-        const pathParts = path.split('/').filter(p => p);
-        
-        // Check if we're on GitHub Pages
-        if (pathParts.length >= 2 && window.location.hostname.includes('github.io')) {
-            const username = pathParts[0];
-            const repo = pathParts[1];
-            
+    let gameFiles = [];
+    
+    // Try GitHub API - this is the MOST RELIABLE method for GitHub Pages
+    const path = window.location.pathname;
+    const parts = path.split('/').filter(p => p);
+    
+    // Extract username and repo from URL
+    // Format: username.github.io/repo-name or custom domain
+    let username = '';
+    let repo = '';
+    
+    if (window.location.hostname.includes('github.io')) {
+        // Standard GitHub Pages: username.github.io/repo-name
+        if (parts.length >= 1) {
+            const firstPart = window.location.hostname.split('.')[0];
+            username = firstPart;
+            repo = parts[0] || '';
+        }
+    }
+    
+    console.log('Detected GitHub info:', { username, repo, hostname: window.location.hostname });
+    
+    // Method 1: GitHub API
+    if (username && repo) {
+        try {
             const apiUrl = `https://api.github.com/repos/${username}/${repo}/contents/assets`;
+            console.log('Fetching from GitHub API:', apiUrl);
+            
             const response = await fetch(apiUrl);
             
             if (response.ok) {
                 const files = await response.json();
-                const gameFiles = files
-                    .filter(file => file.type === 'file' && file.name.endsWith('.html'))
+                console.log('GitHub API returned:', files.length, 'items');
+                
+                gameFiles = files
+                    .filter(file => file.name.endsWith('.html'))
                     .map(file => file.name);
+                
+                console.log('Found HTML files:', gameFiles);
                 
                 if (gameFiles.length > 0) {
                     allGames = gameFiles.map(filename => ({
@@ -43,32 +63,38 @@ async function loadGamesAutomatically() {
                     displayGames(allGames);
                     return;
                 }
+            } else {
+                console.log('GitHub API response not OK:', response.status);
             }
+        } catch (error) {
+            console.log('GitHub API error:', error);
         }
-    } catch (error) {
-        console.log('GitHub API method failed:', error);
     }
     
-    // Method 2: Try direct folder listing
+    // Method 2: Try fetching directory listing (works on some servers)
     try {
+        console.log('Trying direct folder access...');
         const response = await fetch('assets/');
+        
         if (response.ok) {
             const text = await response.text();
+            console.log('Got folder listing, length:', text.length);
+            
+            // Parse HTML directory listing
             const parser = new DOMParser();
             const doc = parser.parseFromString(text, 'text/html');
             const links = doc.querySelectorAll('a');
             
-            const gameFiles = [];
+            gameFiles = [];
             links.forEach(link => {
                 const href = link.getAttribute('href');
                 if (href && href.endsWith('.html')) {
-                    // Get just the filename without path
-                    const filename = href.split('/').pop();
-                    if (filename !== 'index.html') {
-                        gameFiles.push(filename);
-                    }
+                    const filename = href.split('/').pop().split('?')[0];
+                    gameFiles.push(filename);
                 }
             });
+            
+            console.log('Found via folder listing:', gameFiles);
             
             if (gameFiles.length > 0) {
                 allGames = gameFiles.map(filename => ({
@@ -80,12 +106,81 @@ async function loadGamesAutomatically() {
             }
         }
     } catch (error) {
-        console.log('Direct folder listing failed:', error);
+        console.log('Folder listing error:', error);
     }
     
-    // Method 3: Quick smart check - only check a few common patterns
-    gamesGrid.innerHTML = '<div class="loading">Searching for games... this will take a moment...</div>';
-    const foundGames = await quickGameSearch();
+    // Method 3: Brute force check common patterns (FAST VERSION - checks in parallel)
+    console.log('Trying brute force detection...');
+    gamesGrid.innerHTML = '<div class="loading">Searching for games (this may take a moment)...</div>';
+    
+    const patterns = [];
+    
+    // Check numbered patterns up to 500
+    for (let i = 1; i <= 500; i++) {
+        patterns.push(`${i}.html`);
+        patterns.push(`game${i}.html`);
+        patterns.push(`game-${i}.html`);
+        patterns.push(`game_${i}.html`);
+    }
+    
+    // Check with leading zeros (common pattern)
+    for (let i = 1; i <= 100; i++) {
+        const num = i.toString().padStart(3, '0');
+        patterns.push(`${num}.html`);
+        patterns.push(`game${num}.html`);
+    }
+    
+    // Common game names
+    const commonNames = ['math', 'physics', 'chemistry', 'biology', 'science', 
+                        'puzzle', 'quiz', 'adventure', 'racing', 'shooter',
+                        'platformer', 'arcade', 'snake', 'pong', 'tetris',
+                        'breakout', 'space', 'alien', 'zombie', 'tower',
+                        'defense', 'strategy', 'rpg', 'action'];
+    
+    commonNames.forEach(name => {
+        patterns.push(`${name}.html`);
+        patterns.push(`${name}-game.html`);
+        patterns.push(`${name}_game.html`);
+        for (let i = 1; i <= 10; i++) {
+            patterns.push(`${name}${i}.html`);
+            patterns.push(`${name}-${i}.html`);
+        }
+    });
+    
+    // Check in batches
+    const batchSize = 20;
+    const foundGames = [];
+    
+    for (let i = 0; i < patterns.length; i += batchSize) {
+        const batch = patterns.slice(i, i + batchSize);
+        const results = await Promise.all(
+            batch.map(async (filename) => {
+                try {
+                    const response = await fetch(`assets/${filename}`, { method: 'HEAD' });
+                    return response.ok ? filename : null;
+                } catch {
+                    return null;
+                }
+            })
+        );
+        
+        results.forEach(filename => {
+            if (filename) foundGames.push(filename);
+        });
+        
+        // Update progress
+        if (foundGames.length > 0) {
+            gamesGrid.innerHTML = `<div class="loading">Found ${foundGames.length} games so far... (checked ${Math.min(i + batchSize, patterns.length)}/${patterns.length})</div>`;
+        }
+        
+        // Stop early if we found a bunch
+        if (foundGames.length >= 50) {
+            console.log('Found 50+ games, stopping early');
+            break;
+        }
+    }
+    
+    console.log('Brute force found:', foundGames.length, 'games');
     
     if (foundGames.length > 0) {
         allGames = foundGames.map(filename => ({
@@ -93,72 +188,37 @@ async function loadGamesAutomatically() {
             displayName: formatGameName(filename)
         }));
         displayGames(allGames);
-    } else {
-        gamesGrid.innerHTML = `
-            <div class="loading" style="text-align: center;">
-                <p style="font-size: 1.4rem; margin-bottom: 15px;">😢 No games found in assets folder!</p>
-                <p style="font-size: 1rem; opacity: 0.9; margin-bottom: 10px;">Make sure:</p>
-                <p style="font-size: 0.9rem; opacity: 0.8;">1. Files are in the 'assets' folder</p>
-                <p style="font-size: 0.9rem; opacity: 0.8;">2. Files end with .html</p>
-                <p style="font-size: 0.9rem; opacity: 0.8;">3. You've pushed to GitHub</p>
-                <p style="font-size: 0.8rem; margin-top: 15px; opacity: 0.7;">Current path: ${window.location.href}</p>
+        return;
+    }
+    
+    // Nothing worked - show error
+    gamesGrid.innerHTML = `
+        <div class="loading" style="text-align: center; max-width: 700px; margin: 0 auto;">
+            <p style="font-size: 1.6rem; margin-bottom: 20px;">😢 No games found</p>
+            
+            <div style="background: rgba(255,255,255,0.15); padding: 25px; border-radius: 15px; text-align: left; margin-bottom: 20px;">
+                <p style="font-size: 1.1rem; margin-bottom: 15px;"><strong>What I tried:</strong></p>
+                <p style="font-size: 0.95rem; margin: 8px 0;">✓ GitHub API (username: ${username}, repo: ${repo})</p>
+                <p style="font-size: 0.95rem; margin: 8px 0;">✓ Direct folder listing</p>
+                <p style="font-size: 0.95rem; margin: 8px 0;">✓ Checked 1000+ common filename patterns</p>
             </div>
-        `;
-    }
-}
-
-// Quick search for common game patterns
-async function quickGameSearch() {
-    const possibleNames = [];
-    
-    // Check numbered games (1-20 only)
-    for (let i = 1; i <= 20; i++) {
-        possibleNames.push(`game${i}.html`);
-        possibleNames.push(`game-${i}.html`);
-        possibleNames.push(`game_${i}.html`);
-    }
-    
-    // Check common single word names
-    const commonWords = ['math', 'science', 'physics', 'chemistry', 'biology', 
-                        'space', 'puzzle', 'quiz', 'test', 'adventure', 'racing',
-                        'shooter', 'platformer', 'arcade', 'snake', 'pong', 'tetris'];
-    
-    commonWords.forEach(word => {
-        possibleNames.push(`${word}.html`);
-        possibleNames.push(`${word}-game.html`);
-        possibleNames.push(`${word}_game.html`);
-    });
-    
-    // Add the example games
-    possibleNames.push('Physics_Simulator.html');
-    possibleNames.push('Math_Challenge.html');
-    possibleNames.push('index.html');
-    
-    const foundGames = [];
-    
-    // Check in batches of 5 to be faster
-    for (let i = 0; i < possibleNames.length; i += 5) {
-        const batch = possibleNames.slice(i, i + 5);
-        const results = await Promise.all(batch.map(name => checkGameExists(name)));
-        
-        results.forEach((exists, idx) => {
-            if (exists && batch[idx] !== 'index.html') {
-                foundGames.push(batch[idx]);
-            }
-        });
-    }
-    
-    return foundGames;
-}
-
-// Check if a game file exists
-async function checkGameExists(filename) {
-    try {
-        const response = await fetch(`assets/${filename}`, { method: 'HEAD' });
-        return response.ok;
-    } catch (e) {
-        return false;
-    }
+            
+            <div style="background: rgba(255,255,255,0.15); padding: 25px; border-radius: 15px; text-align: left;">
+                <p style="font-size: 1.1rem; margin-bottom: 15px;"><strong>Debug Info:</strong></p>
+                <p style="font-size: 0.9rem; margin: 5px 0;">Current URL: ${window.location.href}</p>
+                <p style="font-size: 0.9rem; margin: 5px 0;">Hostname: ${window.location.hostname}</p>
+                <p style="font-size: 0.9rem; margin: 5px 0;">Path: ${window.location.pathname}</p>
+                <p style="font-size: 0.85rem; margin-top: 15px; opacity: 0.9;">Open browser console (F12) for detailed logs</p>
+            </div>
+            
+            <p style="font-size: 1rem; margin-top: 25px; opacity: 0.9;">
+                Make sure:<br>
+                1. HTML files are in the <code>assets/</code> folder<br>
+                2. Files end with <code>.html</code><br>
+                3. You've pushed and deployed to GitHub Pages
+            </p>
+        </div>
+    `;
 }
 
 // Format the filename into a readable display name
@@ -271,9 +331,17 @@ function setupThemeChanger() {
         overlay.classList.remove('active');
     });
     
+    // Prevent panel clicks from closing it
+    themePanel.addEventListener('click', (e) => {
+        e.stopPropagation();
+    });
+    
     // Theme buttons
     themeButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            
             const theme = btn.getAttribute('data-theme');
             applyTheme(theme);
             
