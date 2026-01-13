@@ -104,6 +104,73 @@ header {
     position: relative;
 }
 
+.cloak-dropdown-container {
+    position: relative;
+}
+
+.cloak-toggle {
+    padding: 12px 25px;
+    background: rgba(138, 43, 226, 0.2);
+    border: 2px solid rgba(138, 43, 226, 0.5);
+    border-radius: 25px;
+    color: white;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.cloak-toggle:hover {
+    background: rgba(138, 43, 226, 0.3);
+    transform: scale(1.05);
+}
+
+.cloak-toggle.active {
+    background: rgba(138, 43, 226, 0.4);
+    border-color: rgba(138, 43, 226, 0.8);
+}
+
+.cloak-dropdown {
+    position: absolute;
+    top: calc(100% + 10px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(255, 255, 255, 0.98);
+    padding: 15px;
+    border-radius: 15px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    display: none;
+    z-index: 10000;
+    min-width: 180px;
+}
+
+.cloak-dropdown.active {
+    display: block;
+}
+
+.cloak-btn {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    margin: 5px 0;
+    background: linear-gradient(135deg, #8a2be2 0%, #9370db 100%);
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.cloak-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(138, 43, 226, 0.4);
+}
+
+.cloak-btn.active {
+    box-shadow: 0 0 0 3px #ffdd57 inset;
+}
+
 .theme-dropdown {
     position: absolute;
     top: calc(100% + 10px);
@@ -287,7 +354,7 @@ body.theme-rainbow {
     background: linear-gradient(45deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3);
     background-size: 400% 400%;
     animation: rainbowShift 10s ease infinite;
-    font-family: 'Rubik', sans-serif;
+    font-family: 'Rubik', sans-serif !important;
 }
 
 @keyframes rainbowShift {
@@ -297,22 +364,167 @@ body.theme-rainbow {
 
 body.theme-galaxy {
     background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
-    font-family: 'Orbitron', sans-serif;
+    font-family: 'Orbitron', sans-serif !important;
 }
 
 body.theme-dark-mode {
     background: #000000;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Inter', sans-serif !important;
 }
 
 body.theme-neon-cyberpunk {
     background: linear-gradient(135deg, #0a0a0a 0%, #1a0a2e 50%, #16213e 100%);
-    font-family: 'Audiowide', cursive;
+    font-family: 'Audiowide', cursive !important;
+}
+
+body.theme-retro-arcade {
+    background: linear-gradient(45deg, #ff0080 25%, transparent 25%), 
+                linear-gradient(-45deg, #ff0080 25%, transparent 25%),
+                linear-gradient(45deg, transparent 75%, #00ffff 75%),
+                linear-gradient(-45deg, transparent 75%, #00ffff 75%), #1a1a2e;
+    background-size: 20px 20px;
+    font-family: 'Press Start 2P', cursive !important;
+}
+
+body.theme-forest-fantasy {
+    background: linear-gradient(135deg, #1e4620 0%, #2d5016 50%, #1a3d1a 100%);
+    font-family: 'Cinzel', serif !important;
+}
+
+body.theme-fire-lava {
+    background: linear-gradient(135deg, #ff0000 0%, #ff4500 25%, #ff6347 50%, #ff7f00 75%, #ff0000 100%);
+    background-size: 400% 400%;
+    animation: fireFlow 5s ease infinite;
+    font-family: 'Russo One', sans-serif !important;
+}
+
+@keyframes fireFlow {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+body.theme-ice-kingdom {
+    background: linear-gradient(135deg, #00bfff 0%, #1e90ff 50%, #87ceeb 100%);
+    font-family: 'Rajdhani', sans-serif !important;
+}
+
+body.theme-ocean-depths {
+    background: linear-gradient(135deg, #001f3f 0%, #003d5c 50%, #005a7a 100%);
+    font-family: 'Exo 2', sans-serif !important;
+}
+
+body.theme-desert-storm {
+    background: linear-gradient(135deg, #daa520 0%, #d2691e 50%, #cd853f 100%);
+    font-family: 'Teko', sans-serif !important;
+}
+
+body.theme-glitch-mode {
+    background: #000;
+    animation: glitchBg 0.3s infinite;
+    font-family: 'VT323', monospace !important;
+}
+
+@keyframes glitchBg {
+    0% { background: #000; }
+    33% { background: #0a0a0a; }
+    66% { background: #050505; }
+    100% { background: #000; }
+}
+
+body.theme-synthwave {
+    background: linear-gradient(180deg, #ff00ff 0%, #ff1493 25%, #ff69b4 50%, #4b0082 75%, #000080 100%);
+    font-family: 'Bungee', cursive !important;
+}
+
+body.theme-blood-moon {
+    background: linear-gradient(135deg, #1a0000 0%, #330000 50%, #4d0000 100%);
+    font-family: 'Creepster', cursive !important;
+}
+
+body.theme-minimal-white {
+    background: #ffffff;
+    font-family: 'Montserrat', sans-serif !important;
+}
+
+body.theme-minimal-white .title,
+body.theme-minimal-white .subtitle,
+body.theme-minimal-white .game-counter {
+    color: #000000;
+    text-shadow: none;
+}
+
+body.theme-minimal-white .game-button {
+    border: 2px solid #000;
+}
+
+body.theme-matrix {
+    background: #000000;
+    font-family: 'Share Tech Mono', monospace !important;
+}
+
+body.theme-matrix .game-button {
+    background: rgba(0, 0, 0, 0.8);
+    color: #00ff00;
+    border: 1px solid #00ff00;
+}
+
+body.theme-galaxy-rainbow {
+    background: radial-gradient(ellipse at center, #ff0080 0%, #ff8c00 20%, #ffd700 40%, #00ff00 60%, #00bfff 80%, #8a2be2 100%);
+    background-size: 200% 200%;
+    animation: galaxyRainbow 10s ease infinite;
+    font-family: 'Oxanium', cursive !important;
+}
+
+@keyframes galaxyRainbow {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+body.theme-steampunk {
+    background: linear-gradient(135deg, #3e2723 0%, #5d4037 50%, #6d4c41 100%);
+    font-family: 'MedievalSharp', cursive !important;
+}
+
+body.theme-steampunk .game-button {
+    background: rgba(205, 127, 50, 0.5);
+    color: #ffd700;
+    border: 2px solid #b8860b;
+}
+
+body.theme-cartoon-pop {
+    background: linear-gradient(45deg, #ff6b6b 0%, #4ecdc4 25%, #ffe66d 50%, #a8e6cf 75%, #ff6b6b 100%);
+    font-family: 'Luckiest Guy', cursive !important;
+}
+
+body.theme-shadow-realm {
+    background: linear-gradient(135deg, #1a0033 0%, #2d004d 50%, #4b0082 100%);
+    font-family: 'Chakra Petch', sans-serif !important;
+}
+
+body.theme-shadow-realm .game-button {
+    background: rgba(138, 43, 226, 0.3);
+    color: #da70d6;
+    border: 2px solid #9370db;
+}
+
+body.theme-snowy-night {
+    background: linear-gradient(135deg, #1e3a5f 0%, #2c5282 50%, #3a7ca5 100%);
+    font-family: 'Silkscreen', cursive !important;
+}
+
+body.theme-snowy-night .game-button {
+    background: rgba(240, 248, 255, 0.3);
+    color: #f0f8ff;
+    border: 2px solid #b0e0e6;
 }
 
 body.theme-custom {
     background: var(--custom-bg);
-    font-family: var(--custom-font);
+    font-family: var(--custom-font) !important;
+}
+
+body.theme-custom * {
+    font-family: inherit !important;
 }
 
 @media (max-width: 768px) {

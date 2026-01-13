@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', function() {
     setupThemes();
     setupSidebar();
     setupFavorites();
+    setupCloaking();
     setupEject();
     setupSearch();
 });
@@ -312,6 +313,14 @@ function applyTheme(theme) {
     if (theme === 'custom') {
         applyCustomTheme();
     }
+    
+    // Force font update on all elements
+    setTimeout(() => {
+        const allButtons = document.querySelectorAll('.game-button');
+        allButtons.forEach(btn => {
+            btn.style.fontFamily = 'inherit';
+        });
+    }, 100);
 }
 
 function applyCustomTheme() {
@@ -321,6 +330,13 @@ function applyCustomTheme() {
     
     document.body.style.setProperty('--custom-bg', `linear-gradient(135deg, ${bg} 0%, ${shade} 100%)`);
     document.body.style.setProperty('--custom-font', font);
+    document.body.style.fontFamily = font;
+    
+    // Force font on all game buttons
+    const allButtons = document.querySelectorAll('.game-button');
+    allButtons.forEach(btn => {
+        btn.style.fontFamily = font;
+    });
     
     localStorage.setItem('customBg', bg);
     localStorage.setItem('customShade', shade);
@@ -337,6 +353,89 @@ function setupSearch() {
         );
         displayGames(filtered);
     };
+}
+
+// ===== CLOAKING =====
+const cloakData = {
+    none: {
+        title: 'Cool Science Games',
+        favicon: ''
+    },
+    google: {
+        title: 'Google',
+        favicon: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAD0ElEQVRYR8WWW0hUURSG/33OzIwzdTRFU7EQC0qLHrKHCCmjBxEVpYSghx6iS0+VET1ZQRQ9iBdEJSgqLyQhRdZDkRdMLCwqL1kW5iVTs9Sc0ZlzztnpjDijM56ZGXWgYc7M2Wt9/1p77bX/Av7zEv65fgDgP8cJAHh7e0dFRUVFhYaGhoWHh7PT09PZAQEBVq/Xa/H7/R6Px+N2u91Ot9vtcLlcdqvVanO5XLa2tjZbW1ubrbm52drY2GhtaGiw1tXVWevq6qy1tbXWmpoa6/379631 9fXW+vr6+tbW1vr6+vr6pqamepZlWSsrK+tra2trq6qqausqKytry8rKasu+lZWV1ebm5trU1NRaiouLa/Py8mov5ufn115MTU2tvZSQkFBbWFhYW1BQUJufn1+bn59fm5+fX5ufn1+bm5tbm5OTU5udnV2TlZVVk5mZWZOZmVlz/fr1mvT09Jq0tLSa1NTUmpSUlJorV67UXL58uTo5Obk6MTGxOiEhoTo+Pr46Li6uOjY2tjomJqY6Kiqq+uLFi9Xnzp2rPnv2bPWZM2eqT58+XX3y5Mnq48ePV588ebL65MmT1SdOnKg+fvx49bFjx6qPHj1affTo0eojR45UHz58uPrQoUPVBw8erD5w4ED1/v37qwMDA6v9/f2r/fz8qvfs2VO9e/fu6l27dlXv3Lmz2s/Pr3rbtm3VW7durQ4MDKzeunVr9ZYtW6o3b95cvWnTpmq/zeXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5eXl5f8DAwMDAwMDAwMDAwMDAwMDAwMDAwMDA'
+    },
+    youtube: {
+        title: 'YouTube',
+        favicon: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAC8klEQVRYR+2XT2gTQRTGv5nNbnbTJGnapFKrKIh/wIMHFQQVD4KI4qHqQfBPK/bgRfFQEA9eFEEQBMWDHhQPHvTgxYMgCh5E8aDgQRGxoGKLtdraJE2z2c3uzIrJZpvdzW6TKngJhJCd2W++973fewuYZ6F5jh//BZCJRCJRSqmUZdnV8Xh8cTQaXRyJRCKRSCQSiUQikUgkEolEotFoNBqNRqPRaDQajUaj0Wg0Go1Go9FoNBqNRqPRaDQajUaj0Wg0Go1Go9FoNBqNRqPRaDQajUaj0Wg0Go1Go9FoNBqNRqPRaDQajUaj0Wg0Go1Go9FoNBqNRqPRaDQajUaj0Wg0Go1Go9FoNBqNRqPRaDQajUaj0Wg0Go1Go9FoNBqNRqPRaDQajUaj0Wg0Go1Go9FoNBqNRqPRaDQajUaj0Wg0Go1Go9FoNBqNRqPRaDQajUaj0Wg0Go1Go9FoNBqNRqPRaDQajUaj0Wg0Go1Go9FoNBqNRqPRaDQajUaj0Wg0Go1Go9FoNBqNRqPRaDT+1wDWAsBaAFgLAGsBYC0ArAWAtQCwFgDWAsBaAFgLAGsBYC0ArAWAtQCwFgDWAsBaAFgLAGsBYC0ArAWAtQCwFgDWAsBaAFgLAGsBYC0ArAWAtQCwFgDWAsBaAFgLAGsBYC0ArAWAtQCwFgDWAsBaAFgLAGsBYC0ArAWAtQCwFgDWAsBaAFgLAGsBYC0ArAWAtQCwFgDWAsBaAFgLAGsBYC0ArAWAtQCwFgDWAsBaAFgLAGsBYC0ArAWAtQCwFgDWAsBaAFgLAGsBYC0ArAWAtQCwFgDWAsBaAFgLAGsBYC0ArAWAtQCwFgDWAsBaAFgLAGsBYC0ArAWAtQCwFgDWAsBaAFgLAGsBYC0ArAWAtQCwFgDWAsBaAFgLAGsBYC0ArAWAtQCwFgDWAsBaAFgLAGsBYC0ArAWAtQCwFgDWAsBaAFgLAGsBYC0ArAWAtQCwFgDWAsBaAFgLAGsBYC0ArAWAtQCwFgDWAsBaAFgLAGsBYC0ArAWAtQCwFgDWAsBaAFgLAGsBYC0ArAWAtQCwFgDWAsBaAFgLAGsBYC0ArAWAtQCwFgDWAsBaAFgL'
+    },
+    classroom: {
+        title: 'Home - Google Classroom',
+        favicon: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAD3klEQVRYR8VXW2wUVRj+zp'
+    },
+    zoom: {
+        title: 'Zoom Meeting',
+        favicon: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAADLElEQVRYR8WXTWgUQRDHq3p'
+    },
+    schoology: {
+        title: 'Home | Schoology',
+        favicon: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAADVElEQVRYR8WXS2xTVxiAv3'
+    }
+};
+
+function setupCloaking() {
+    const toggle = document.getElementById('cloakToggle');
+    const dropdown = document.getElementById('cloakDropdown');
+    const buttons = document.querySelectorAll('.cloak-btn');
+    
+    toggle.onclick = (e) => {
+        e.stopPropagation();
+        dropdown.classList.toggle('active');
+    };
+    
+    document.addEventListener('click', (e) => {
+        if (!dropdown.contains(e.target) && e.target !== toggle) {
+            dropdown.classList.remove('active');
+        }
+    });
+    
+    buttons.forEach(btn => {
+        btn.onclick = () => {
+            const cloak = btn.dataset.cloak;
+            applyCloak(cloak);
+            
+            buttons.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            
+            toggle.classList.toggle('active', cloak !== 'none');
+        };
+    });
+    
+    // Load saved cloak
+    const saved = localStorage.getItem('cloak') || 'none';
+    applyCloak(saved);
+    buttons.forEach(b => {
+        if (b.dataset.cloak === saved) b.classList.add('active');
+    });
+    if (saved !== 'none') toggle.classList.add('active');
+}
+
+function applyCloak(cloak) {
+    const data = cloakData[cloak];
+    
+    // Change title
+    document.title = data.title;
+    
+    // Change favicon
+    let link = document.querySelector("link[rel~='icon']");
+    if (!link) {
+        link = document.createElement('link');
+        link.rel = 'icon';
+        document.head.appendChild(link);
+    }
+    link.href = data.favicon || '';
+    
+    localStorage.setItem('cloak', cloak);
 }
 
 // ===== EJECT =====
