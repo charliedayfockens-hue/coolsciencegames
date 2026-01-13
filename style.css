@@ -344,6 +344,10 @@ header {
     margin-top: 20px;
 }
 
+.theme-dropdown-container {
+    position: relative;
+}
+
 .theme-toggle,
 .favorites-toggle {
     padding: 12px 30px;
@@ -371,143 +375,99 @@ header {
     box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
 }
 
-/* Theme Panel */
-.theme-panel {
-    position: fixed;
-    top: 50%;
+/* Theme Dropdown */
+.theme-dropdown {
+    position: absolute;
+    top: calc(100% + 10px);
     left: 50%;
-    transform: translate(-50%, -50%) scale(0);
-    background: rgba(255, 255, 255, 0.95);
+    transform: translateX(-50%) translateY(-10px);
+    background: rgba(255, 255, 255, 0.98);
     backdrop-filter: blur(20px);
-    padding: 30px;
-    border-radius: 20px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-    z-index: 10000;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    min-width: 300px;
     opacity: 0;
-    transition: all 0.3s ease;
-    max-width: 500px;
-    width: 90%;
     pointer-events: none;
+    transition: all 0.3s ease;
+    z-index: 10001;
 }
 
-.theme-panel.active {
-    transform: translate(-50%, -50%) scale(1);
+.theme-dropdown.active {
     opacity: 1;
     pointer-events: all;
+    transform: translateX(-50%) translateY(0);
 }
 
-.theme-panel h3 {
-    color: #667eea;
-    margin-bottom: 20px;
-    text-align: center;
-    font-size: 1.5rem;
-}
-
-.theme-panel h4 {
-    color: #667eea;
-    margin: 20px 0 15px;
-    font-size: 1.2rem;
-}
-
-.theme-buttons {
+.theme-dropdown .theme-buttons {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 15px;
-    margin-bottom: 20px;
+    gap: 10px;
+    margin-bottom: 15px;
 }
 
-.theme-btn {
-    padding: 15px 20px;
+.theme-dropdown .theme-btn {
+    padding: 12px 15px;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border: none;
-    border-radius: 12px;
-    color: white;
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.theme-btn:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
-}
-
-.theme-btn.active {
-    box-shadow: 0 0 0 3px #ffdd57 inset;
-}
-
-.custom-color-panel {
-    background: rgba(102, 126, 234, 0.1);
-    padding: 20px;
-    border-radius: 12px;
-    margin-top: 15px;
-}
-
-.color-controls {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
-.color-control {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 15px;
-}
-
-.color-control label {
-    color: #333;
-    font-weight: 600;
-    flex: 1;
-}
-
-.color-control input[type="color"] {
-    width: 60px;
-    height: 40px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-}
-
-.close-panel-btn {
-    width: 100%;
-    padding: 12px;
-    margin-top: 20px;
-    background: #ff6b6b;
     border: none;
     border-radius: 10px;
     color: white;
-    font-size: 1rem;
+    font-size: 0.95rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
 }
 
-.close-panel-btn:hover {
-    background: #ff5252;
+.theme-dropdown .theme-btn:hover {
     transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
 }
 
-/* Overlay */
-.theme-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 9998;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s ease;
+.theme-dropdown .theme-btn.active {
+    box-shadow: 0 0 0 3px #ffdd57 inset;
 }
 
-.theme-overlay.active {
-    opacity: 1;
-    pointer-events: all;
+.theme-dropdown .custom-color-panel {
+    background: rgba(102, 126, 234, 0.1);
+    padding: 15px;
+    border-radius: 10px;
+    margin-top: 10px;
 }
+
+.theme-dropdown .custom-color-panel h4 {
+    color: #667eea;
+    margin-bottom: 12px;
+    font-size: 1rem;
+}
+
+.theme-dropdown .color-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.theme-dropdown .color-control {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.theme-dropdown .color-control label {
+    color: #333;
+    font-weight: 600;
+    font-size: 0.9rem;
+    flex: 1;
+}
+
+.theme-dropdown .color-control input[type="color"] {
+    width: 50px;
+    height: 35px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
 
 /* Game Sidebar Panel */
 .game-sidebar {

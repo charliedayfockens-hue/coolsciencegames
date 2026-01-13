@@ -314,35 +314,21 @@ function setupSearch() {
 // Setup theme changer
 function setupThemeChanger() {
     const themeToggle = document.getElementById('themeToggle');
-    const themePanel = document.getElementById('themePanel');
-    const closePanel = document.getElementById('closeThemePanel');
+    const themeDropdown = document.getElementById('themeDropdown');
     const themeButtons = document.querySelectorAll('.theme-btn');
     const customColorPanel = document.getElementById('customColorPanel');
     
-    // Create overlay
-    const overlay = document.createElement('div');
-    overlay.className = 'theme-overlay';
-    document.body.appendChild(overlay);
-    
-    // Toggle panel
-    themeToggle.addEventListener('click', () => {
-        themePanel.classList.add('active');
-        overlay.classList.add('active');
-    });
-    
-    closePanel.addEventListener('click', () => {
-        themePanel.classList.remove('active');
-        overlay.classList.remove('active');
-    });
-    
-    overlay.addEventListener('click', () => {
-        themePanel.classList.remove('active');
-        overlay.classList.remove('active');
-    });
-    
-    // Prevent panel clicks from closing it
-    themePanel.addEventListener('click', (e) => {
+    // Toggle dropdown
+    themeToggle.addEventListener('click', (e) => {
         e.stopPropagation();
+        themeDropdown.classList.toggle('active');
+    });
+    
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!themeDropdown.contains(e.target) && e.target !== themeToggle) {
+            themeDropdown.classList.remove('active');
+        }
     });
     
     // Theme buttons
@@ -524,6 +510,7 @@ function openGameSidebar(filename, displayName) {
     updatePlayCount();
     updateFavoriteButton();
     updateLikeButtons();
+    updateLikeCounts();
 }
 
 // ===== DATA STORAGE FUNCTIONS =====
@@ -542,6 +529,41 @@ function saveGameData(filename, data) {
     localStorage.setItem(`game_${filename}`, JSON.stringify(data));
 }
 
+// Global counters for likes and dislikes
+function getGlobalLikeCount(filename) {
+    const count = localStorage.getItem(`global_likes_${filename}`);
+    return count ? parseInt(count) : 0;
+}
+
+function getGlobalDislikeCount(filename) {
+    const count = localStorage.getItem(`global_dislikes_${filename}`);
+    return count ? parseInt(count) : 0;
+}
+
+function incrementGlobalLikes(filename) {
+    const current = getGlobalLikeCount(filename);
+    localStorage.setItem(`global_likes_${filename}`, (current + 1).toString());
+}
+
+function decrementGlobalLikes(filename) {
+    const current = getGlobalLikeCount(filename);
+    if (current > 0) {
+        localStorage.setItem(`global_likes_${filename}`, (current - 1).toString());
+    }
+}
+
+function incrementGlobalDislikes(filename) {
+    const current = getGlobalDislikeCount(filename);
+    localStorage.setItem(`global_dislikes_${filename}`, (current + 1).toString());
+}
+
+function decrementGlobalDislikes(filename) {
+    const current = getGlobalDislikeCount(filename);
+    if (current > 0) {
+        localStorage.setItem(`global_dislikes_${filename}`, (current - 1).toString());
+    }
+}
+
 function incrementPlayCount(filename) {
     const data = getGameData(filename);
     data.playCount++;
@@ -556,23 +578,49 @@ function toggleFavorite(filename) {
 
 function toggleLike(filename) {
     const data = getGameData(filename);
+    const wasLiked = data.liked;
+    const wasDisliked = data.disliked;
+    
     if (data.liked) {
+        // Unlike
         data.liked = false;
+        decrementGlobalLikes(filename);
     } else {
+        // Like
         data.liked = true;
-        data.disliked = false; // Can't like and dislike
+        incrementGlobalLikes(filename);
+        
+        // Remove dislike if present
+        if (data.disliked) {
+            data.disliked = false;
+            decrementGlobalDislikes(filename);
+        }
     }
+    
     saveGameData(filename, data);
 }
 
 function toggleDislike(filename) {
     const data = getGameData(filename);
+    const wasLiked = data.liked;
+    const wasDisliked = data.disliked;
+    
     if (data.disliked) {
+        // Un-dislike
         data.disliked = false;
+        decrementGlobalDislikes(filename);
     } else {
+        // Dislike
         data.disliked = true;
-        data.liked = false; // Can't like and dislike
+        incrementGlobalDislikes(filename);
+        
+        // Remove like if present
+        if (data.liked) {
+            data.liked = false;
+            decrementGlobalLikes(filename);
+        }
     }
+    
     saveGameData(filename, data);
 }
 
@@ -587,6 +635,15 @@ function updatePlayCount() {
     if (!currentGame) return;
     const data = getGameData(currentGame.filename);
     document.getElementById('playCount').textContent = data.playCount;
+}
+
+function updateLikeCounts() {
+    if (!currentGame) return;
+    const likeCount = getGlobalLikeCount(currentGame.filename);
+    const dislikeCount = getGlobalDislikeCount(currentGame.filename);
+    
+    document.getElementById('likeCount').textContent = likeCount;
+    document.getElementById('dislikeCount').textContent = dislikeCount;
 }
 
 function updateFavoriteButton() {
@@ -619,6 +676,9 @@ function updateLikeButtons() {
         likeBtn.classList.remove('active');
         dislikeBtn.classList.remove('active');
     }
+    
+    // Update counts too
+    updateLikeCounts();
 }
 
 // ===== FAVORITES TOGGLE =====

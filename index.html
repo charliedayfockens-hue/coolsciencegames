@@ -13,40 +13,38 @@
             <h1 class="title">Cool Science Games</h1>
             <p class="subtitle">Lowkirkentologicalockedinlowstate</p>
             <div class="header-buttons">
-                <button id="themeToggle" class="theme-toggle">🎨 Change Theme</button>
+                <div class="theme-dropdown-container">
+                    <button id="themeToggle" class="theme-toggle">🎨 Change Theme</button>
+                    <div id="themeDropdown" class="theme-dropdown">
+                        <div class="theme-buttons">
+                            <button class="theme-btn" data-theme="default">Default</button>
+                            <button class="theme-btn" data-theme="rainbow">Rainbow</button>
+                            <button class="theme-btn" data-theme="galaxy">Galaxy</button>
+                            <button class="theme-btn" data-theme="custom">Custom</button>
+                        </div>
+                        
+                        <div id="customColorPanel" class="custom-color-panel" style="display: none;">
+                            <h4>Custom Colors</h4>
+                            <div class="color-controls">
+                                <div class="color-control">
+                                    <label>Background Color:</label>
+                                    <input type="color" id="bgColorPicker" value="#667eea">
+                                </div>
+                                <div class="color-control">
+                                    <label>Background Shade:</label>
+                                    <input type="color" id="bgShadePicker" value="#764ba2">
+                                </div>
+                                <div class="color-control">
+                                    <label>Button Text Color:</label>
+                                    <input type="color" id="textColorPicker" value="#667eea">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <button id="favoritesToggle" class="favorites-toggle">⭐ Favorites</button>
             </div>
         </header>
-
-        <div id="themePanel" class="theme-panel">
-            <h3>Choose Theme</h3>
-            <div class="theme-buttons">
-                <button class="theme-btn" data-theme="default">Default</button>
-                <button class="theme-btn" data-theme="rainbow">Rainbow</button>
-                <button class="theme-btn" data-theme="galaxy">Galaxy</button>
-                <button class="theme-btn" data-theme="custom">Custom</button>
-            </div>
-            
-            <div id="customColorPanel" class="custom-color-panel" style="display: none;">
-                <h4>Custom Colors</h4>
-                <div class="color-controls">
-                    <div class="color-control">
-                        <label>Background Color:</label>
-                        <input type="color" id="bgColorPicker" value="#667eea">
-                    </div>
-                    <div class="color-control">
-                        <label>Background Shade:</label>
-                        <input type="color" id="bgShadePicker" value="#764ba2">
-                    </div>
-                    <div class="color-control">
-                        <label>Button Text Color:</label>
-                        <input type="color" id="textColorPicker" value="#667eea">
-                    </div>
-                </div>
-            </div>
-            
-            <button id="closeThemePanel" class="close-panel-btn">Close</button>
-        </div>
 
         <div class="search-container">
             <input type="text" id="searchBar" placeholder="Search for games..." class="search-bar">
@@ -73,6 +71,16 @@
                     <span class="stat-icon">👥</span>
                     <span class="stat-label">Play Count:</span>
                     <span id="playCount" class="stat-value">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-icon">👍</span>
+                    <span class="stat-label">Likes:</span>
+                    <span id="likeCount" class="stat-value">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-icon">👎</span>
+                    <span class="stat-label">Dislikes:</span>
+                    <span id="dislikeCount" class="stat-value">0</span>
                 </div>
             </div>
             
