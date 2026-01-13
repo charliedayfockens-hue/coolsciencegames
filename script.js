@@ -61,6 +61,7 @@ async function loadGames() {
     
     allGames = games;
     displayGames(games);
+    updateLeaderboard();
 }
 
 function formatName(filename) {
@@ -136,6 +137,9 @@ function playGame() {
     
     window.open(`assets/${currentGame.filename}`, '_blank');
     document.getElementById('playCount').textContent = data.plays;
+    
+    // Update leaderboard
+    updateLeaderboard();
 }
 
 function toggleFavorite() {
@@ -353,6 +357,44 @@ function setupSearch() {
         );
         displayGames(filtered);
     };
+}
+
+// ===== LEADERBOARD =====
+function updateLeaderboard() {
+    // Get all games with their play counts
+    const gamesWithPlays = allGames.map(game => ({
+        name: game.displayName,
+        filename: game.filename,
+        plays: getData(game.filename).plays
+    }));
+    
+    // Sort by plays (highest first)
+    gamesWithPlays.sort((a, b) => b.plays - a.plays);
+    
+    // Get top 10
+    const top10 = gamesWithPlays.slice(0, 10);
+    
+    // Display leaderboard
+    const list = document.getElementById('leaderboardList');
+    list.innerHTML = '';
+    
+    if (top10.every(g => g.plays === 0)) {
+        list.innerHTML = '<div style="text-align:center;color:#999;font-size:0.9rem;padding:20px 0;">No games played yet!</div>';
+        return;
+    }
+    
+    top10.forEach((game, index) => {
+        if (game.plays > 0) {
+            const item = document.createElement('div');
+            item.className = 'leaderboard-item';
+            item.innerHTML = `
+                <span class="rank">#${index + 1}</span>
+                <span class="name">${game.name}</span>
+                <span class="plays">${game.plays}</span>
+            `;
+            list.appendChild(item);
+        }
+    });
 }
 
 // ===== CLOAKING =====
