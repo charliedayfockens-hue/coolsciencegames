@@ -255,11 +255,19 @@ function displayGames(games) {
     noResults.style.display = 'none';
     gamesGrid.innerHTML = '';
     
+    // Get saved custom font if in custom theme
+    const savedFont = localStorage.getItem('customFont');
+    
     games.forEach((game, index) => {
         const button = document.createElement('button');
         button.className = 'game-button fade-in';
         button.textContent = game.displayName;
         button.style.animationDelay = `${index * 0.05}s`;
+        
+        // Apply custom font if it exists
+        if (savedFont && currentTheme === 'custom') {
+            button.style.fontFamily = savedFont;
+        }
         
         // Check if game is favorited
         if (isGameFavorited(game.filename)) {
@@ -427,7 +435,22 @@ function updateCustomTheme() {
 // Update custom font
 function updateCustomFont() {
     const font = document.getElementById('fontPicker').value;
+    
+    // Apply to entire body
     document.body.style.fontFamily = font;
+    
+    // Also explicitly apply to game buttons to ensure they inherit
+    const gameButtons = document.querySelectorAll('.game-button');
+    gameButtons.forEach(button => {
+        button.style.fontFamily = font;
+    });
+    
+    // Apply to all other text elements
+    const allTextElements = document.querySelectorAll('h1, h2, h3, h4, p, span, button, input, label, select');
+    allTextElements.forEach(element => {
+        element.style.fontFamily = font;
+    });
+    
     localStorage.setItem('customFont', font);
 }
 

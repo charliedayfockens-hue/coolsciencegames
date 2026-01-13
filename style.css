@@ -502,6 +502,7 @@ header {
     overflow: hidden;
     text-align: center;
     word-wrap: break-word;
+    font-family: inherit;
 }
 
 .game-button::before {
