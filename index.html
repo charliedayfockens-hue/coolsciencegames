@@ -12,7 +12,10 @@
         <header>
             <h1 class="title">Cool Science Games</h1>
             <p class="subtitle">Lowkirkentologicalockedinlowstate</p>
-            <button id="themeToggle" class="theme-toggle">🎨 Change Theme</button>
+            <div class="header-buttons">
+                <button id="themeToggle" class="theme-toggle">🎨 Change Theme</button>
+                <button id="favoritesToggle" class="favorites-toggle">⭐ Favorites</button>
+            </div>
         </header>
 
         <div id="themePanel" class="theme-panel">
@@ -55,6 +58,44 @@
 
         <div id="noResults" class="no-results" style="display: none;">
             <p>No games found matching your search.</p>
+        </div>
+    </div>
+
+    <!-- Game Sidebar Panel -->
+    <div id="gameSidebar" class="game-sidebar">
+        <button id="closeSidebar" class="close-sidebar">✕</button>
+        
+        <div class="sidebar-content">
+            <h2 id="sidebarGameTitle" class="sidebar-game-title">Game Title</h2>
+            
+            <div class="game-stats">
+                <div class="stat-item">
+                    <span class="stat-icon">👥</span>
+                    <span class="stat-label">Play Count:</span>
+                    <span id="playCount" class="stat-value">0</span>
+                </div>
+            </div>
+            
+            <div class="game-actions">
+                <button id="favoriteBtn" class="action-btn favorite-btn">
+                    <span class="btn-icon">⭐</span>
+                    <span class="btn-text">Favorite</span>
+                </button>
+                
+                <button id="likeBtn" class="action-btn like-btn">
+                    <span class="btn-icon">👍</span>
+                    <span class="btn-text">Like</span>
+                </button>
+                
+                <button id="dislikeBtn" class="action-btn dislike-btn">
+                    <span class="btn-icon">👎</span>
+                    <span class="btn-text">Dislike</span>
+                </button>
+            </div>
+            
+            <button id="playGameBtn" class="play-game-btn">
+                ▶ PLAY GAME
+            </button>
         </div>
     </div>
 

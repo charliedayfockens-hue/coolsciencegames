@@ -1,12 +1,16 @@
 // This will be populated automatically by scanning the assets folder
 let allGames = [];
 let currentTheme = 'default';
+let currentGame = null;
+let showingFavorites = false;
 
 // Initialize the page
 document.addEventListener('DOMContentLoaded', function() {
     loadGamesAutomatically();
     setupSearch();
     setupThemeChanger();
+    setupGameSidebar();
+    setupFavoritesToggle();
     loadSavedTheme();
 });
 
@@ -257,9 +261,14 @@ function displayGames(games) {
         button.textContent = game.displayName;
         button.style.animationDelay = `${index * 0.05}s`;
         
-        // Open game in new tab when clicked
+        // Check if game is favorited
+        if (isGameFavorited(game.filename)) {
+            button.innerHTML = `⭐ ${game.displayName}`;
+        }
+        
+        // Open sidebar when clicked instead of opening game directly
         button.addEventListener('click', () => {
-            openGame(game.filename);
+            openGameSidebar(game.filename, game.displayName);
         });
         
         gamesGrid.appendChild(button);
@@ -431,4 +440,223 @@ function loadSavedTheme() {
     if (savedTheme === 'custom') {
         document.getElementById('customColorPanel').style.display = 'block';
     }
+}
+
+// ===== GAME SIDEBAR FUNCTIONALITY =====
+
+function setupGameSidebar() {
+    const sidebar = document.getElementById('gameSidebar');
+    const closeSidebar = document.getElementById('closeSidebar');
+    const playGameBtn = document.getElementById('playGameBtn');
+    const favoriteBtn = document.getElementById('favoriteBtn');
+    const likeBtn = document.getElementById('likeBtn');
+    const dislikeBtn = document.getElementById('dislikeBtn');
+    
+    // Create sidebar overlay
+    const sidebarOverlay = document.createElement('div');
+    sidebarOverlay.className = 'sidebar-overlay';
+    document.body.appendChild(sidebarOverlay);
+    
+    // Close sidebar
+    closeSidebar.addEventListener('click', () => {
+        sidebar.classList.remove('active');
+        sidebarOverlay.classList.remove('active');
+    });
+    
+    sidebarOverlay.addEventListener('click', () => {
+        sidebar.classList.remove('active');
+        sidebarOverlay.classList.remove('active');
+    });
+    
+    // Play game button
+    playGameBtn.addEventListener('click', () => {
+        if (currentGame) {
+            incrementPlayCount(currentGame.filename);
+            openGame(currentGame.filename);
+            updatePlayCount();
+        }
+    });
+    
+    // Favorite button
+    favoriteBtn.addEventListener('click', () => {
+        if (currentGame) {
+            toggleFavorite(currentGame.filename);
+            updateFavoriteButton();
+            // Refresh display if showing favorites
+            if (showingFavorites) {
+                displayFavorites();
+            } else {
+                // Refresh current view to update star icons
+                displayGames(allGames);
+            }
+        }
+    });
+    
+    // Like button
+    likeBtn.addEventListener('click', () => {
+        if (currentGame) {
+            toggleLike(currentGame.filename);
+            updateLikeButtons();
+        }
+    });
+    
+    // Dislike button
+    dislikeBtn.addEventListener('click', () => {
+        if (currentGame) {
+            toggleDislike(currentGame.filename);
+            updateLikeButtons();
+        }
+    });
+}
+
+function openGameSidebar(filename, displayName) {
+    currentGame = { filename, displayName };
+    
+    const sidebar = document.getElementById('gameSidebar');
+    const sidebarOverlay = document.querySelector('.sidebar-overlay');
+    const gameTitle = document.getElementById('sidebarGameTitle');
+    
+    gameTitle.textContent = displayName;
+    
+    sidebar.classList.add('active');
+    sidebarOverlay.classList.add('active');
+    
+    updatePlayCount();
+    updateFavoriteButton();
+    updateLikeButtons();
+}
+
+// ===== DATA STORAGE FUNCTIONS =====
+
+function getGameData(filename) {
+    const data = localStorage.getItem(`game_${filename}`);
+    return data ? JSON.parse(data) : {
+        playCount: 0,
+        liked: false,
+        disliked: false,
+        favorited: false
+    };
+}
+
+function saveGameData(filename, data) {
+    localStorage.setItem(`game_${filename}`, JSON.stringify(data));
+}
+
+function incrementPlayCount(filename) {
+    const data = getGameData(filename);
+    data.playCount++;
+    saveGameData(filename, data);
+}
+
+function toggleFavorite(filename) {
+    const data = getGameData(filename);
+    data.favorited = !data.favorited;
+    saveGameData(filename, data);
+}
+
+function toggleLike(filename) {
+    const data = getGameData(filename);
+    if (data.liked) {
+        data.liked = false;
+    } else {
+        data.liked = true;
+        data.disliked = false; // Can't like and dislike
+    }
+    saveGameData(filename, data);
+}
+
+function toggleDislike(filename) {
+    const data = getGameData(filename);
+    if (data.disliked) {
+        data.disliked = false;
+    } else {
+        data.disliked = true;
+        data.liked = false; // Can't like and dislike
+    }
+    saveGameData(filename, data);
+}
+
+function isGameFavorited(filename) {
+    const data = getGameData(filename);
+    return data.favorited;
+}
+
+// ===== UPDATE UI FUNCTIONS =====
+
+function updatePlayCount() {
+    if (!currentGame) return;
+    const data = getGameData(currentGame.filename);
+    document.getElementById('playCount').textContent = data.playCount;
+}
+
+function updateFavoriteButton() {
+    if (!currentGame) return;
+    const data = getGameData(currentGame.filename);
+    const favoriteBtn = document.getElementById('favoriteBtn');
+    
+    if (data.favorited) {
+        favoriteBtn.classList.add('active');
+        favoriteBtn.querySelector('.btn-text').textContent = 'Favorited';
+    } else {
+        favoriteBtn.classList.remove('active');
+        favoriteBtn.querySelector('.btn-text').textContent = 'Favorite';
+    }
+}
+
+function updateLikeButtons() {
+    if (!currentGame) return;
+    const data = getGameData(currentGame.filename);
+    const likeBtn = document.getElementById('likeBtn');
+    const dislikeBtn = document.getElementById('dislikeBtn');
+    
+    if (data.liked) {
+        likeBtn.classList.add('active');
+        dislikeBtn.classList.remove('active');
+    } else if (data.disliked) {
+        dislikeBtn.classList.add('active');
+        likeBtn.classList.remove('active');
+    } else {
+        likeBtn.classList.remove('active');
+        dislikeBtn.classList.remove('active');
+    }
+}
+
+// ===== FAVORITES TOGGLE =====
+
+function setupFavoritesToggle() {
+    const favoritesToggle = document.getElementById('favoritesToggle');
+    
+    favoritesToggle.addEventListener('click', () => {
+        showingFavorites = !showingFavorites;
+        
+        if (showingFavorites) {
+            favoritesToggle.classList.add('active');
+            favoritesToggle.textContent = '🎮 All Games';
+            displayFavorites();
+        } else {
+            favoritesToggle.classList.remove('active');
+            favoritesToggle.textContent = '⭐ Favorites';
+            displayGames(allGames);
+        }
+    });
+}
+
+function displayFavorites() {
+    const favoritedGames = allGames.filter(game => isGameFavorited(game.filename));
+    
+    const gamesGrid = document.getElementById('gamesGrid');
+    const noResults = document.getElementById('noResults');
+    
+    if (favoritedGames.length === 0) {
+        gamesGrid.innerHTML = `
+            <div class="loading" style="text-align: center;">
+                <p style="font-size: 1.4rem; margin-bottom: 15px;">⭐ No favorites yet!</p>
+                <p style="font-size: 1rem; opacity: 0.9;">Click the star button on games to add them to your favorites.</p>
+            </div>
+        `;
+        noResults.style.display = 'none';
+        return;
+    }
+    
+    displayGames(favoritedGames);
 }
