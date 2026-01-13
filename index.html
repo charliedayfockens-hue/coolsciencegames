@@ -18,167 +18,54 @@
             <p class="game-counter" id="gameCounter">0 Games Available</p>
             <div class="header-buttons">
                 <div class="theme-dropdown-container">
-                    <button id="themeToggle" class="theme-toggle">🎨 Change Theme</button>
+                    <button id="themeToggle" class="theme-toggle">🎨 Theme</button>
                     <div id="themeDropdown" class="theme-dropdown">
-                        <h3 style="color: #667eea; margin-bottom: 15px; font-size: 1.2rem;">Choose Theme</h3>
+                        <button class="theme-btn" data-theme="default">Default</button>
+                        <button class="theme-btn" data-theme="rainbow">Rainbow</button>
+                        <button class="theme-btn" data-theme="galaxy">Galaxy</button>
+                        <button class="theme-btn" data-theme="dark-mode">Dark</button>
+                        <button class="theme-btn" data-theme="neon-cyberpunk">Cyberpunk</button>
+                        <button class="theme-btn" data-theme="custom">Custom</button>
                         
-                        <div class="theme-buttons-grid">
-                            <button class="theme-btn" data-theme="default">Default</button>
-                            <button class="theme-btn" data-theme="rainbow">Rainbow</button>
-                            <button class="theme-btn" data-theme="galaxy">Galaxy</button>
-                            <button class="theme-btn" data-theme="neon-cyberpunk">Neon Cyberpunk</button>
-                            <button class="theme-btn" data-theme="dark-mode">Dark Mode</button>
-                            <button class="theme-btn" data-theme="retro-arcade">Retro Arcade</button>
-                            <button class="theme-btn" data-theme="forest-fantasy">Forest Fantasy</button>
-                            <button class="theme-btn" data-theme="fire-lava">Fire & Lava</button>
-                            <button class="theme-btn" data-theme="ice-kingdom">Ice Kingdom</button>
-                            <button class="theme-btn" data-theme="ocean-depths">Ocean Depths</button>
-                            <button class="theme-btn" data-theme="desert-storm">Desert Storm</button>
-                            <button class="theme-btn" data-theme="glitch-mode">Glitch Mode</button>
-                            <button class="theme-btn" data-theme="synthwave">Synthwave Sunset</button>
-                            <button class="theme-btn" data-theme="blood-moon">Blood Moon</button>
-                            <button class="theme-btn" data-theme="minimal-white">Minimal White</button>
-                            <button class="theme-btn" data-theme="matrix">Matrix Code</button>
-                            <button class="theme-btn" data-theme="galaxy-rainbow">Galaxy Rainbow</button>
-                            <button class="theme-btn" data-theme="steampunk">Steampunk</button>
-                            <button class="theme-btn" data-theme="cartoon-pop">Cartoon Pop</button>
-                            <button class="theme-btn" data-theme="shadow-realm">Shadow Realm</button>
-                            <button class="theme-btn" data-theme="snowy-night">Snowy Night</button>
-                            <button class="theme-btn" data-theme="custom">Custom</button>
-                        </div>
-                        
-                        <div id="customColorPanel" class="custom-color-panel" style="display: none;">
-                            <h4>Custom Colors & Font</h4>
-                            <div class="color-controls">
-                                <div class="color-control">
-                                    <label>Background Color:</label>
-                                    <input type="color" id="bgColorPicker" value="#667eea">
-                                </div>
-                                <div class="color-control">
-                                    <label>Background Shade:</label>
-                                    <input type="color" id="bgShadePicker" value="#764ba2">
-                                </div>
-                                <div class="color-control">
-                                    <label>Button Text Color:</label>
-                                    <input type="color" id="textColorPicker" value="#667eea">
-                                </div>
-                                <div class="color-control">
-                                    <label>Font:</label>
-                                    <select id="fontPicker" class="font-picker">
-                                        <option value="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif">Default</option>
-                                        <option value="'Orbitron', sans-serif">Orbitron</option>
-                                        <option value="'Press Start 2P', cursive">Press Start 2P</option>
-                                        <option value="'Rajdhani', sans-serif">Rajdhani</option>
-                                        <option value="'Audiowide', cursive">Audiowide</option>
-                                        <option value="'VT323', monospace">VT323</option>
-                                        <option value="'Russo One', sans-serif">Russo One</option>
-                                        <option value="'Bungee', cursive">Bungee</option>
-                                        <option value="'Exo 2', sans-serif">Exo 2</option>
-                                        <option value="'Share Tech Mono', monospace">Share Tech Mono</option>
-                                        <option value="'Pixelify Sans', cursive">Pixelify Sans</option>
-                                        <option value="'Cinzel', serif">Cinzel</option>
-                                        <option value="'Creepster', cursive">Creepster</option>
-                                        <option value="'Oxanium', cursive">Oxanium</option>
-                                        <option value="'Silkscreen', cursive">Silkscreen</option>
-                                        <option value="'Teko', sans-serif">Teko</option>
-                                        <option value="'Rubik', sans-serif">Rubik</option>
-                                        <option value="'Montserrat', sans-serif">Montserrat</option>
-                                        <option value="'Freckle Face', cursive">Freckle Face</option>
-                                        <option value="'MedievalSharp', cursive">MedievalSharp</option>
-                                        <option value="'Chakra Petch', sans-serif">Chakra Petch</option>
-                                        <option value="'Anton', sans-serif">Anton</option>
-                                        <option value="'Nosifer', cursive">Nosifer</option>
-                                        <option value="'Inter', sans-serif">Inter</option>
-                                        <option value="'Luckiest Guy', cursive">Luckiest Guy</option>
-                                        <option value="'Aldrich', sans-serif">Aldrich</option>
-                                        <option value="'Roboto Mono', monospace">Roboto Mono</option>
-                                        <option value="'Unica One', cursive">Unica One</option>
-                                        <option value="'Major Mono Display', monospace">Major Mono Display</option>
-                                    </select>
-                                </div>
-                            </div>
+                        <div id="customPanel" style="display:none; margin-top:10px;">
+                            <input type="color" id="bgColor" value="#667eea">
+                            <input type="color" id="bgShade" value="#764ba2">
+                            <select id="fontPicker">
+                                <option value="'Segoe UI', sans-serif">Default</option>
+                                <option value="'Orbitron', sans-serif">Orbitron</option>
+                                <option value="'Press Start 2P', cursive">Press Start 2P</option>
+                                <option value="'VT323', monospace">VT323</option>
+                            </select>
                         </div>
                     </div>
                 </div>
                 <button id="favoritesToggle" class="favorites-toggle">⭐ Favorites</button>
-                
-                <div class="cloak-dropdown-container">
-                    <button id="cloakToggle" class="cloak-toggle">🎭 Tab Cloak</button>
-                    <div id="cloakDropdown" class="cloak-dropdown">
-                        <h3 style="color: #667eea; margin-bottom: 15px; font-size: 1.2rem;">Choose Disguise</h3>
-                        <div class="cloak-buttons">
-                            <button class="cloak-btn" data-cloak="none">None (Default)</button>
-                            <button class="cloak-btn" data-cloak="schoology">Schoology</button>
-                            <button class="cloak-btn" data-cloak="google-classroom">Google Classroom</button>
-                            <button class="cloak-btn" data-cloak="zoom">Zoom</button>
-                            <button class="cloak-btn" data-cloak="google">Google</button>
-                            <button class="cloak-btn" data-cloak="youtube">YouTube</button>
-                        </div>
-                    </div>
-                </div>
-                
                 <button id="ejectButton" class="eject-button">🚀 Eject</button>
             </div>
         </header>
 
         <div class="search-container">
-            <input type="text" id="searchBar" placeholder="Search for games..." class="search-bar">
+            <input type="text" id="searchBar" placeholder="Search games..." class="search-bar">
         </div>
 
-        <div id="gamesGrid" class="games-grid">
-            <!-- Game buttons will be dynamically inserted here -->
-        </div>
-
-        <div id="noResults" class="no-results" style="display: none;">
-            <p>No games found matching your search.</p>
-        </div>
+        <div id="gamesGrid" class="games-grid"></div>
+        <div id="noResults" class="no-results" style="display: none;">No games found.</div>
     </div>
 
-    <!-- Game Sidebar Panel -->
+    <!-- Game Sidebar -->
     <div id="gameSidebar" class="game-sidebar">
         <button id="closeSidebar" class="close-sidebar">✕</button>
-        
         <div class="sidebar-content">
-            <h2 id="sidebarGameTitle" class="sidebar-game-title">Game Title</h2>
-            
-            <div class="game-stats">
-                <div class="stat-item">
-                    <span class="stat-icon">👥</span>
-                    <span class="stat-label">Play Count:</span>
-                    <span id="playCount" class="stat-value">0</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-icon">👍</span>
-                    <span class="stat-label">Likes:</span>
-                    <span id="likeCount" class="stat-value">0</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-icon">👎</span>
-                    <span class="stat-label">Dislikes:</span>
-                    <span id="dislikeCount" class="stat-value">0</span>
-                </div>
+            <h2 id="sidebarTitle">Game</h2>
+            <div class="stats">
+                <p>Plays: <span id="playCount">0</span></p>
+                <p>Likes: <span id="likeCount">0</span></p>
+                <p>Dislikes: <span id="dislikeCount">0</span></p>
             </div>
-            
-            <div class="game-actions">
-                <button id="favoriteBtn" class="action-btn favorite-btn">
-                    <span class="btn-icon">⭐</span>
-                    <span class="btn-text">Favorite</span>
-                </button>
-                
-                <button id="likeBtn" class="action-btn like-btn">
-                    <span class="btn-icon">👍</span>
-                    <span class="btn-text">Like</span>
-                </button>
-                
-                <button id="dislikeBtn" class="action-btn dislike-btn">
-                    <span class="btn-icon">👎</span>
-                    <span class="btn-text">Dislike</span>
-                </button>
-            </div>
-            
-            <button id="playGameBtn" class="play-game-btn">
-                ▶ PLAY GAME
-            </button>
+            <button id="favoriteBtn" class="action-btn">⭐ Favorite</button>
+            <button id="likeBtn" class="action-btn">👍 Like</button>
+            <button id="dislikeBtn" class="action-btn">👎 Dislike</button>
+            <button id="playBtn" class="play-btn">▶ PLAY</button>
         </div>
     </div>
 
