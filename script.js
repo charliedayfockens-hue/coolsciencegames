@@ -10,9 +10,9 @@ let showingFavorites = false;
 // 2. Create a new bin with this content: {"plays":{},"likes":{},"dislikes":{}}
 // 3. Copy the bin URL and paste it below
 // 4. Get your API key and paste it below
-const DATABASE_URL = 'YOUR_JSONBIN_URL_HERE'; // Replace with your JSONBin.io URL
-const API_KEY = 'YOUR_API_KEY_HERE'; // Replace with your JSONBin.io API key
-const USE_CLOUD_SYNC = false; // Set to true when you have a database URL
+const DATABASE_URL = 'https://api.jsonbin.io/v3/b/6969ca90d0ea881f406f3ac9'; // Replace with your JSONBin.io URL
+const API_KEY = '$2a$10$nZhRxLSo6N0uWfit8Zg.D.PsM7gogYoMZsrYo3mROyZHYZdFjb0V.'; // Replace with your JSONBin.io API key
+const USE_CLOUD_SYNC = true; // Set to true when you have a database URL
 
 // Initialize
 document.addEventListener('DOMContentLoaded', async function() {
