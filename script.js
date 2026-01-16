@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', function() {
     setupCloaking();
     setupEject();
     setupSearch();
+    setupClock();
 });
 
 // ===== LOAD GAMES =====
@@ -115,8 +116,8 @@ function openSidebar(game) {
     currentGame = game;
     document.getElementById('sidebarTitle').textContent = game.displayName;
     
-    const data = getData(game.filename);
-    document.getElementById('playCount').textContent = data.plays;
+    // Show GLOBAL stats (visible to everyone)
+    document.getElementById('playCount').textContent = getGlobalPlays(game.filename);
     document.getElementById('likeCount').textContent = getLikes(game.filename);
     document.getElementById('dislikeCount').textContent = getDislikes(game.filename);
     
@@ -131,12 +132,11 @@ function closeSidebar() {
 function playGame() {
     if (!currentGame) return;
     
-    const data = getData(currentGame.filename);
-    data.plays++;
-    saveData(currentGame.filename, data);
+    // Increment GLOBAL play count (visible to everyone)
+    incrementGlobalPlays(currentGame.filename);
     
     window.open(`assets/${currentGame.filename}`, '_blank');
-    document.getElementById('playCount').textContent = data.plays;
+    document.getElementById('playCount').textContent = getGlobalPlays(currentGame.filename);
     
     // Update leaderboard
     updateLeaderboard();
@@ -156,67 +156,73 @@ function toggleFavorite() {
 function toggleLike() {
     if (!currentGame) return;
     
-    const data = getData(currentGame.filename);
+    const currentStatus = getUserLikeStatus(currentGame.filename);
     
-    if (data.liked) {
-        data.liked = false;
+    if (currentStatus === 'liked') {
+        // Unlike
         decrementLikes(currentGame.filename);
+        setUserLikeStatus(currentGame.filename, 'none');
     } else {
-        data.liked = true;
+        // Like
         incrementLikes(currentGame.filename);
+        setUserLikeStatus(currentGame.filename, 'liked');
         
-        if (data.disliked) {
-            data.disliked = false;
+        // Remove dislike if present
+        if (currentStatus === 'disliked') {
             decrementDislikes(currentGame.filename);
         }
     }
     
-    saveData(currentGame.filename, data);
     updateButtons();
 }
 
 function toggleDislike() {
     if (!currentGame) return;
     
-    const data = getData(currentGame.filename);
+    const currentStatus = getUserLikeStatus(currentGame.filename);
     
-    if (data.disliked) {
-        data.disliked = false;
+    if (currentStatus === 'disliked') {
+        // Un-dislike
         decrementDislikes(currentGame.filename);
+        setUserLikeStatus(currentGame.filename, 'none');
     } else {
-        data.disliked = true;
+        // Dislike
         incrementDislikes(currentGame.filename);
+        setUserLikeStatus(currentGame.filename, 'disliked');
         
-        if (data.liked) {
-            data.liked = false;
+        // Remove like if present
+        if (currentStatus === 'liked') {
             decrementLikes(currentGame.filename);
         }
     }
     
-    saveData(currentGame.filename, data);
     updateButtons();
 }
 
 function updateButtons() {
     if (!currentGame) return;
     
-    const data = getData(currentGame.filename);
+    const userStatus = getUserLikeStatus(currentGame.filename);
     const favBtn = document.getElementById('favoriteBtn');
     const likeBtn = document.getElementById('likeBtn');
     const dislikeBtn = document.getElementById('dislikeBtn');
     
-    favBtn.classList.toggle('active', data.favorited);
-    likeBtn.classList.toggle('active', data.liked);
-    dislikeBtn.classList.toggle('active', data.disliked);
+    // Favorite status (personal)
+    favBtn.classList.toggle('active', getData(currentGame.filename).favorited);
     
+    // Like/Dislike status (personal, but counts are global)
+    likeBtn.classList.toggle('active', userStatus === 'liked');
+    dislikeBtn.classList.toggle('active', userStatus === 'disliked');
+    
+    // Update counts (global - everyone sees the same numbers)
     document.getElementById('likeCount').textContent = getLikes(currentGame.filename);
     document.getElementById('dislikeCount').textContent = getDislikes(currentGame.filename);
 }
 
-// ===== DATA STORAGE =====
+// ===== DATA STORAGE (GLOBAL - SHARED FOR EVERYONE) =====
 function getData(filename) {
     const data = localStorage.getItem(`game_${filename}`);
-    return data ? JSON.parse(data) : { plays: 0, liked: false, disliked: false, favorited: false };
+    return data ? JSON.parse(data) : { favorited: false };
 }
 
 function saveData(filename, data) {
@@ -227,30 +233,58 @@ function isFavorited(filename) {
     return getData(filename).favorited;
 }
 
-function getLikes(filename) {
-    return parseInt(localStorage.getItem(`likes_${filename}`) || '0');
+// GLOBAL play counts (visible to everyone)
+function getGlobalPlays(filename) {
+    return parseInt(localStorage.getItem(`global_plays_${filename}`) || '0');
 }
 
-function getDislikes(filename) {
-    return parseInt(localStorage.getItem(`dislikes_${filename}`) || '0');
+function incrementGlobalPlays(filename) {
+    const current = getGlobalPlays(filename);
+    localStorage.setItem(`global_plays_${filename}`, (current + 1).toString());
+}
+
+// GLOBAL likes (visible to everyone)
+function getLikes(filename) {
+    return parseInt(localStorage.getItem(`global_likes_${filename}`) || '0');
 }
 
 function incrementLikes(filename) {
-    localStorage.setItem(`likes_${filename}`, (getLikes(filename) + 1).toString());
+    const current = getLikes(filename);
+    localStorage.setItem(`global_likes_${filename}`, (current + 1).toString());
 }
 
 function decrementLikes(filename) {
     const current = getLikes(filename);
-    if (current > 0) localStorage.setItem(`likes_${filename}`, (current - 1).toString());
+    if (current > 0) {
+        localStorage.setItem(`global_likes_${filename}`, (current - 1).toString());
+    }
+}
+
+// GLOBAL dislikes (visible to everyone)
+function getDislikes(filename) {
+    return parseInt(localStorage.getItem(`global_dislikes_${filename}`) || '0');
 }
 
 function incrementDislikes(filename) {
-    localStorage.setItem(`dislikes_${filename}`, (getDislikes(filename) + 1).toString());
+    const current = getDislikes(filename);
+    localStorage.setItem(`global_dislikes_${filename}`, (current + 1).toString());
 }
 
 function decrementDislikes(filename) {
     const current = getDislikes(filename);
-    if (current > 0) localStorage.setItem(`dislikes_${filename}`, (current - 1).toString());
+    if (current > 0) {
+        localStorage.setItem(`global_dislikes_${filename}`, (current - 1).toString());
+    }
+}
+
+// User's personal like/dislike status
+function getUserLikeStatus(filename) {
+    const status = localStorage.getItem(`user_like_${filename}`);
+    return status || 'none'; // 'liked', 'disliked', or 'none'
+}
+
+function setUserLikeStatus(filename, status) {
+    localStorage.setItem(`user_like_${filename}`, status);
 }
 
 // ===== FAVORITES =====
@@ -361,29 +395,29 @@ function setupSearch() {
 
 // ===== LEADERBOARD =====
 function updateLeaderboard() {
-    // Get all games with their play counts
+    // Get all games with their play counts from GLOBAL data
     const gamesWithPlays = allGames.map(game => ({
         name: game.displayName,
         filename: game.filename,
-        plays: getData(game.filename).plays
+        plays: getGlobalPlays(game.filename)
     }));
     
     // Sort by plays (highest first)
     gamesWithPlays.sort((a, b) => b.plays - a.plays);
     
-    // Get top 10
-    const top10 = gamesWithPlays.slice(0, 10);
+    // Get top 5
+    const top5 = gamesWithPlays.slice(0, 5);
     
     // Display leaderboard
     const list = document.getElementById('leaderboardList');
     list.innerHTML = '';
     
-    if (top10.every(g => g.plays === 0)) {
+    if (top5.every(g => g.plays === 0)) {
         list.innerHTML = '<div style="text-align:center;color:#999;font-size:0.9rem;padding:20px 0;">No games played yet!</div>';
         return;
     }
     
-    top10.forEach((game, index) => {
+    top5.forEach((game, index) => {
         if (game.plays > 0) {
             const item = document.createElement('div');
             item.className = 'leaderboard-item';
@@ -486,4 +520,22 @@ function setupEject() {
         window.close();
         if (!window.closed) window.location.href = 'about:blank';
     };
+}
+
+// ===== CLOCK =====
+function setupClock() {
+    function updateClock() {
+        const now = new Date();
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+        
+        document.getElementById('clock').textContent = `${hours}:${minutes}:${seconds}`;
+    }
+    
+    // Update immediately
+    updateClock();
+    
+    // Update every second
+    setInterval(updateClock, 1000);
 }
