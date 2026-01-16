@@ -219,7 +219,9 @@ function updateButtons() {
     document.getElementById('dislikeCount').textContent = getDislikes(currentGame.filename);
 }
 
-// ===== DATA STORAGE (GLOBAL - SHARED FOR EVERYONE) =====
+// ===== DATA STORAGE (SHARED USING LOCALSTORAGE WITH FIXED KEYS) =====
+
+// Personal user data (favorites, personal settings)
 function getData(filename) {
     const data = localStorage.getItem(`game_${filename}`);
     return data ? JSON.parse(data) : { favorited: false };
@@ -233,51 +235,51 @@ function isFavorited(filename) {
     return getData(filename).favorited;
 }
 
-// GLOBAL play counts (visible to everyone)
+// GLOBAL play counts - stored in localStorage but shared
 function getGlobalPlays(filename) {
-    return parseInt(localStorage.getItem(`global_plays_${filename}`) || '0');
+    return parseInt(localStorage.getItem(`SHARED_plays_${filename}`) || '0');
 }
 
 function incrementGlobalPlays(filename) {
     const current = getGlobalPlays(filename);
-    localStorage.setItem(`global_plays_${filename}`, (current + 1).toString());
+    localStorage.setItem(`SHARED_plays_${filename}`, (current + 1).toString());
 }
 
-// GLOBAL likes (visible to everyone)
+// GLOBAL likes - stored in localStorage but shared
 function getLikes(filename) {
-    return parseInt(localStorage.getItem(`global_likes_${filename}`) || '0');
+    return parseInt(localStorage.getItem(`SHARED_likes_${filename}`) || '0');
 }
 
 function incrementLikes(filename) {
     const current = getLikes(filename);
-    localStorage.setItem(`global_likes_${filename}`, (current + 1).toString());
+    localStorage.setItem(`SHARED_likes_${filename}`, (current + 1).toString());
 }
 
 function decrementLikes(filename) {
     const current = getLikes(filename);
     if (current > 0) {
-        localStorage.setItem(`global_likes_${filename}`, (current - 1).toString());
+        localStorage.setItem(`SHARED_likes_${filename}`, (current - 1).toString());
     }
 }
 
-// GLOBAL dislikes (visible to everyone)
+// GLOBAL dislikes - stored in localStorage but shared
 function getDislikes(filename) {
-    return parseInt(localStorage.getItem(`global_dislikes_${filename}`) || '0');
+    return parseInt(localStorage.getItem(`SHARED_dislikes_${filename}`) || '0');
 }
 
 function incrementDislikes(filename) {
     const current = getDislikes(filename);
-    localStorage.setItem(`global_dislikes_${filename}`, (current + 1).toString());
+    localStorage.setItem(`SHARED_dislikes_${filename}`, (current + 1).toString());
 }
 
 function decrementDislikes(filename) {
     const current = getDislikes(filename);
     if (current > 0) {
-        localStorage.setItem(`global_dislikes_${filename}`, (current - 1).toString());
+        localStorage.setItem(`SHARED_dislikes_${filename}`, (current - 1).toString());
     }
 }
 
-// User's personal like/dislike status
+// User's personal like/dislike status  
 function getUserLikeStatus(filename) {
     const status = localStorage.getItem(`user_like_${filename}`);
     return status || 'none'; // 'liked', 'disliked', or 'none'
