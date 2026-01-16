@@ -3,21 +3,18 @@ let allGames = [];
 let currentGame = null;
 let showingFavorites = false;
 
-// CONFIGURATION: Set your database URL here
-// You can use JSONBin.io (free) or any JSON hosting service
-// Instructions: 
-// 1. Go to https://jsonbin.io and create a free account
-// 2. Create a new bin with this content: {"plays":{},"likes":{},"dislikes":{}}
-// 3. Copy the bin URL and paste it below
-// 4. Get your API key and paste it below
-const DATABASE_URL = 'https://api.jsonbin.io/v3/b/6969ca90d0ea881f406f3ac9'; // Replace with your JSONBin.io URL
-const API_KEY = '$2a$10$fB1aasZYO5d9CW3jC/xFZ.6DIKMFTfIY1FzgOXCrL11/xE6VmmF4C'; // Replace with your JSONBin.io API key
-const USE_CLOUD_SYNC = true; // Set to true when you have a database URL
+// Local shared data file
+const SHARED_DATA_FILE = 'game-data.json';
+let sharedData = {
+    plays: {},
+    likes: {},
+    dislikes: {}
+};
 
 // Initialize
 document.addEventListener('DOMContentLoaded', async function() {
-    // Load cloud data first if enabled
-    await loadCloudData();
+    // Load shared data from file first
+    await loadSharedData();
     
     loadGames();
     setupThemes();
@@ -28,20 +25,18 @@ document.addEventListener('DOMContentLoaded', async function() {
     setupSearch();
     setupClock();
     
-    // Auto-refresh cloud data every 10 seconds if enabled
-    if (USE_CLOUD_SYNC) {
-        setInterval(async () => {
-            await loadCloudData();
-            updateLeaderboard();
-            
-            // Update sidebar if open
-            if (currentGame) {
-                document.getElementById('playCount').textContent = getGlobalPlays(currentGame.filename);
-                document.getElementById('likeCount').textContent = getLikes(currentGame.filename);
-                document.getElementById('dislikeCount').textContent = getDislikes(currentGame.filename);
-            }
-        }, 10000);
-    }
+    // Reload shared data every 5 seconds to catch updates
+    setInterval(async () => {
+        await loadSharedData();
+        updateLeaderboard();
+        
+        // Update sidebar if open
+        if (currentGame) {
+            document.getElementById('playCount').textContent = getGlobalPlays(currentGame.filename);
+            document.getElementById('likeCount').textContent = getLikes(currentGame.filename);
+            document.getElementById('dislikeCount').textContent = getDislikes(currentGame.filename);
+        }
+    }, 5000);
 });
 
 // ===== LOAD GAMES =====
@@ -248,57 +243,46 @@ function updateButtons() {
     document.getElementById('dislikeCount').textContent = getDislikes(currentGame.filename);
 }
 
-// ===== CLOUD DATA STORAGE (SHARED ACROSS ALL COMPUTERS) =====
+// ===== SHARED DATA STORAGE (LOCAL FILE - WORKS ACROSS ALL BROWSERS) =====
 
-let cloudData = {
-    plays: {},
-    likes: {},
-    dislikes: {}
-};
-
-// Load data from cloud
-async function loadCloudData() {
-    if (!USE_CLOUD_SYNC) return;
-    
+// Load shared data from local JSON file
+async function loadSharedData() {
     try {
-        const response = await fetch(DATABASE_URL, {
-            headers: {
-                'X-Master-Key': API_KEY
-            }
-        });
-        
+        const response = await fetch(SHARED_DATA_FILE);
         if (response.ok) {
-            const data = await response.json();
-            cloudData = data.record || data;
-            console.log('✅ Cloud data loaded:', cloudData);
+            sharedData = await response.json();
+            console.log('✅ Shared data loaded from file:', sharedData);
+        } else {
+            console.log('⚠️ No shared data file found, using defaults');
         }
     } catch (e) {
-        console.log('⚠️ Could not load cloud data:', e);
+        console.log('⚠️ Could not load shared data:', e);
     }
 }
 
-// Save data to cloud
-async function saveCloudData() {
-    if (!USE_CLOUD_SYNC) return;
+// Save shared data - downloads file that user must save to website folder
+function saveSharedData() {
+    // Create a downloadable JSON file
+    const dataStr = JSON.stringify(sharedData, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(dataBlob);
     
-    try {
-        await fetch(DATABASE_URL, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Master-Key': API_KEY
-            },
-            body: JSON.stringify(cloudData)
-        });
-        console.log('✅ Cloud data saved');
-    } catch (e) {
-        console.log('⚠️ Could not save cloud data:', e);
-    }
+    // Create download link
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'game-data.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    console.log('💾 IMPORTANT: Save the downloaded file as "game-data.json" in your website folder!');
+    alert('📥 Data file downloaded! \n\nTo share data across browsers:\n1. Save the downloaded file as "game-data.json"\n2. Put it in the same folder as index.html\n3. Refresh the page\n\nNow all browsers will see the same data!');
 }
 
-// ===== DATA STORAGE (HYBRID: LOCAL + CLOUD) =====
+// ===== DATA STORAGE =====
 
-// Personal user data (favorites, personal settings - stays local)
+// Personal user data (favorites - stays local)
 function getData(filename) {
     const data = localStorage.getItem(`game_${filename}`);
     return data ? JSON.parse(data) : { favorited: false };
@@ -312,95 +296,63 @@ function isFavorited(filename) {
     return getData(filename).favorited;
 }
 
-// GLOBAL play counts - cloud if available, localStorage fallback
+// GLOBAL play counts - from shared file
 function getGlobalPlays(filename) {
-    if (USE_CLOUD_SYNC) {
-        return cloudData.plays[filename] || 0;
-    }
-    return parseInt(localStorage.getItem(`SHARED_plays_${filename}`) || '0');
+    return sharedData.plays[filename] || 0;
 }
 
 function incrementGlobalPlays(filename) {
-    if (USE_CLOUD_SYNC) {
-        if (!cloudData.plays[filename]) cloudData.plays[filename] = 0;
-        cloudData.plays[filename]++;
-        saveCloudData();
-    } else {
-        const current = getGlobalPlays(filename);
-        localStorage.setItem(`SHARED_plays_${filename}`, (current + 1).toString());
+    if (!sharedData.plays[filename]) {
+        sharedData.plays[filename] = 0;
     }
+    sharedData.plays[filename]++;
+    saveSharedData();
 }
 
-// GLOBAL likes - cloud if available, localStorage fallback
+// GLOBAL likes - from shared file
 function getLikes(filename) {
-    if (USE_CLOUD_SYNC) {
-        return cloudData.likes[filename] || 0;
-    }
-    return parseInt(localStorage.getItem(`SHARED_likes_${filename}`) || '0');
+    return sharedData.likes[filename] || 0;
 }
 
 function incrementLikes(filename) {
-    if (USE_CLOUD_SYNC) {
-        if (!cloudData.likes[filename]) cloudData.likes[filename] = 0;
-        cloudData.likes[filename]++;
-        saveCloudData();
-    } else {
-        const current = getLikes(filename);
-        localStorage.setItem(`SHARED_likes_${filename}`, (current + 1).toString());
+    if (!sharedData.likes[filename]) {
+        sharedData.likes[filename] = 0;
     }
+    sharedData.likes[filename]++;
+    saveSharedData();
 }
 
 function decrementLikes(filename) {
-    if (USE_CLOUD_SYNC) {
-        if (cloudData.likes[filename] && cloudData.likes[filename] > 0) {
-            cloudData.likes[filename]--;
-            saveCloudData();
-        }
-    } else {
-        const current = getLikes(filename);
-        if (current > 0) {
-            localStorage.setItem(`SHARED_likes_${filename}`, (current - 1).toString());
-        }
+    if (sharedData.likes[filename] && sharedData.likes[filename] > 0) {
+        sharedData.likes[filename]--;
+        saveSharedData();
     }
 }
 
-// GLOBAL dislikes - cloud if available, localStorage fallback
+// GLOBAL dislikes - from shared file
 function getDislikes(filename) {
-    if (USE_CLOUD_SYNC) {
-        return cloudData.dislikes[filename] || 0;
-    }
-    return parseInt(localStorage.getItem(`SHARED_dislikes_${filename}`) || '0');
+    return sharedData.dislikes[filename] || 0;
 }
 
 function incrementDislikes(filename) {
-    if (USE_CLOUD_SYNC) {
-        if (!cloudData.dislikes[filename]) cloudData.dislikes[filename] = 0;
-        cloudData.dislikes[filename]++;
-        saveCloudData();
-    } else {
-        const current = getDislikes(filename);
-        localStorage.setItem(`SHARED_dislikes_${filename}`, (current + 1).toString());
+    if (!sharedData.dislikes[filename]) {
+        sharedData.dislikes[filename] = 0;
     }
+    sharedData.dislikes[filename]++;
+    saveSharedData();
 }
 
 function decrementDislikes(filename) {
-    if (USE_CLOUD_SYNC) {
-        if (cloudData.dislikes[filename] && cloudData.dislikes[filename] > 0) {
-            cloudData.dislikes[filename]--;
-            saveCloudData();
-        }
-    } else {
-        const current = getDislikes(filename);
-        if (current > 0) {
-            localStorage.setItem(`SHARED_dislikes_${filename}`, (current - 1).toString());
-        }
+    if (sharedData.dislikes[filename] && sharedData.dislikes[filename] > 0) {
+        sharedData.dislikes[filename]--;
+        saveSharedData();
     }
 }
 
 // User's personal like/dislike status  
 function getUserLikeStatus(filename) {
     const status = localStorage.getItem(`user_like_${filename}`);
-    return status || 'none'; // 'liked', 'disliked', or 'none'
+    return status || 'none';
 }
 
 function setUserLikeStatus(filename, status) {
