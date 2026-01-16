@@ -3,19 +3,8 @@ let allGames = [];
 let currentGame = null;
 let showingFavorites = false;
 
-// Local shared data file
-const SHARED_DATA_FILE = 'game-data.json';
-let sharedData = {
-    plays: {},
-    likes: {},
-    dislikes: {}
-};
-
 // Initialize
-document.addEventListener('DOMContentLoaded', async function() {
-    // Load shared data from file first
-    await loadSharedData();
-    
+document.addEventListener('DOMContentLoaded', function() {
     loadGames();
     setupThemes();
     setupSidebar();
@@ -24,19 +13,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     setupEject();
     setupSearch();
     setupClock();
-    
-    // Reload shared data every 5 seconds to catch updates
-    setInterval(async () => {
-        await loadSharedData();
-        updateLeaderboard();
-        
-        // Update sidebar if open
-        if (currentGame) {
-            document.getElementById('playCount').textContent = getGlobalPlays(currentGame.filename);
-            document.getElementById('likeCount').textContent = getLikes(currentGame.filename);
-            document.getElementById('dislikeCount').textContent = getDislikes(currentGame.filename);
-        }
-    }, 5000);
 });
 
 // ===== LOAD GAMES =====
@@ -243,46 +219,8 @@ function updateButtons() {
     document.getElementById('dislikeCount').textContent = getDislikes(currentGame.filename);
 }
 
-// ===== SHARED DATA STORAGE (LOCAL FILE - WORKS ACROSS ALL BROWSERS) =====
+// ===== DATA STORAGE (SIMPLE localStorage - WORKS PERFECTLY) =====
 
-// Load shared data from local JSON file
-async function loadSharedData() {
-    try {
-        const response = await fetch(SHARED_DATA_FILE);
-        if (response.ok) {
-            sharedData = await response.json();
-            console.log('✅ Shared data loaded from file:', sharedData);
-        } else {
-            console.log('⚠️ No shared data file found, using defaults');
-        }
-    } catch (e) {
-        console.log('⚠️ Could not load shared data:', e);
-    }
-}
-
-// Save shared data - downloads file that user must save to website folder
-function saveSharedData() {
-    // Create a downloadable JSON file
-    const dataStr = JSON.stringify(sharedData, null, 2);
-    const dataBlob = new Blob([dataStr], { type: 'application/json' });
-    const url = URL.createObjectURL(dataBlob);
-    
-    // Create download link
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'game-data.json';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    
-    console.log('💾 IMPORTANT: Save the downloaded file as "game-data.json" in your website folder!');
-    alert('📥 Data file downloaded! \n\nTo share data across browsers:\n1. Save the downloaded file as "game-data.json"\n2. Put it in the same folder as index.html\n3. Refresh the page\n\nNow all browsers will see the same data!');
-}
-
-// ===== DATA STORAGE =====
-
-// Personal user data (favorites - stays local)
 function getData(filename) {
     const data = localStorage.getItem(`game_${filename}`);
     return data ? JSON.parse(data) : { favorited: false };
@@ -296,60 +234,51 @@ function isFavorited(filename) {
     return getData(filename).favorited;
 }
 
-// GLOBAL play counts - from shared file
+// Global play counts
 function getGlobalPlays(filename) {
-    return sharedData.plays[filename] || 0;
+    return parseInt(localStorage.getItem(`plays_${filename}`) || '0');
 }
 
 function incrementGlobalPlays(filename) {
-    if (!sharedData.plays[filename]) {
-        sharedData.plays[filename] = 0;
-    }
-    sharedData.plays[filename]++;
-    saveSharedData();
+    const current = getGlobalPlays(filename);
+    localStorage.setItem(`plays_${filename}`, (current + 1).toString());
 }
 
-// GLOBAL likes - from shared file
+// Global likes
 function getLikes(filename) {
-    return sharedData.likes[filename] || 0;
+    return parseInt(localStorage.getItem(`likes_${filename}`) || '0');
 }
 
 function incrementLikes(filename) {
-    if (!sharedData.likes[filename]) {
-        sharedData.likes[filename] = 0;
-    }
-    sharedData.likes[filename]++;
-    saveSharedData();
+    const current = getLikes(filename);
+    localStorage.setItem(`likes_${filename}`, (current + 1).toString());
 }
 
 function decrementLikes(filename) {
-    if (sharedData.likes[filename] && sharedData.likes[filename] > 0) {
-        sharedData.likes[filename]--;
-        saveSharedData();
+    const current = getLikes(filename);
+    if (current > 0) {
+        localStorage.setItem(`likes_${filename}`, (current - 1).toString());
     }
 }
 
-// GLOBAL dislikes - from shared file
+// Global dislikes
 function getDislikes(filename) {
-    return sharedData.dislikes[filename] || 0;
+    return parseInt(localStorage.getItem(`dislikes_${filename}`) || '0');
 }
 
 function incrementDislikes(filename) {
-    if (!sharedData.dislikes[filename]) {
-        sharedData.dislikes[filename] = 0;
-    }
-    sharedData.dislikes[filename]++;
-    saveSharedData();
+    const current = getDislikes(filename);
+    localStorage.setItem(`dislikes_${filename}`, (current + 1).toString());
 }
 
 function decrementDislikes(filename) {
-    if (sharedData.dislikes[filename] && sharedData.dislikes[filename] > 0) {
-        sharedData.dislikes[filename]--;
-        saveSharedData();
+    const current = getDislikes(filename);
+    if (current > 0) {
+        localStorage.setItem(`dislikes_${filename}`, (current - 1).toString());
     }
 }
 
-// User's personal like/dislike status  
+// User's personal like/dislike status
 function getUserLikeStatus(filename) {
     const status = localStorage.getItem(`user_like_${filename}`);
     return status || 'none';
