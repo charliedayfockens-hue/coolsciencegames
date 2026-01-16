@@ -3,8 +3,22 @@ let allGames = [];
 let currentGame = null;
 let showingFavorites = false;
 
+// CONFIGURATION: Set your database URL here
+// You can use JSONBin.io (free) or any JSON hosting service
+// Instructions: 
+// 1. Go to https://jsonbin.io and create a free account
+// 2. Create a new bin with this content: {"plays":{},"likes":{},"dislikes":{}}
+// 3. Copy the bin URL and paste it below
+// 4. Get your API key and paste it below
+const DATABASE_URL = 'YOUR_JSONBIN_URL_HERE'; // Replace with your JSONBin.io URL
+const API_KEY = 'YOUR_API_KEY_HERE'; // Replace with your JSONBin.io API key
+const USE_CLOUD_SYNC = false; // Set to true when you have a database URL
+
 // Initialize
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
+    // Load cloud data first if enabled
+    await loadCloudData();
+    
     loadGames();
     setupThemes();
     setupSidebar();
@@ -13,6 +27,21 @@ document.addEventListener('DOMContentLoaded', function() {
     setupEject();
     setupSearch();
     setupClock();
+    
+    // Auto-refresh cloud data every 10 seconds if enabled
+    if (USE_CLOUD_SYNC) {
+        setInterval(async () => {
+            await loadCloudData();
+            updateLeaderboard();
+            
+            // Update sidebar if open
+            if (currentGame) {
+                document.getElementById('playCount').textContent = getGlobalPlays(currentGame.filename);
+                document.getElementById('likeCount').textContent = getLikes(currentGame.filename);
+                document.getElementById('dislikeCount').textContent = getDislikes(currentGame.filename);
+            }
+        }, 10000);
+    }
 });
 
 // ===== LOAD GAMES =====
@@ -219,9 +248,57 @@ function updateButtons() {
     document.getElementById('dislikeCount').textContent = getDislikes(currentGame.filename);
 }
 
-// ===== DATA STORAGE (SHARED USING LOCALSTORAGE WITH FIXED KEYS) =====
+// ===== CLOUD DATA STORAGE (SHARED ACROSS ALL COMPUTERS) =====
 
-// Personal user data (favorites, personal settings)
+let cloudData = {
+    plays: {},
+    likes: {},
+    dislikes: {}
+};
+
+// Load data from cloud
+async function loadCloudData() {
+    if (!USE_CLOUD_SYNC) return;
+    
+    try {
+        const response = await fetch(DATABASE_URL, {
+            headers: {
+                'X-Master-Key': API_KEY
+            }
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            cloudData = data.record || data;
+            console.log('✅ Cloud data loaded:', cloudData);
+        }
+    } catch (e) {
+        console.log('⚠️ Could not load cloud data:', e);
+    }
+}
+
+// Save data to cloud
+async function saveCloudData() {
+    if (!USE_CLOUD_SYNC) return;
+    
+    try {
+        await fetch(DATABASE_URL, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Master-Key': API_KEY
+            },
+            body: JSON.stringify(cloudData)
+        });
+        console.log('✅ Cloud data saved');
+    } catch (e) {
+        console.log('⚠️ Could not save cloud data:', e);
+    }
+}
+
+// ===== DATA STORAGE (HYBRID: LOCAL + CLOUD) =====
+
+// Personal user data (favorites, personal settings - stays local)
 function getData(filename) {
     const data = localStorage.getItem(`game_${filename}`);
     return data ? JSON.parse(data) : { favorited: false };
@@ -235,47 +312,88 @@ function isFavorited(filename) {
     return getData(filename).favorited;
 }
 
-// GLOBAL play counts - stored in localStorage but shared
+// GLOBAL play counts - cloud if available, localStorage fallback
 function getGlobalPlays(filename) {
+    if (USE_CLOUD_SYNC) {
+        return cloudData.plays[filename] || 0;
+    }
     return parseInt(localStorage.getItem(`SHARED_plays_${filename}`) || '0');
 }
 
 function incrementGlobalPlays(filename) {
-    const current = getGlobalPlays(filename);
-    localStorage.setItem(`SHARED_plays_${filename}`, (current + 1).toString());
+    if (USE_CLOUD_SYNC) {
+        if (!cloudData.plays[filename]) cloudData.plays[filename] = 0;
+        cloudData.plays[filename]++;
+        saveCloudData();
+    } else {
+        const current = getGlobalPlays(filename);
+        localStorage.setItem(`SHARED_plays_${filename}`, (current + 1).toString());
+    }
 }
 
-// GLOBAL likes - stored in localStorage but shared
+// GLOBAL likes - cloud if available, localStorage fallback
 function getLikes(filename) {
+    if (USE_CLOUD_SYNC) {
+        return cloudData.likes[filename] || 0;
+    }
     return parseInt(localStorage.getItem(`SHARED_likes_${filename}`) || '0');
 }
 
 function incrementLikes(filename) {
-    const current = getLikes(filename);
-    localStorage.setItem(`SHARED_likes_${filename}`, (current + 1).toString());
-}
-
-function decrementLikes(filename) {
-    const current = getLikes(filename);
-    if (current > 0) {
-        localStorage.setItem(`SHARED_likes_${filename}`, (current - 1).toString());
+    if (USE_CLOUD_SYNC) {
+        if (!cloudData.likes[filename]) cloudData.likes[filename] = 0;
+        cloudData.likes[filename]++;
+        saveCloudData();
+    } else {
+        const current = getLikes(filename);
+        localStorage.setItem(`SHARED_likes_${filename}`, (current + 1).toString());
     }
 }
 
-// GLOBAL dislikes - stored in localStorage but shared
+function decrementLikes(filename) {
+    if (USE_CLOUD_SYNC) {
+        if (cloudData.likes[filename] && cloudData.likes[filename] > 0) {
+            cloudData.likes[filename]--;
+            saveCloudData();
+        }
+    } else {
+        const current = getLikes(filename);
+        if (current > 0) {
+            localStorage.setItem(`SHARED_likes_${filename}`, (current - 1).toString());
+        }
+    }
+}
+
+// GLOBAL dislikes - cloud if available, localStorage fallback
 function getDislikes(filename) {
+    if (USE_CLOUD_SYNC) {
+        return cloudData.dislikes[filename] || 0;
+    }
     return parseInt(localStorage.getItem(`SHARED_dislikes_${filename}`) || '0');
 }
 
 function incrementDislikes(filename) {
-    const current = getDislikes(filename);
-    localStorage.setItem(`SHARED_dislikes_${filename}`, (current + 1).toString());
+    if (USE_CLOUD_SYNC) {
+        if (!cloudData.dislikes[filename]) cloudData.dislikes[filename] = 0;
+        cloudData.dislikes[filename]++;
+        saveCloudData();
+    } else {
+        const current = getDislikes(filename);
+        localStorage.setItem(`SHARED_dislikes_${filename}`, (current + 1).toString());
+    }
 }
 
 function decrementDislikes(filename) {
-    const current = getDislikes(filename);
-    if (current > 0) {
-        localStorage.setItem(`SHARED_dislikes_${filename}`, (current - 1).toString());
+    if (USE_CLOUD_SYNC) {
+        if (cloudData.dislikes[filename] && cloudData.dislikes[filename] > 0) {
+            cloudData.dislikes[filename]--;
+            saveCloudData();
+        }
+    } else {
+        const current = getDislikes(filename);
+        if (current > 0) {
+            localStorage.setItem(`SHARED_dislikes_${filename}`, (current - 1).toString());
+        }
     }
 }
 
@@ -526,13 +644,24 @@ function setupEject() {
 
 // ===== CLOCK =====
 function setupClock() {
+    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    
     function updateClock() {
         const now = new Date();
+        
+        // Time
         const hours = String(now.getHours()).padStart(2, '0');
         const minutes = String(now.getMinutes()).padStart(2, '0');
         const seconds = String(now.getSeconds()).padStart(2, '0');
-        
         document.getElementById('clock').textContent = `${hours}:${minutes}:${seconds}`;
+        
+        // Date
+        const dayName = days[now.getDay()];
+        const monthName = months[now.getMonth()];
+        const date = now.getDate();
+        const year = now.getFullYear();
+        document.getElementById('date').textContent = `${dayName}, ${monthName} ${date}, ${year}`;
     }
     
     // Update immediately
