@@ -3,16 +3,13 @@ let allGames = [];
 let currentGame = null;
 let showingFavorites = false;
 
+// User system
+let currentUser = null;
+let isGuest = false;
+
 // Initialize
 document.addEventListener('DOMContentLoaded', function() {
-    loadGames();
-    setupThemes();
-    setupSidebar();
-    setupFavorites();
-    setupCloaking();
-    setupEject();
-    setupSearch();
-    setupClock();
+    checkAuth();
 });
 
 // ===== LOAD GAMES =====
@@ -132,18 +129,37 @@ function closeSidebar() {
 function playGame() {
     if (!currentGame) return;
     
+    // Guest users can play but data doesn't save
+    if (isGuest) {
+        window.open(`assets/${currentGame.filename}`, '_blank');
+        return;
+    }
+    
     // Increment GLOBAL play count (visible to everyone)
     incrementGlobalPlays(currentGame.filename);
+    
+    // Update user status
+    updateUserStatus('Online', currentGame.displayName);
     
     window.open(`assets/${currentGame.filename}`, '_blank');
     document.getElementById('playCount').textContent = getGlobalPlays(currentGame.filename);
     
     // Update leaderboard
     updateLeaderboard();
+    
+    // Reset status after 5 seconds
+    setTimeout(() => {
+        updateUserStatus('Online', null);
+    }, 5000);
 }
 
 function toggleFavorite() {
     if (!currentGame) return;
+    
+    if (isGuest) {
+        alert('Please login or register to save favorites!');
+        return;
+    }
     
     const data = getData(currentGame.filename);
     data.favorited = !data.favorited;
@@ -155,6 +171,11 @@ function toggleFavorite() {
 
 function toggleLike() {
     if (!currentGame) return;
+    
+    if (isGuest) {
+        alert('Please login or register to like games!');
+        return;
+    }
     
     const currentStatus = getUserLikeStatus(currentGame.filename);
     
@@ -178,6 +199,11 @@ function toggleLike() {
 
 function toggleDislike() {
     if (!currentGame) return;
+    
+    if (isGuest) {
+        alert('Please login or register to dislike games!');
+        return;
+    }
     
     const currentStatus = getUserLikeStatus(currentGame.filename);
     
@@ -406,19 +432,19 @@ function updateLeaderboard() {
     // Sort by plays (highest first)
     gamesWithPlays.sort((a, b) => b.plays - a.plays);
     
-    // Get top 5
-    const top5 = gamesWithPlays.slice(0, 5);
+    // Get top 20
+    const top20 = gamesWithPlays.slice(0, 20);
     
     // Display leaderboard
     const list = document.getElementById('leaderboardList');
     list.innerHTML = '';
     
-    if (top5.every(g => g.plays === 0)) {
+    if (top20.every(g => g.plays === 0)) {
         list.innerHTML = '<div style="text-align:center;color:#999;font-size:0.9rem;padding:20px 0;">No games played yet!</div>';
         return;
     }
     
-    top5.forEach((game, index) => {
+    top20.forEach((game, index) => {
         if (game.plays > 0) {
             const item = document.createElement('div');
             item.className = 'leaderboard-item';
@@ -551,3 +577,351 @@ function setupClock() {
     // Update every second
     setInterval(updateClock, 1000);
 }
+
+// ===== USER AUTHENTICATION SYSTEM =====
+
+function checkAuth() {
+    const savedUser = localStorage.getItem('currentUser');
+    const savedGuest = localStorage.getItem('isGuest');
+    
+    if (savedUser) {
+        currentUser = savedUser;
+        isGuest = false;
+        showUserBar();
+        initializeApp();
+    } else if (savedGuest === 'true') {
+        isGuest = true;
+        showUserBar();
+        initializeApp();
+    } else {
+        showAuthModal();
+    }
+}
+
+function showAuthModal() {
+    document.getElementById('authModal').style.display = 'flex';
+    setupAuthListeners();
+}
+
+function hideAuthModal() {
+    document.getElementById('authModal').style.display = 'none';
+}
+
+function setupAuthListeners() {
+    document.getElementById('showRegister').onclick = () => {
+        document.getElementById('loginForm').style.display = 'none';
+        document.getElementById('registerForm').style.display = 'block';
+    };
+    
+    document.getElementById('showLogin').onclick = () => {
+        document.getElementById('registerForm').style.display = 'none';
+        document.getElementById('loginForm').style.display = 'block';
+    };
+    
+    document.getElementById('loginBtn').onclick = handleLogin;
+    document.getElementById('registerBtn').onclick = handleRegister;
+    document.getElementById('playAsGuest').onclick = handleGuest;
+}
+
+function handleLogin() {
+    const username = document.getElementById('loginUsername').value.trim();
+    const password = document.getElementById('loginPassword').value;
+    
+    if (!username || !password) {
+        alert('Please enter both username and password');
+        return;
+    }
+    
+    const users = JSON.parse(localStorage.getItem('users') || '{}');
+    
+    if (users[username] && users[username].password === password) {
+        currentUser = username;
+        isGuest = false;
+        localStorage.setItem('currentUser', username);
+        localStorage.removeItem('isGuest');
+        hideAuthModal();
+        showUserBar();
+        initializeApp();
+    } else {
+        alert('Invalid username or password');
+    }
+}
+
+function handleRegister() {
+    const username = document.getElementById('registerUsername').value.trim();
+    const password = document.getElementById('registerPassword').value;
+    const confirm = document.getElementById('registerConfirm').value;
+    
+    if (!username || !password || !confirm) {
+        alert('Please fill in all fields');
+        return;
+    }
+    
+    if (username.length < 3) {
+        alert('Username must be at least 3 characters');
+        return;
+    }
+    
+    if (password.length < 4) {
+        alert('Password must be at least 4 characters');
+        return;
+    }
+    
+    if (password !== confirm) {
+        alert('Passwords do not match');
+        return;
+    }
+    
+    const users = JSON.parse(localStorage.getItem('users') || '{}');
+    
+    if (users[username]) {
+        alert('Username already exists');
+        return;
+    }
+    
+    users[username] = {
+        password: password,
+        friends: [],
+        friendRequests: [],
+        status: 'Online',
+        currentGame: null,
+        createdAt: Date.now()
+    };
+    
+    localStorage.setItem('users', JSON.stringify(users));
+    
+    currentUser = username;
+    isGuest = false;
+    localStorage.setItem('currentUser', username);
+    localStorage.removeItem('isGuest');
+    hideAuthModal();
+    showUserBar();
+    initializeApp();
+}
+
+function handleGuest() {
+    isGuest = true;
+    currentUser = null;
+    localStorage.setItem('isGuest', 'true');
+    localStorage.removeItem('currentUser');
+    hideAuthModal();
+    showUserBar();
+    initializeApp();
+}
+
+function handleLogout() {
+    if (confirm('Are you sure you want to logout?')) {
+        updateUserStatus('Offline');
+        currentUser = null;
+        isGuest = false;
+        localStorage.removeItem('currentUser');
+        localStorage.removeItem('isGuest');
+        location.reload();
+    }
+}
+
+function showUserBar() {
+    document.getElementById('userBar').style.display = 'flex';
+    document.getElementById('currentUsername').textContent = currentUser || 'Guest';
+    
+    if (isGuest) {
+        document.getElementById('friendsBtn').style.display = 'none';
+        document.getElementById('notificationsBtn').style.display = 'none';
+    }
+    
+    document.getElementById('logoutBtn').onclick = handleLogout;
+    
+    if (!isGuest) {
+        updateUserStatus('Online');
+        setupFriendSystem();
+        updateNotificationBadge();
+    }
+}
+
+function initializeApp() {
+    loadGames();
+    setupThemes();
+    setupSidebar();
+    setupFavorites();
+    setupCloaking();
+    setupEject();
+    setupSearch();
+    setupClock();
+}
+
+// ===== FRIEND SYSTEM =====
+
+function setupFriendSystem() {
+    document.getElementById('friendsBtn').onclick = () => {
+        document.getElementById('friendsPanel').classList.add('active');
+        loadFriendsList();
+    };
+    
+    document.getElementById('notificationsBtn').onclick = () => {
+        document.getElementById('notificationsPanel').classList.add('active');
+        loadFriendRequests();
+    };
+    
+    document.querySelectorAll('.close-panel').forEach(btn => {
+        btn.onclick = () => {
+            document.querySelectorAll('.side-panel').forEach(panel => {
+                panel.classList.remove('active');
+            });
+        };
+    });
+    
+    document.getElementById('sendFriendRequest').onclick = sendFriendRequest;
+}
+
+function sendFriendRequest() {
+    const targetUsername = document.getElementById('friendSearchInput').value.trim();
+    
+    if (!targetUsername) {
+        alert('Please enter a username');
+        return;
+    }
+    
+    if (targetUsername === currentUser) {
+        alert('You cannot send a friend request to yourself');
+        return;
+    }
+    
+    const users = JSON.parse(localStorage.getItem('users') || '{}');
+    
+    if (!users[targetUsername]) {
+        alert('❌ Username invalid - user does not exist');
+        return;
+    }
+    
+    if (users[currentUser].friends.includes(targetUsername)) {
+        alert('You are already friends with this user');
+        return;
+    }
+    
+    if (users[targetUsername].friendRequests.includes(currentUser)) {
+        alert('Friend request already sent');
+        return;
+    }
+    
+    users[targetUsername].friendRequests.push(currentUser);
+    localStorage.setItem('users', JSON.stringify(users));
+    
+    alert('✅ Friend request sent!');
+    document.getElementById('friendSearchInput').value = '';
+}
+
+function loadFriendRequests() {
+    const users = JSON.parse(localStorage.getItem('users') || '{}');
+    const requests = users[currentUser].friendRequests || [];
+    const list = document.getElementById('notificationsList');
+    
+    if (requests.length === 0) {
+        list.innerHTML = '<p style="text-align:center;color:#999;">No friend requests</p>';
+        return;
+    }
+    
+    list.innerHTML = requests.map(username => `
+        <div class="notification-item">
+            <div>
+                <div class="friend-name">${username}</div>
+                <small>wants to be friends</small>
+            </div>
+            <div>
+                <button class="accept-btn" onclick="acceptFriendRequest('${username}')">Accept</button>
+                <button class="reject-btn" onclick="rejectFriendRequest('${username}')">Reject</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+window.acceptFriendRequest = function(username) {
+    const users = JSON.parse(localStorage.getItem('users') || '{}');
+    
+    users[currentUser].friends.push(username);
+    users[username].friends.push(currentUser);
+    
+    users[currentUser].friendRequests = users[currentUser].friendRequests.filter(u => u !== username);
+    
+    localStorage.setItem('users', JSON.stringify(users));
+    
+    loadFriendRequests();
+    updateNotificationBadge();
+    alert(`✅ You are now friends with ${username}!`);
+};
+
+window.rejectFriendRequest = function(username) {
+    const users = JSON.parse(localStorage.getItem('users') || '{}');
+    users[currentUser].friendRequests = users[currentUser].friendRequests.filter(u => u !== username);
+    localStorage.setItem('users', JSON.stringify(users));
+    
+    loadFriendRequests();
+    updateNotificationBadge();
+};
+
+function loadFriendsList() {
+    const users = JSON.parse(localStorage.getItem('users') || '{}');
+    const friends = users[currentUser].friends || [];
+    const list = document.getElementById('friendsList');
+    
+    if (friends.length === 0) {
+        list.innerHTML = '<p style="text-align:center;color:#999;margin-top:20px;">No friends yet. Add some!</p>';
+        return;
+    }
+    
+    list.innerHTML = friends.map(username => {
+        const friend = users[username];
+        const status = friend.status || 'Offline';
+        const statusText = friend.currentGame ? `Playing: ${friend.currentGame}` : status;
+        
+        return `
+            <div class="friend-item">
+                <div>
+                    <div class="friend-name">👤 ${username}</div>
+                    <div class="friend-status">${statusText}</div>
+                </div>
+                <button class="unfriend-btn" onclick="unfriend('${username}')">Unfriend</button>
+            </div>
+        `;
+    }).join('');
+}
+
+window.unfriend = function(username) {
+    if (confirm(`Unfriend ${username}?`)) {
+        const users = JSON.parse(localStorage.getItem('users') || '{}');
+        
+        users[currentUser].friends = users[currentUser].friends.filter(u => u !== username);
+        users[username].friends = users[username].friends.filter(u => u !== currentUser);
+        
+        localStorage.setItem('users', JSON.stringify(users));
+        loadFriendsList();
+    }
+};
+
+function updateNotificationBadge() {
+    const users = JSON.parse(localStorage.getItem('users') || '{}');
+    const requests = users[currentUser].friendRequests || [];
+    const badge = document.getElementById('notifBadge');
+    
+    if (requests.length > 0) {
+        badge.textContent = requests.length;
+        badge.style.display = 'block';
+    } else {
+        badge.style.display = 'none';
+    }
+}
+
+function updateUserStatus(status, gameName = null) {
+    if (isGuest || !currentUser) return;
+    
+    const users = JSON.parse(localStorage.getItem('users') || '{}');
+    if (users[currentUser]) {
+        users[currentUser].status = status;
+        users[currentUser].currentGame = gameName;
+        localStorage.setItem('users', JSON.stringify(users));
+    }
+}
+
+window.addEventListener('beforeunload', () => {
+    updateUserStatus('Offline', null);
+});
+
