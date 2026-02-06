@@ -9,6 +9,7 @@ body {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     min-height: 100vh;
     overflow-x: hidden;
+    overflow-y: auto;
     position: relative;
     transition: all 0.3s ease;
 }
@@ -440,268 +441,8 @@ header {
     box-shadow: 0 10px 25px rgba(76, 175, 80, 0.4);
 }
 
-/* Themes */
-body.theme-rainbow {
-    background: linear-gradient(45deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3);
-    background-size: 400% 400%;
-    animation: rainbowShift 10s ease infinite;
-    font-family: 'Rubik', sans-serif !important;
-}
+/* Themes - Enhanced with Cool Animations */
 
-@keyframes rainbowShift {
-    0%, 100% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-}
-
-body.theme-galaxy {
-    background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
-    font-family: 'Orbitron', sans-serif !important;
-    overflow: hidden;
-}
-
-body.theme-galaxy::before {
-    content: '★';
-    position: fixed;
-    top: 0;
-    left: 0;
-    font-size: 2rem;
-    color: white;
-    z-index: 0;
-    pointer-events: none;
-    animation: shootingStar1 3s linear infinite;
-}
-
-body.theme-galaxy::after {
-    content: '★';
-    position: fixed;
-    top: 20%;
-    left: 80%;
-    font-size: 1.5rem;
-    color: white;
-    z-index: 0;
-    pointer-events: none;
-    animation: shootingStar2 4s linear infinite 1.5s;
-}
-
-@keyframes shootingStar1 {
-    0% { 
-        left: -10%;
-        top: 10%;
-        opacity: 1;
-    }
-    100% { 
-        left: 110%;
-        top: 80%;
-        opacity: 0;
-    }
-}
-
-@keyframes shootingStar2 {
-    0% { 
-        left: 110%;
-        top: 20%;
-        opacity: 1;
-    }
-    100% { 
-        left: -10%;
-        top: 90%;
-        opacity: 0;
-    }
-}
-
-body.theme-dark-mode {
-    background: #000000;
-    font-family: 'Inter', sans-serif !important;
-}
-
-body.theme-neon-cyberpunk {
-    background: linear-gradient(135deg, #0a0a0a 0%, #1a0a2e 50%, #16213e 100%);
-    font-family: 'Audiowide', cursive !important;
-}
-
-body.theme-retro-arcade {
-    background: linear-gradient(45deg, #ff0080 25%, transparent 25%), 
-                linear-gradient(-45deg, #ff0080 25%, transparent 25%),
-                linear-gradient(45deg, transparent 75%, #00ffff 75%),
-                linear-gradient(-45deg, transparent 75%, #00ffff 75%), #1a1a2e;
-    background-size: 20px 20px;
-    font-family: 'Press Start 2P', cursive !important;
-}
-
-body.theme-forest-fantasy {
-    background: linear-gradient(135deg, #1e4620 0%, #2d5016 50%, #1a3d1a 100%);
-    font-family: 'Cinzel', serif !important;
-}
-
-body.theme-fire-lava {
-    background: linear-gradient(135deg, #ff0000 0%, #ff4500 25%, #ff6347 50%, #ff7f00 75%, #ff0000 100%);
-    background-size: 400% 400%;
-    animation: fireFlow 5s ease infinite;
-    font-family: 'Russo One', sans-serif !important;
-}
-
-@keyframes fireFlow {
-    0%, 100% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-}
-
-body.theme-ice-kingdom {
-    background: linear-gradient(135deg, #00bfff 0%, #1e90ff 50%, #87ceeb 100%);
-    font-family: 'Rajdhani', sans-serif !important;
-}
-
-body.theme-ocean-depths {
-    background: linear-gradient(135deg, #001f3f 0%, #003d5c 50%, #005a7a 100%);
-    font-family: 'Exo 2', sans-serif !important;
-}
-
-body.theme-desert-storm {
-    background: linear-gradient(135deg, #daa520 0%, #d2691e 50%, #cd853f 100%);
-    font-family: 'Teko', sans-serif !important;
-}
-
-body.theme-glitch-mode {
-    background: #000;
-    animation: glitchBg 0.3s infinite;
-    font-family: 'VT323', monospace !important;
-}
-
-@keyframes glitchBg {
-    0% { background: #000; }
-    33% { background: #0a0a0a; }
-    66% { background: #050505; }
-    100% { background: #000; }
-}
-
-body.theme-glitch-mode .game-button {
-    animation: glitchShake 0.5s infinite;
-}
-
-@keyframes glitchShake {
-    0% { transform: translate(0, 0) rotate(0deg); }
-    10% { transform: translate(-2px, 2px) rotate(-1deg); }
-    20% { transform: translate(2px, -2px) rotate(1deg); }
-    30% { transform: translate(-2px, -2px) rotate(-1deg); }
-    40% { transform: translate(2px, 2px) rotate(1deg); }
-    50% { transform: translate(-2px, 2px) rotate(-1deg); }
-    60% { transform: translate(2px, -2px) rotate(1deg); }
-    70% { transform: translate(-2px, -2px) rotate(-1deg); }
-    80% { transform: translate(2px, 2px) rotate(1deg); }
-    90% { transform: translate(-2px, 2px) rotate(-1deg); }
-    100% { transform: translate(0, 0) rotate(0deg); }
-}
-
-body.theme-synthwave {
-    background: linear-gradient(180deg, #ff00ff 0%, #ff1493 25%, #ff69b4 50%, #4b0082 75%, #000080 100%);
-    font-family: 'Bungee', cursive !important;
-}
-
-body.theme-blood-moon {
-    background: linear-gradient(135deg, #1a0000 0%, #330000 50%, #4d0000 100%);
-    font-family: 'Creepster', cursive !important;
-}
-
-body.theme-minimal-white {
-    background: #ffffff;
-    font-family: 'Montserrat', sans-serif !important;
-}
-
-body.theme-minimal-white .title,
-body.theme-minimal-white .subtitle,
-body.theme-minimal-white .game-counter {
-    color: #000000;
-    text-shadow: none;
-}
-
-body.theme-minimal-white .game-button {
-    border: 2px solid #000;
-}
-
-body.theme-matrix {
-    background: #000000;
-    font-family: 'Share Tech Mono', monospace !important;
-    overflow: hidden;
-}
-
-body.theme-matrix::before {
-    content: '0 1 0 1 1 0 1 0 0 1 1 0 1 0 1 1 0 0 1 0 1 1 0 1 0 1 0 0 1 1 0 1 0 1 1 0 0 1 0 1 1 0 1 0 1 0 0 1 1 0 1 0 1 1 0 0 1 0 1 1 0 1 0 1 0 0 1 1 0 1 0 1 1 0 0 1 0 1 1 0 1 0 1 0 0 1 1 0 1 0 1 1 0 0 1 0 1 1 0 1';
-    position: fixed;
-    top: -100%;
-    left: 0;
-    width: 100%;
-    height: 200%;
-    color: #00ff00;
-    font-size: 1.2rem;
-    line-height: 1.5;
-    word-wrap: break-word;
-    opacity: 0.3;
-    z-index: 0;
-    pointer-events: none;
-    animation: matrixFall 20s linear infinite;
-}
-
-@keyframes matrixFall {
-    0% { top: -100%; }
-    100% { top: 100%; }
-}
-
-body.theme-matrix .game-button {
-    background: rgba(0, 0, 0, 0.8);
-    color: #00ff00;
-    border: 1px solid #00ff00;
-}
-
-body.theme-galaxy-rainbow {
-    background: radial-gradient(ellipse at center, #ff0080 0%, #ff8c00 20%, #ffd700 40%, #00ff00 60%, #00bfff 80%, #8a2be2 100%);
-    background-size: 200% 200%;
-    animation: galaxyRainbow 10s ease infinite;
-    font-family: 'Oxanium', cursive !important;
-}
-
-@keyframes galaxyRainbow {
-    0%, 100% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-}
-
-body.theme-steampunk {
-    background: linear-gradient(135deg, #3e2723 0%, #5d4037 50%, #6d4c41 100%);
-    font-family: 'MedievalSharp', cursive !important;
-}
-
-body.theme-steampunk .game-button {
-    background: rgba(205, 127, 50, 0.5);
-    color: #ffd700;
-    border: 2px solid #b8860b;
-}
-
-body.theme-cartoon-pop {
-    background: linear-gradient(45deg, #ff6b6b 0%, #4ecdc4 25%, #ffe66d 50%, #a8e6cf 75%, #ff6b6b 100%);
-    font-family: 'Luckiest Guy', cursive !important;
-}
-
-body.theme-shadow-realm {
-    background: linear-gradient(135deg, #1a0033 0%, #2d004d 50%, #4b0082 100%);
-    font-family: 'Chakra Petch', sans-serif !important;
-}
-
-body.theme-shadow-realm .game-button {
-    background: rgba(138, 43, 226, 0.3);
-    color: #da70d6;
-    border: 2px solid #9370db;
-}
-
-body.theme-snowy-night {
-    background: linear-gradient(135deg, #1e3a5f 0%, #2c5282 50%, #3a7ca5 100%);
-    font-family: 'Silkscreen', cursive !important;
-}
-
-body.theme-snowy-night .game-button {
-    background: rgba(240, 248, 255, 0.3);
-    color: #f0f8ff;
-    border: 2px solid #b0e0e6;
-}
-
-body.theme-custom {
     background: var(--custom-bg);
     font-family: var(--custom-font) !important;
 }
@@ -1018,3 +759,446 @@ body.theme-custom * {
         right: -100%;
     }
 }
+
+/* Enhanced Themes with Cool Animations */
+
+/* Rainbow theme - Enhanced */
+body.theme-rainbow {
+    background: linear-gradient(45deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3);
+    background-size: 400% 400%;
+    animation: rainbowShift 10s ease infinite;
+    font-family: 'Rubik', sans-serif !important;
+    overflow-y: auto;
+}
+
+body.theme-rainbow::before {
+    content: '🌈 ✨ 🌟 ⭐ 💫';
+    position: fixed;
+    font-size: 3rem;
+    width: 200%;
+    animation: rainbowScroll 20s linear infinite;
+    opacity: 0.2;
+    pointer-events: none;
+    z-index: 0;
+}
+
+@keyframes rainbowScroll {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+}
+
+/* Galaxy theme - Enhanced with nebula */
+body.theme-galaxy {
+    background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
+    font-family: 'Orbitron', sans-serif !important;
+    overflow-y: auto;
+}
+
+body.theme-galaxy::before {
+    content: '✦';
+    position: fixed;
+    font-size: 2rem;
+    color: white;
+    text-shadow: 0 0 10px white;
+    animation: galaxyStars 5s ease-in-out infinite;
+    top: 20%;
+    left: 30%;
+    pointer-events: none;
+    z-index: 0;
+}
+
+@keyframes galaxyStars {
+    0%, 100% { opacity: 0.3; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.5); }
+}
+
+/* Dark Mode - Enhanced with subtle grid */
+body.theme-dark-mode {
+    background: #000000;
+    font-family: 'Inter', sans-serif !important;
+    overflow-y: auto;
+    position: relative;
+}
+
+body.theme-dark-mode::before {
+    content: '';
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    background-image: 
+        linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    background-size: 50px 50px;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Neon Cyberpunk - Enhanced with scan lines */
+body.theme-neon-cyberpunk {
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a0a2e 50%, #16213e 100%);
+    font-family: 'Audiowide', cursive !important;
+    overflow-y: auto;
+}
+
+body.theme-neon-cyberpunk::before {
+    content: '';
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    background: repeating-linear-gradient(
+        0deg,
+        rgba(0, 255, 255, 0.03),
+        rgba(0, 255, 255, 0.03) 1px,
+        transparent 1px,
+        transparent 2px
+    );
+    animation: scanlines 8s linear infinite;
+    pointer-events: none;
+    z-index: 0;
+}
+
+@keyframes scanlines {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(50px); }
+}
+
+/* Retro Arcade - Enhanced with moving pixels */
+body.theme-retro-arcade {
+    background: #1a1a2e;
+    font-family: 'Press Start 2P', cursive !important;
+    overflow-y: auto;
+}
+
+body.theme-retro-arcade::before {
+    content: '';
+    position: fixed;
+    width: 200%;
+    height: 200%;
+    background-image: 
+        linear-gradient(45deg, #ff0080 25%, transparent 25%),
+        linear-gradient(-45deg, #ff0080 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #00ffff 75%),
+        linear-gradient(-45deg, transparent 75%, #00ffff 75%);
+    background-size: 40px 40px;
+    opacity: 0.3;
+    animation: pixelMove 10s linear infinite;
+    pointer-events: none;
+    z-index: 0;
+}
+
+@keyframes pixelMove {
+    0% { transform: translate(0, 0); }
+    100% { transform: translate(40px, 40px); }
+}
+
+/* Forest Fantasy - Enhanced with floating leaves */
+body.theme-forest-fantasy {
+    background: linear-gradient(135deg, #1e4620 0%, #2d5016 50%, #1a3d1a 100%);
+    font-family: 'Cinzel', serif !important;
+    overflow-y: auto;
+}
+
+body.theme-forest-fantasy::before {
+    content: '🍃 🍂 🌿';
+    position: fixed;
+    font-size: 2rem;
+    width: 200%;
+    animation: leavesfall 15s linear infinite;
+    opacity: 0.4;
+    pointer-events: none;
+    z-index: 0;
+}
+
+@keyframes leavesfall {
+    0% { transform: translateY(-100px) rotate(0deg); }
+    100% { transform: translateY(100vh) rotate(360deg); }
+}
+
+/* Fire & Lava - Enhanced with flame particles */
+body.theme-fire-lava {
+    background: linear-gradient(135deg, #ff0000 0%, #ff4500 25%, #ff6347 50%, #ff7f00 75%, #ff0000 100%);
+    background-size: 400% 400%;
+    animation: fireFlow 5s ease infinite;
+    font-family: 'Russo One', sans-serif !important;
+    overflow-y: auto;
+}
+
+body.theme-fire-lava::before {
+    content: '🔥';
+    position: fixed;
+    font-size: 4rem;
+    bottom: 0;
+    left: 50%;
+    animation: fireRise 3s ease-in-out infinite;
+    opacity: 0.5;
+    pointer-events: none;
+    z-index: 0;
+}
+
+@keyframes fireRise {
+    0% { transform: translateY(0) scale(1); opacity: 0.5; }
+    100% { transform: translateY(-100vh) scale(2); opacity: 0; }
+}
+
+/* Ice Kingdom - Enhanced with snowflakes */
+body.theme-ice-kingdom {
+    background: linear-gradient(135deg, #00bfff 0%, #1e90ff 50%, #87ceeb 100%);
+    font-family: 'Rajdhani', sans-serif !important;
+    overflow-y: auto;
+}
+
+body.theme-ice-kingdom::before {
+    content: '❄️ ❄ ❅ ❆';
+    position: fixed;
+    font-size: 2rem;
+    width: 200%;
+    animation: snowFall 12s linear infinite;
+    opacity: 0.6;
+    pointer-events: none;
+    z-index: 0;
+}
+
+@keyframes snowFall {
+    0% { transform: translateY(-100px); }
+    100% { transform: translateY(100vh); }
+}
+
+/* Ocean Depths - Enhanced with waves */
+body.theme-ocean-depths {
+    background: linear-gradient(135deg, #001f3f 0%, #003d5c 50%, #005a7a 100%);
+    font-family: 'Exo 2', sans-serif !important;
+    overflow-y: auto;
+}
+
+body.theme-ocean-depths::before {
+    content: '';
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    background: repeating-linear-gradient(
+        90deg,
+        transparent,
+        rgba(0, 255, 255, 0.05) 50px,
+        transparent 100px
+    );
+    animation: waves 8s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 0;
+}
+
+@keyframes waves {
+    0%, 100% { transform: translateX(0); }
+    50% { transform: translateX(50px); }
+}
+
+/* Desert Storm - Enhanced with sand */
+body.theme-desert-storm {
+    background: linear-gradient(135deg, #daa520 0%, #d2691e 50%, #cd853f 100%);
+    font-family: 'Teko', sans-serif !important;
+    overflow-y: auto;
+}
+
+body.theme-desert-storm::before {
+    content: '';
+    position: fixed;
+    width: 200%;
+    height: 100%;
+    background: repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent 10px,
+        rgba(139, 69, 19, 0.1) 10px,
+        rgba(139, 69, 19, 0.1) 20px
+    );
+    animation: sandStorm 15s linear infinite;
+    pointer-events: none;
+    z-index: 0;
+}
+
+@keyframes sandStorm {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+}
+
+/* Synthwave - Enhanced with grid */
+body.theme-synthwave {
+    background: linear-gradient(180deg, #ff00ff 0%, #ff1493 25%, #ff69b4 50%, #4b0082 75%, #000080 100%);
+    font-family: 'Bungee', cursive !important;
+    overflow-y: auto;
+}
+
+body.theme-synthwave::before {
+    content: '';
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    height: 50%;
+    background: 
+        linear-gradient(rgba(255, 0, 255, 0.3) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 0, 255, 0.3) 1px, transparent 1px);
+    background-size: 50px 50px;
+    transform: perspective(500px) rotateX(60deg);
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Blood Moon - Enhanced with dripping effect */
+body.theme-blood-moon {
+    background: linear-gradient(135deg, #1a0000 0%, #330000 50%, #4d0000 100%);
+    font-family: 'Creepster', cursive !important;
+    overflow-y: auto;
+}
+
+body.theme-blood-moon::before {
+    content: '🌙';
+    position: fixed;
+    font-size: 8rem;
+    top: 10%;
+    right: 10%;
+    filter: brightness(0.5) sepia(1) hue-rotate(-50deg) saturate(5);
+    animation: bloodPulse 3s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 0;
+}
+
+@keyframes bloodPulse {
+    0%, 100% { opacity: 0.5; transform: scale(1); }
+    50% { opacity: 0.8; transform: scale(1.1); }
+}
+
+/* Minimal White - Enhanced with subtle pattern */
+body.theme-minimal-white {
+    background: #ffffff;
+    font-family: 'Montserrat', sans-serif !important;
+    overflow-y: auto;
+}
+
+body.theme-minimal-white::before {
+    content: '';
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    background-image: radial-gradient(circle, #00000005 1px, transparent 1px);
+    background-size: 20px 20px;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Galaxy Rainbow - Enhanced */
+body.theme-galaxy-rainbow {
+    background: radial-gradient(ellipse at center, #ff0080 0%, #ff8c00 20%, #ffd700 40%, #00ff00 60%, #00bfff 80%, #8a2be2 100%);
+    background-size: 200% 200%;
+    animation: galaxyRainbow 10s ease infinite;
+    font-family: 'Oxanium', cursive !important;
+    overflow-y: auto;
+}
+
+body.theme-galaxy-rainbow::before {
+    content: '⭐ 🌟 ✨ 💫';
+    position: fixed;
+    font-size: 3rem;
+    width: 200%;
+    animation: starTwinkle 8s linear infinite;
+    opacity: 0.4;
+    pointer-events: none;
+    z-index: 0;
+}
+
+@keyframes starTwinkle {
+    0% { transform: translateX(0) rotate(0deg); }
+    100% { transform: translateX(-50%) rotate(360deg); }
+}
+
+/* Steampunk - Enhanced with gears */
+body.theme-steampunk {
+    background: linear-gradient(135deg, #3e2723 0%, #5d4037 50%, #6d4c41 100%);
+    font-family: 'MedievalSharp', cursive !important;
+    overflow-y: auto;
+}
+
+body.theme-steampunk::before {
+    content: '⚙️';
+    position: fixed;
+    font-size: 6rem;
+    top: 20%;
+    left: 10%;
+    animation: gearSpin 10s linear infinite;
+    opacity: 0.15;
+    pointer-events: none;
+    z-index: 0;
+}
+
+@keyframes gearSpin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Cartoon Pop - Enhanced with bouncing */
+body.theme-cartoon-pop {
+    background: linear-gradient(45deg, #ff6b6b 0%, #4ecdc4 25%, #ffe66d 50%, #a8e6cf 75%, #ff6b6b 100%);
+    font-family: 'Luckiest Guy', cursive !important;
+    overflow-y: auto;
+}
+
+body.theme-cartoon-pop::before {
+    content: '🎈 🎪 🎨';
+    position: fixed;
+    font-size: 3rem;
+    animation: bounce 2s ease-in-out infinite;
+    left: 20%;
+    opacity: 0.3;
+    pointer-events: none;
+    z-index: 0;
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-50px); }
+}
+
+/* Shadow Realm - Enhanced with dark particles */
+body.theme-shadow-realm {
+    background: linear-gradient(135deg, #1a0033 0%, #2d004d 50%, #4b0082 100%);
+    font-family: 'Chakra Petch', sans-serif !important;
+    overflow-y: auto;
+}
+
+body.theme-shadow-realm::before {
+    content: '';
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    background-image: radial-gradient(circle, rgba(138, 43, 226, 0.1) 1px, transparent 1px);
+    background-size: 30px 30px;
+    animation: shadowPulse 4s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 0;
+}
+
+@keyframes shadowPulse {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 0.6; }
+}
+
+/* Snowy Night - Enhanced with snow */
+body.theme-snowy-night {
+    background: linear-gradient(135deg, #1e3a5f 0%, #2c5282 50%, #3a7ca5 100%);
+    font-family: 'Silkscreen', cursive !important;
+    overflow-y: auto;
+}
+
+body.theme-snowy-night::before {
+    content: '❄️';
+    position: fixed;
+    font-size: 2rem;
+    animation: snowDrift 10s linear infinite;
+    opacity: 0.7;
+    pointer-events: none;
+    z-index: 0;
+}
+
+@keyframes snowDrift {
+    0% { transform: translate(-100px, -100px); }
+    100% { transform: translate(100vw, 100vh); }
+}
+

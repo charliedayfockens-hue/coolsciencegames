@@ -716,14 +716,28 @@ function showUserBar() {
     if (isGuest) {
         document.getElementById('friendsBtn').style.display = 'none';
         document.getElementById('notificationsBtn').style.display = 'none';
-        document.getElementById('logoutBtn').style.display = 'none';
+        document.getElementById('logoutBtn').style.display = 'inline-block';
     } else {
         document.getElementById('friendsBtn').style.display = 'inline-block';
         document.getElementById('notificationsBtn').style.display = 'inline-block';
-        document.getElementById('logoutBtn').style.display = 'none'; // Removed logout button
+        document.getElementById('logoutBtn').style.display = 'inline-block';
         updateUserStatus('Online');
         setupFriendSystem();
         updateNotificationBadge();
+    }
+    
+    document.getElementById('logoutBtn').onclick = handleLogout;
+}
+
+function handleLogout() {
+    if (confirm('Are you sure you want to logout?')) {
+        if (!isGuest) {
+            updateUserStatus('Offline');
+        }
+        currentUser = null;
+        isGuest = false;
+        localStorage.removeItem('currentUser');
+        location.reload();
     }
 }
 
