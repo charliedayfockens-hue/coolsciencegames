@@ -582,15 +582,11 @@ function setupClock() {
 
 function checkAuth() {
     const savedUser = localStorage.getItem('currentUser');
-    const savedGuest = localStorage.getItem('isGuest');
     
     if (savedUser) {
         currentUser = savedUser;
         isGuest = false;
-        showUserBar();
-        initializeApp();
-    } else if (savedGuest === 'true') {
-        isGuest = true;
+        hideAuthModal();
         showUserBar();
         initializeApp();
     } else {
@@ -632,13 +628,12 @@ function handleLogin() {
         return;
     }
     
-    const users = JSON.parse(localStorage.getItem('users') || '{}');
+    const users = JSON.parse(localStorage.getItem('globalUsers') || '{}');
     
     if (users[username] && users[username].password === password) {
         currentUser = username;
         isGuest = false;
         localStorage.setItem('currentUser', username);
-        localStorage.removeItem('isGuest');
         hideAuthModal();
         showUserBar();
         initializeApp();
@@ -672,7 +667,7 @@ function handleRegister() {
         return;
     }
     
-    const users = JSON.parse(localStorage.getItem('users') || '{}');
+    const users = JSON.parse(localStorage.getItem('globalUsers') || '{}');
     
     if (users[username]) {
         alert('Username already exists');
@@ -688,50 +683,44 @@ function handleRegister() {
         createdAt: Date.now()
     };
     
-    localStorage.setItem('users', JSON.stringify(users));
+    localStorage.setItem('globalUsers', JSON.stringify(users));
+    
+    // Increment global player count
+    const playerCount = parseInt(localStorage.getItem('globalPlayerCount') || '0');
+    localStorage.setItem('globalPlayerCount', (playerCount + 1).toString());
     
     currentUser = username;
     isGuest = false;
     localStorage.setItem('currentUser', username);
-    localStorage.removeItem('isGuest');
     hideAuthModal();
     showUserBar();
     initializeApp();
+    
+    // Show reminder to other users
+    alert(`✅ Account created!\n\n👥 Total players: ${playerCount + 1}\n\n⚠️ IMPORTANT FOR OTHER BROWSERS:\nOther users need to refresh (Ctrl+R or Windows+R) to see your account!`);
 }
 
 function handleGuest() {
     isGuest = true;
-    currentUser = null;
-    localStorage.setItem('isGuest', 'true');
+    currentUser = 'Guest';
     localStorage.removeItem('currentUser');
     hideAuthModal();
     showUserBar();
     initializeApp();
 }
 
-function handleLogout() {
-    if (confirm('Are you sure you want to logout?')) {
-        updateUserStatus('Offline');
-        currentUser = null;
-        isGuest = false;
-        localStorage.removeItem('currentUser');
-        localStorage.removeItem('isGuest');
-        location.reload();
-    }
-}
-
 function showUserBar() {
     document.getElementById('userBar').style.display = 'flex';
-    document.getElementById('currentUsername').textContent = currentUser || 'Guest';
+    document.getElementById('currentUsername').textContent = currentUser;
     
     if (isGuest) {
         document.getElementById('friendsBtn').style.display = 'none';
         document.getElementById('notificationsBtn').style.display = 'none';
-    }
-    
-    document.getElementById('logoutBtn').onclick = handleLogout;
-    
-    if (!isGuest) {
+        document.getElementById('logoutBtn').style.display = 'none';
+    } else {
+        document.getElementById('friendsBtn').style.display = 'inline-block';
+        document.getElementById('notificationsBtn').style.display = 'inline-block';
+        document.getElementById('logoutBtn').style.display = 'none'; // Removed logout button
         updateUserStatus('Online');
         setupFriendSystem();
         updateNotificationBadge();
@@ -747,6 +736,12 @@ function initializeApp() {
     setupEject();
     setupSearch();
     setupClock();
+    updatePlayerCount();
+}
+
+function updatePlayerCount() {
+    const count = parseInt(localStorage.getItem('globalPlayerCount') || '0');
+    document.getElementById('playerCounter').textContent = `👥 ${count} Player${count !== 1 ? 's' : ''}`;
 }
 
 // ===== FRIEND SYSTEM =====
@@ -786,7 +781,7 @@ function sendFriendRequest() {
         return;
     }
     
-    const users = JSON.parse(localStorage.getItem('users') || '{}');
+    const users = JSON.parse(localStorage.getItem('globalUsers') || '{}');
     
     if (!users[targetUsername]) {
         alert('❌ Username invalid - user does not exist');
@@ -804,14 +799,14 @@ function sendFriendRequest() {
     }
     
     users[targetUsername].friendRequests.push(currentUser);
-    localStorage.setItem('users', JSON.stringify(users));
+    localStorage.setItem('globalUsers', JSON.stringify(users));
     
     alert('✅ Friend request sent!');
     document.getElementById('friendSearchInput').value = '';
 }
 
 function loadFriendRequests() {
-    const users = JSON.parse(localStorage.getItem('users') || '{}');
+    const users = JSON.parse(localStorage.getItem('globalUsers') || '{}');
     const requests = users[currentUser].friendRequests || [];
     const list = document.getElementById('notificationsList');
     
@@ -835,14 +830,14 @@ function loadFriendRequests() {
 }
 
 window.acceptFriendRequest = function(username) {
-    const users = JSON.parse(localStorage.getItem('users') || '{}');
+    const users = JSON.parse(localStorage.getItem('globalUsers') || '{}');
     
     users[currentUser].friends.push(username);
     users[username].friends.push(currentUser);
     
     users[currentUser].friendRequests = users[currentUser].friendRequests.filter(u => u !== username);
     
-    localStorage.setItem('users', JSON.stringify(users));
+    localStorage.setItem('globalUsers', JSON.stringify(users));
     
     loadFriendRequests();
     updateNotificationBadge();
@@ -850,16 +845,16 @@ window.acceptFriendRequest = function(username) {
 };
 
 window.rejectFriendRequest = function(username) {
-    const users = JSON.parse(localStorage.getItem('users') || '{}');
+    const users = JSON.parse(localStorage.getItem('globalUsers') || '{}');
     users[currentUser].friendRequests = users[currentUser].friendRequests.filter(u => u !== username);
-    localStorage.setItem('users', JSON.stringify(users));
+    localStorage.setItem('globalUsers', JSON.stringify(users));
     
     loadFriendRequests();
     updateNotificationBadge();
 };
 
 function loadFriendsList() {
-    const users = JSON.parse(localStorage.getItem('users') || '{}');
+    const users = JSON.parse(localStorage.getItem('globalUsers') || '{}');
     const friends = users[currentUser].friends || [];
     const list = document.getElementById('friendsList');
     
@@ -869,7 +864,7 @@ function loadFriendsList() {
     }
     
     list.innerHTML = friends.map(username => {
-        const friend = users[username];
+        const friend = users[username] || { status: 'Offline', currentGame: null };
         const status = friend.status || 'Offline';
         const statusText = friend.currentGame ? `Playing: ${friend.currentGame}` : status;
         
@@ -887,18 +882,20 @@ function loadFriendsList() {
 
 window.unfriend = function(username) {
     if (confirm(`Unfriend ${username}?`)) {
-        const users = JSON.parse(localStorage.getItem('users') || '{}');
+        const users = JSON.parse(localStorage.getItem('globalUsers') || '{}');
         
         users[currentUser].friends = users[currentUser].friends.filter(u => u !== username);
-        users[username].friends = users[username].friends.filter(u => u !== currentUser);
+        if (users[username]) {
+            users[username].friends = users[username].friends.filter(u => u !== currentUser);
+        }
         
-        localStorage.setItem('users', JSON.stringify(users));
+        localStorage.setItem('globalUsers', JSON.stringify(users));
         loadFriendsList();
     }
 };
 
 function updateNotificationBadge() {
-    const users = JSON.parse(localStorage.getItem('users') || '{}');
+    const users = JSON.parse(localStorage.getItem('globalUsers') || '{}');
     const requests = users[currentUser].friendRequests || [];
     const badge = document.getElementById('notifBadge');
     
@@ -913,11 +910,11 @@ function updateNotificationBadge() {
 function updateUserStatus(status, gameName = null) {
     if (isGuest || !currentUser) return;
     
-    const users = JSON.parse(localStorage.getItem('users') || '{}');
+    const users = JSON.parse(localStorage.getItem('globalUsers') || '{}');
     if (users[currentUser]) {
         users[currentUser].status = status;
         users[currentUser].currentGame = gameName;
-        localStorage.setItem('users', JSON.stringify(users));
+        localStorage.setItem('globalUsers', JSON.stringify(users));
     }
 }
 
