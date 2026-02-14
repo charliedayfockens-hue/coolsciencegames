@@ -1,313 +1,102 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Varooom 3D — Play Free</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet"/>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     :root {
-      --red:    #ff2b4e;
-      --yellow: #ffe94a;
-      --teal:   #00e5cc;
-      --dark:   #0a0a0f;
-      --panel:  #10101a;
-      --border: #1e1e30;
+      --red: #ff2b4e; --yellow: #ffe94a; --teal: #00e5cc;
+      --dark: #0a0a0f; --panel: #10101a; --border: #1e1e30;
     }
+    html, body { height: 100%; background: var(--dark); color: #fff; font-family: 'Share Tech Mono', monospace; overflow-x: hidden; }
 
-    html, body {
-      height: 100%;
-      background: var(--dark);
-      color: #fff;
-      font-family: 'Share Tech Mono', monospace;
-      overflow-x: hidden;
-    }
-
-    /* ── Animated road grid background ── */
     body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
+      content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0;
       background:
         repeating-linear-gradient(90deg, transparent, transparent 79px, rgba(0,229,204,.04) 80px),
         repeating-linear-gradient(0deg,  transparent, transparent 79px, rgba(0,229,204,.04) 80px);
       background-size: 80px 80px;
       animation: gridScroll 12s linear infinite;
-      pointer-events: none;
-      z-index: 0;
     }
-    @keyframes gridScroll {
-      from { background-position: 0 0; }
-      to   { background-position: 80px 80px; }
-    }
-
-    /* ── Scanlines ── */
+    @keyframes gridScroll { from { background-position: 0 0; } to { background-position: 80px 80px; } }
     body::after {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background: repeating-linear-gradient(
-        to bottom,
-        rgba(0,0,0,0) 0px, rgba(0,0,0,0) 2px,
-        rgba(0,0,0,.18) 2px, rgba(0,0,0,.18) 4px
-      );
-      pointer-events: none;
-      z-index: 999;
+      content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 999;
+      background: repeating-linear-gradient(to bottom, rgba(0,0,0,0) 0px, rgba(0,0,0,0) 2px, rgba(0,0,0,.15) 2px, rgba(0,0,0,.15) 4px);
     }
 
-    /* ── Layout ── */
-    .page {
-      position: relative;
-      z-index: 1;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 24px 16px 40px;
-    }
+    .page { position: relative; z-index: 1; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 24px 16px 48px; }
 
-    /* ── Header ── */
-    header {
-      width: 100%;
-      max-width: 900px;
-      text-align: center;
-      margin-bottom: 20px;
-    }
-
-    .logo-line {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 14px;
-      margin-bottom: 6px;
-    }
-
-    .flag {
-      width: 36px;
-      height: 36px;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 3px;
-    }
-    .flag span {
-      display: block;
-      border-radius: 2px;
-    }
-    .flag span:nth-child(1) { background: #fff; }
-    .flag span:nth-child(2) { background: #111; }
-    .flag span:nth-child(3) { background: #111; }
-    .flag span:nth-child(4) { background: #fff; }
-
+    header { width: 100%; max-width: 900px; text-align: center; margin-bottom: 18px; }
+    .logo-line { display: flex; align-items: center; justify-content: center; gap: 14px; margin-bottom: 6px; }
+    .flag { width: 32px; height: 32px; display: grid; grid-template-columns: 1fr 1fr; gap: 3px; }
+    .flag span { display: block; border-radius: 2px; }
+    .flag span:nth-child(odd)  { background: #fff; }
+    .flag span:nth-child(even) { background: #111; }
     h1 {
-      font-family: 'Orbitron', sans-serif;
-      font-size: clamp(2rem, 6vw, 3.6rem);
-      font-weight: 900;
-      letter-spacing: .06em;
-      line-height: 1;
+      font-family: 'Orbitron', sans-serif; font-size: clamp(2rem, 6vw, 3.6rem); font-weight: 900;
+      letter-spacing: .06em; line-height: 1;
       background: linear-gradient(135deg, var(--yellow) 0%, var(--red) 60%, #ff6b00 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      text-shadow: none;
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
       filter: drop-shadow(0 0 18px rgba(255,46,78,.5));
     }
+    .subtitle { font-size: .78rem; letter-spacing: .2em; text-transform: uppercase; color: var(--teal); margin-top: 4px; }
+    .stripe { width: 100%; max-width: 900px; height: 3px; background: linear-gradient(90deg, transparent, var(--red), var(--yellow), var(--teal), transparent); margin: 14px 0; border-radius: 2px; }
 
-    .subtitle {
-      font-size: .78rem;
-      letter-spacing: .2em;
-      text-transform: uppercase;
-      color: var(--teal);
-      margin-top: 4px;
-    }
-
-    /* speed stripe */
-    .stripe {
-      width: 100%;
-      max-width: 900px;
-      height: 3px;
-      background: linear-gradient(90deg, transparent, var(--red), var(--yellow), var(--teal), transparent);
-      margin: 14px 0;
-      border-radius: 2px;
-    }
-
-    /* ── Game frame ── */
     .game-shell {
-      width: 100%;
-      max-width: 900px;
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      overflow: hidden;
-      box-shadow:
-        0 0 0 1px rgba(0,229,204,.15),
-        0 0 40px rgba(255,46,78,.12),
-        0 8px 60px rgba(0,0,0,.8);
+      width: 100%; max-width: 900px; background: #000; border: 1px solid var(--border); border-radius: 6px; overflow: hidden;
+      box-shadow: 0 0 0 1px rgba(0,229,204,.12), 0 0 40px rgba(255,46,78,.1), 0 8px 60px rgba(0,0,0,.8);
       position: relative;
     }
+    .game-shell::before, .game-shell::after { content: ''; position: absolute; width: 20px; height: 20px; border-color: var(--teal); border-style: solid; z-index: 10; pointer-events: none; }
+    .game-shell::before { top: 8px; left: 8px; border-width: 2px 0 0 2px; }
+    .game-shell::after  { bottom: 8px; right: 8px; border-width: 0 2px 2px 0; }
 
-    /* corner accents */
-    .game-shell::before,
-    .game-shell::after {
-      content: '';
-      position: absolute;
-      width: 20px; height: 20px;
-      border-color: var(--teal);
-      border-style: solid;
-      z-index: 10;
-      pointer-events: none;
+    .top-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 8px 14px; background: rgba(0,0,0,.5); border-bottom: 1px solid var(--border);
+      font-size: .68rem; letter-spacing: .1em; color: #555;
     }
-    .game-shell::before {
-      top: 8px; left: 8px;
-      border-width: 2px 0 0 2px;
-    }
-    .game-shell::after {
-      bottom: 8px; right: 8px;
-      border-width: 0 2px 2px 0;
-    }
+    .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--teal); box-shadow: 0 0 8px var(--teal); animation: blink 2s ease-in-out infinite; margin-right: 6px; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.25} }
 
-    .frame-top-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 8px 14px;
-      background: rgba(0,0,0,.4);
-      border-bottom: 1px solid var(--border);
-      font-size: .7rem;
-      letter-spacing: .1em;
-      color: #555;
-    }
+    #game { width: 100%; aspect-ratio: 3/2; background: #000; display: block; min-height: 300px; }
 
-    .status-dot {
-      display: inline-block;
-      width: 7px; height: 7px;
-      border-radius: 50%;
-      background: var(--teal);
-      box-shadow: 0 0 8px var(--teal);
-      animation: pulse 2s ease-in-out infinite;
-      margin-right: 6px;
+    .bottom-bar {
+      display: flex; flex-wrap: wrap; gap: 8px; padding: 10px 14px;
+      background: rgba(0,0,0,.4); border-top: 1px solid var(--border);
+      align-items: center; justify-content: space-between;
     }
-    @keyframes pulse {
-      0%,100% { opacity: 1; }
-      50%      { opacity: .3; }
-    }
+    .badges { display: flex; gap: 8px; flex-wrap: wrap; }
+    .badge { font-size: .62rem; letter-spacing: .1em; text-transform: uppercase; padding: 3px 10px; border-radius: 2px; border: 1px solid; }
+    .b-green  { color: var(--teal);   border-color: var(--teal);   background: rgba(0,229,204,.06); }
+    .b-yellow { color: var(--yellow); border-color: var(--yellow); background: rgba(255,233,74,.06); }
+    .b-red    { color: var(--red);    border-color: var(--red);    background: rgba(255,43,78,.06); }
 
-    .game-frame-wrap {
-      position: relative;
-      width: 100%;
-      padding-bottom: 56.25%; /* 16:9 */
-      background: #000;
+    .help-note {
+      width: 100%; max-width: 900px; margin-top: 14px;
+      background: rgba(0,229,204,.05); border: 1px solid rgba(0,229,204,.15);
+      border-radius: 6px; padding: 12px 18px; font-size: .72rem; color: #888; line-height: 1.7;
     }
+    .help-note strong { color: var(--teal); }
 
-    .game-frame-wrap iframe {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      border: none;
-      display: block;
-    }
-
-    /* ── Info bar ── */
-    .info-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      padding: 12px 14px;
-      background: rgba(0,0,0,.35);
-      border-top: 1px solid var(--border);
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .badge {
-      font-size: .65rem;
-      letter-spacing: .12em;
-      text-transform: uppercase;
-      padding: 3px 10px;
-      border-radius: 2px;
-      border: 1px solid;
-    }
-    .badge-green  { color: var(--teal);   border-color: var(--teal);   background: rgba(0,229,204,.06); }
-    .badge-yellow { color: var(--yellow); border-color: var(--yellow); background: rgba(255,233,74,.06); }
-    .badge-red    { color: var(--red);    border-color: var(--red);    background: rgba(255,43,78,.06); }
-
-    .fullscreen-btn {
-      background: none;
-      border: 1px solid var(--teal);
-      color: var(--teal);
-      font-family: 'Share Tech Mono', monospace;
-      font-size: .68rem;
-      letter-spacing: .1em;
-      padding: 4px 14px;
-      border-radius: 2px;
-      cursor: pointer;
-      text-transform: uppercase;
-      transition: background .2s, color .2s;
-    }
-    .fullscreen-btn:hover {
-      background: var(--teal);
-      color: #000;
-    }
-
-    /* ── Controls card ── */
     .controls-card {
-      width: 100%;
-      max-width: 900px;
-      margin-top: 18px;
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 18px 22px;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 18px;
+      width: 100%; max-width: 900px; margin-top: 14px;
+      background: var(--panel); border: 1px solid var(--border); border-radius: 6px;
+      padding: 18px 22px; display: grid; grid-template-columns: 1fr 1fr; gap: 18px;
     }
-
-    @media (max-width: 540px) {
-      .controls-card { grid-template-columns: 1fr; }
-    }
-
+    @media (max-width: 520px) { .controls-card { grid-template-columns: 1fr; } }
     .ctrl-group h3 {
-      font-family: 'Orbitron', sans-serif;
-      font-size: .68rem;
-      letter-spacing: .2em;
-      text-transform: uppercase;
-      color: var(--yellow);
-      margin-bottom: 10px;
-      padding-bottom: 6px;
-      border-bottom: 1px solid var(--border);
+      font-family: 'Orbitron', sans-serif; font-size: .66rem; letter-spacing: .2em;
+      text-transform: uppercase; color: var(--yellow); margin-bottom: 10px;
+      padding-bottom: 6px; border-bottom: 1px solid var(--border);
     }
+    .ctrl-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; font-size: .7rem; color: #777; }
+    .key { background: #1a1a28; border: 1px solid #2a2a40; border-bottom: 2px solid #3a3a55; padding: 2px 8px; border-radius: 3px; color: #ccc; font-size: .66rem; white-space: nowrap; }
 
-    .ctrl-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 6px;
-      font-size: .72rem;
-      color: #888;
-    }
-
-    .key {
-      background: #1a1a28;
-      border: 1px solid #2a2a40;
-      border-bottom: 2px solid #3a3a55;
-      padding: 2px 8px;
-      border-radius: 3px;
-      color: #ccc;
-      font-size: .68rem;
-      white-space: nowrap;
-    }
-
-    /* ── Footer ── */
-    footer {
-      margin-top: 28px;
-      font-size: .62rem;
-      color: #333;
-      letter-spacing: .1em;
-      text-align: center;
-    }
+    footer { margin-top: 28px; font-size: .62rem; color: #333; letter-spacing: .1em; text-align: center; }
     footer a { color: #444; text-decoration: none; }
     footer a:hover { color: var(--teal); }
   </style>
@@ -317,71 +106,79 @@
 
   <header>
     <div class="logo-line">
-      <div class="flag">
-        <span></span><span></span><span></span><span></span>
-      </div>
+      <div class="flag"><span></span><span></span><span></span><span></span></div>
       <h1>VAROOOM 3D</h1>
-      <div class="flag">
-        <span></span><span></span><span></span><span></span>
-      </div>
+      <div class="flag"><span></span><span></span><span></span><span></span></div>
     </div>
-    <p class="subtitle">GBA Racing &nbsp;·&nbsp; Open Source &nbsp;·&nbsp; Play Free</p>
+    <p class="subtitle">GBA Racing &nbsp;·&nbsp; Open Source &nbsp;·&nbsp; zlib License</p>
   </header>
 
   <div class="stripe"></div>
 
   <div class="game-shell">
-    <div class="frame-top-bar">
-      <span><span class="status-dot"></span>GAME LOADED</span>
-      <span>VAROOOM-3D &nbsp;·&nbsp; GBA.Ninja</span>
-      <span>ZLIB LICENSE</span>
+    <div class="top-bar">
+      <span><span class="dot"></span>EMULATORJS — mGBA CORE</span>
+      <span>VAROOOM-3D v7.3.0</span>
+      <span>ZLIB / CC-BY-NC-SA</span>
     </div>
-
-    <div class="game-frame-wrap">
-      <iframe
-        src="https://itch.io/embed-upload/4978934?color=0a0a0f"
-        allowfullscreen
-        allow="autoplay; fullscreen *; gamepad *;"
-        title="Varooom 3D GBA racing game"
-      ></iframe>
-    </div>
-
-    <div class="info-row">
-      <div style="display:flex;gap:8px;flex-wrap:wrap;">
-        <span class="badge badge-green">Open Source</span>
-        <span class="badge badge-yellow">GBA Homebrew</span>
-        <span class="badge badge-red">Racing</span>
+    <div id="game"></div>
+    <div class="bottom-bar">
+      <div class="badges">
+        <span class="badge b-green">Open Source</span>
+        <span class="badge b-yellow">GBA Homebrew</span>
+        <span class="badge b-red">60 FPS Racing</span>
       </div>
-      <button class="fullscreen-btn" onclick="document.querySelector('iframe').requestFullscreen()">
-        ⛶ Fullscreen
-      </button>
+      <span style="font-size:.65rem;color:#444;">CLICK GAME TO FOCUS · F11 FOR FULLSCREEN</span>
     </div>
+  </div>
+
+  <div class="help-note">
+    <strong>First load:</strong> EmulatorJS downloads the mGBA core (~3 MB) from its CDN — takes a few seconds on first visit.
+    Click inside the game to give it keyboard focus. Use the <strong>≡ menu</strong> in the emulator for save states, display scaling, and controller remapping.
   </div>
 
   <div class="controls-card">
     <div class="ctrl-group">
       <h3>⌨ Keyboard</h3>
-      <div class="ctrl-row"><span>Move Left / Right</span>   <span><span class="key">←</span> <span class="key">→</span></span></div>
+      <div class="ctrl-row"><span>Steer Left / Right</span>  <span><span class="key">← →</span></span></div>
       <div class="ctrl-row"><span>Speed Stance (hold)</span> <span><span class="key">↑</span></span></div>
       <div class="ctrl-row"><span>180° Slide</span>          <span><span class="key">↓</span></span></div>
-      <div class="ctrl-row"><span>Drift</span>               <span><span class="key">Z</span> or <span class="key">Space</span></span></div>
-      <div class="ctrl-row"><span>Pause</span>               <span><span class="key">Enter</span></span></div>
+      <div class="ctrl-row"><span>Drift (A button)</span>    <span><span class="key">Z</span></span></div>
+      <div class="ctrl-row"><span>Turbo (B button)</span>    <span><span class="key">X</span></span></div>
+      <div class="ctrl-row"><span>Pause (Start)</span>       <span><span class="key">Enter</span></span></div>
+      <div class="ctrl-row"><span>Select</span>              <span><span class="key">Shift</span></span></div>
     </div>
     <div class="ctrl-group">
-      <h3>🎮 Gamepad (Xbox)</h3>
-      <div class="ctrl-row"><span>Steer</span>             <span><span class="key">L-Stick ↔</span></span></div>
-      <div class="ctrl-row"><span>Speed Stance</span>      <span><span class="key">L-Stick ↑</span></span></div>
-      <div class="ctrl-row"><span>180° Slide</span>        <span><span class="key">L-Stick ↓</span></span></div>
-      <div class="ctrl-row"><span>Drift</span>             <span><span class="key">A</span> or <span class="key">RB</span></span></div>
-      <div class="ctrl-row"><span>Pause</span>             <span><span class="key">Start</span></span></div>
+      <h3>🎮 Gamepad</h3>
+      <div class="ctrl-row"><span>Steer</span>        <span><span class="key">L-Stick ↔</span></span></div>
+      <div class="ctrl-row"><span>Speed Stance</span> <span><span class="key">L-Stick ↑</span></span></div>
+      <div class="ctrl-row"><span>180° Slide</span>   <span><span class="key">L-Stick ↓</span></span></div>
+      <div class="ctrl-row"><span>Drift</span>        <span><span class="key">A</span></span></div>
+      <div class="ctrl-row"><span>Turbo</span>        <span><span class="key">B</span></span></div>
+      <div class="ctrl-row"><span>Pause</span>        <span><span class="key">Start</span></span></div>
     </div>
   </div>
 
   <footer>
-    <p>Varooom 3D by <a href="https://gvaliente.itch.io" target="_blank">GValiente</a>, Kaappis &amp; tempest &nbsp;·&nbsp; Released under <a href="https://opensource.org/licenses/Zlib" target="_blank">zlib license</a></p>
-    <p style="margin-top:4px;">Source code: <a href="https://github.com/GValiente/butano" target="_blank">github.com/GValiente/butano</a></p>
+    <p>Varooom 3D by <a href="https://gvaliente.itch.io/varooom-3d" target="_blank">GValiente, Kaappis &amp; tempest</a> · Released under zlib License</p>
+    <p style="margin-top:4px;">Source code: <a href="https://github.com/GValiente/butano" target="_blank">github.com/GValiente/butano</a> &nbsp;·&nbsp; Powered by <a href="https://emulatorjs.org" target="_blank">EmulatorJS</a></p>
   </footer>
 
 </div>
+
+<script>
+  // ── EmulatorJS config ──────────────────────────────────────────────────────
+  // ROM is pulled directly from the official open-source GitHub repo (zlib license).
+  // EmulatorJS (mGBA core) is loaded from the public CDN — no files needed locally.
+  // ──────────────────────────────────────────────────────────────────────────
+  window.EJS_player        = '#game';
+  window.EJS_core          = 'gba';
+  window.EJS_gameUrl       = 'https://github.com/GValiente/butano/raw/refs/heads/master/games/varooom-3d/varooom-3d.gba';
+  window.EJS_pathtodata    = 'https://cdn.emulatorjs.org/stable/data/';
+  window.EJS_color         = '#00e5cc';
+  window.EJS_startOnLoaded = true;
+  window.EJS_defaultControls = true;
+</script>
+<script src="https://cdn.emulatorjs.org/stable/data/loader.js"></script>
 </body>
 </html>
